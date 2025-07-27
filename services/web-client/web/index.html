@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Secure Purchase App</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">  
+</head>
+<body>
+  <h1>Welcome to Purchase System haa</h1>
+  <div id="user-info"></div>
+  <button id="loginBtn">Login</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
+  <button id="callUserHello">Call User Hello</button>
+  <button id="callAdminHello">Call Admin Hello</button>
+  <p id="helloResponse"></p>
+
+
+
+  <div id="purchaseSection" style="display:none;">
+    <h2>Make a Purchase</h2>
+    <form id="purchaseForm">
+      <label>Product: <input type="text" id="product" required></label><br>
+      <label>Quantity: <input type="number" id="quantity" required></label><br>
+      <button type="submit">Submit Purchase</button>
+    </form>
+    <p id="result"></p>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
