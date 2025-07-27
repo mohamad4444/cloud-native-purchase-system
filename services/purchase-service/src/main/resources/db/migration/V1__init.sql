@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS purchases;
 CREATE TABLE purchases (
        id SERIAL PRIMARY KEY,
        lager_item_id BIGINT NOT NULL,

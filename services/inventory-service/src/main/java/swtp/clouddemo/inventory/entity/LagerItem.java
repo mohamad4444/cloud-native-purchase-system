@@ -1,20 +1,17 @@
 package swtp.clouddemo.inventory.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
-
 @Entity
+@Table(name = "lager_item")
 @Data
 public class LagerItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;   // was Long
 
     private String product;
-    private int quantity;
-
+    private Integer quantity; // optional but nice to stay consistent with wrapper types
 }
