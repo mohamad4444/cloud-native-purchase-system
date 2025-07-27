@@ -1,0 +1,106 @@
+---
+services:
+  nginx-frontend:
+    build:
+      context: ./services/web-client
+      dockerfile: Dockerfile
+    container_name: purchasesystem-frontend
+    ports:
+      - "4200:80"
+    volumes:
+      # Mount your built static files
+      - ./services/web-client/web:/usr/share/nginx/html:ro
+      # Optional: mount a custom nginx.conf if you have one
+      # - ./web-frontend-nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - purchase-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2.5
+    container_name: keycloak
+    command: start-dev
+    restart: always
+    ports:
+      - '8180:8080'
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloakpass
+      KC_HOSTNAME: localhost
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    depends_on:
+      - keycloak-db
+    networks:
+      - purchase-network
+  keycloak-db:
+    image: postgres:15
+    container_name: keycloak-db
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloakpass
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./docker/keycloak/keycloak_db_data:/var/lib/postgresql/data
+    networks:
+      - purchase-network
+  purchase-db:
+    image: postgres:15
+    container_name: purchase-db
+    restart: always
+    environment:
+      POSTGRES_DB: purchase
+      POSTGRES_USER: purchase_user
+      POSTGRES_PASSWORD: purchase_pass
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./docker/purchase/purchase_db_data:/var/lib/postgresql/data
+    networks:
+      - purchase-network
+  inventory-db:
+    image: postgres:15
+    container_name: inventory-db
+    restart: always
+    environment:
+      POSTGRES_DB: inventory
+      POSTGRES_USER: inventory_user
+      POSTGRES_PASSWORD: inventory_pass
+    ports:
+      - '5434:5432'
+    volumes:
+      - ./docker/inventory/inventory_db_data:/var/lib/postgresql/data
+    networks:
+      - purchase-network
+  artemis:
+    user: root
+    build:
+      context: ./docker/activemq-artemis
+    image: custom-artemis:latest
+    container_name: artemis
+    environment:
+      ARTEMIS_USER: admin
+      ARTEMIS_PASSWORD: admin
+      ANONYMOUS_LOGIN: 'false'
+    ports:
+      - '61616:61616'
+      - '8161:8161'
+    volumes:
+      - ./docker/activemq-artemis/artemis-instance:/var/lib/artemis-instance
+    restart: always
+    networks:
+      - purchase-network
+
+
+volumes:
+  keycloak_db_data: null
+  purchase_db_data: null
+  inventory_db_data: null
+  web-frontend: null
+networks:
+  purchase-network:
+    driver: bridge
