@@ -1,0 +1,35 @@
+<configuration xmlns="urn:activemq">
+  <core>
+    <!-- Broker settings here -->
+    <name>artemis-broker</name>
+    <persistence-enabled>true</persistence-enabled>
+
+    <!-- Acceptors -->
+    <acceptors>
+      <acceptor name="tcp">tcp://0.0.0.0:61616</acceptor>
+    </acceptors>
+
+    <!-- Security settings -->
+    <security-settings>
+      <security-setting match="#">
+        <permission type="send" roles="admins"/>
+        <permission type="consume" roles="admins"/>
+        <permission type="createNonDurableQueue" roles="admins"/>
+      </security-setting>
+    <security-setting match="purchase.to.inventory">
+        <permission type="send" roles="producers"/>
+        <permission type="consume" roles="consumers"/>
+    </security-setting>
+    </security-settings>
+
+    <!-- Addresses-->
+    <addresses>
+      <address name="order-events">
+        <anycast>
+          <queue name="purchase.to.inventory"/>
+        </anycast>
+      </address>
+    </addresses>
+
+  </core>
+</configuration>

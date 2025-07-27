@@ -77,23 +77,18 @@ services:
     networks:
       - purchase-network
   artemis:
-    user: root
-    build:
-      context: ./docker/activemq-artemis
-    image: custom-artemis:latest
-    container_name: artemis
+    build: ./docker/artemis/.
+    container_name: artemis-broker
+    restart: unless-stopped
     environment:
       ARTEMIS_USER: admin
       ARTEMIS_PASSWORD: admin
-      ANONYMOUS_LOGIN: 'false'
+      ANONYMOUS_LOGIN: "false"
     ports:
-      - '61616:61616'
-      - '8161:8161'
+      - "61616:61616"   # Core messaging
+      - "8161:8161"     # Web console
     volumes:
-      - ./docker/activemq-artemis/artemis-instance:/var/lib/artemis-instance
-    restart: always
-    networks:
-      - purchase-network
+      - ./docker/artemis/artemis-data:/var/lib/artemis-instance
 
 
 volumes:
