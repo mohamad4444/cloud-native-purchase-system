@@ -7,6 +7,8 @@ import swtp.clouddemo.purchase.dto.PurchaseDtoOut;
 import swtp.clouddemo.purchase.entity.Purchase;
 import swtp.clouddemo.purchase.mapper.PurchaseMapper;
 import swtp.clouddemo.purchase.repository.PurchaseRepository;
+import swtp.clouddemo.purchase.service.PurchaseService;
+import swtp.clouddemo.purchase.service.PurchaseServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,8 +19,11 @@ public class PurchaseController {
 
     private final PurchaseRepository purchaseRepository;
 
-    public PurchaseController(PurchaseRepository purchaseRepository) {
+    private final PurchaseService purchaseService;
+
+    public PurchaseController(PurchaseRepository purchaseRepository, PurchaseService purchaseService) {
         this.purchaseRepository = purchaseRepository;
+        this.purchaseService = purchaseService;
     }
 
     @GetMapping
@@ -49,5 +54,12 @@ public class PurchaseController {
     public ResponseEntity<PurchaseDtoOut> createPurchase(@RequestBody PurchaseDtoIn dtoIn) {
         Purchase saved = purchaseRepository.save(PurchaseMapper.toEntity(dtoIn));
         return ResponseEntity.ok(PurchaseMapper.toDto(saved));
+    }
+
+
+    @GetMapping("/fetch-inventory")
+    public String fetchInventory() {
+        purchaseService.fetchInventory();
+        return "Fetch request sent to Inventory Service!";
     }
 }

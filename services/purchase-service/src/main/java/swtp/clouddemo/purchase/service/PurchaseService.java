@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface PurchaseService {
     List<Purchase> getRecentPurchases();
+    void fetchInventory();
 }

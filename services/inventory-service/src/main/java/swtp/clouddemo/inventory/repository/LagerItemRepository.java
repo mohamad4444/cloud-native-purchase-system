@@ -1,7 +1,7 @@
 package swtp.clouddemo.inventory.repository;
 
-import swtp.clouddemo.inventory.entity.LagerItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import swtp.clouddemo.inventory.entity.ProductEntity;
 
-public interface LagerItemRepository extends JpaRepository<LagerItem, Long> {
+public interface LagerItemRepository extends JpaRepository<ProductEntity, Long> {
 }
