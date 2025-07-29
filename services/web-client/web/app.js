@@ -32,11 +32,11 @@ document.addEventListener('DOMContentLoaded', function () {
     console.error('Keycloak init error:', err);
   });
 document.getElementById('callUserHello').addEventListener('click', async () => {
-  callHelloEndpoint('/hello/user');
+  callHelloEndpoint('http://localhost:8080/helloUser');
 });
 
 document.getElementById('callAdminHello').addEventListener('click', async () => {
-  callHelloEndpoint('/hello/admin');
+  callHelloEndpoint('http://localhost:8080/helloAdmin');
 });
 
 async function callHelloEndpoint(url) {
@@ -89,7 +89,7 @@ async function callHelloEndpoint(url) {
       const quantity = document.getElementById('quantity').value;
 
       try {
-        const response = await fetch('/api/purchase', {
+        const response = await fetch('http://localhost:8080/api/purchase', {
           method: 'POST',
           headers: {
             'Authorization': 'Bearer ' + keycloak.token,

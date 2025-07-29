@@ -2,21 +2,21 @@ package swtp.clouddemo.purchase.dto;
 
 public class PurchaseDtoOut {
 
-    private Long id;
+    private Integer id;
     private String productName;
     private int quantity;
     private String timestamp;
 
     public PurchaseDtoOut() {}
 
-    public PurchaseDtoOut(Long id, String productName, int quantity, String timestamp) {
+    public PurchaseDtoOut(Integer id, String productName, int quantity, String timestamp) {
         this.id = id;
         this.productName = productName;
         this.quantity = quantity;
         this.timestamp = timestamp;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -32,7 +32,7 @@ public class PurchaseDtoOut {
         return timestamp;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
