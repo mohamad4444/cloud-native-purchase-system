@@ -2,7 +2,7 @@ package swtp.clouddemo.inventory.service;
 
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
-import swtp.clouddemo.inventory.dtos.Product;
+import swtp.clouddemo.common.dto.Product;
 import swtp.clouddemo.inventory.repository.LagerItemRepository;
 
 import java.util.List;
