@@ -1,4 +1,4 @@
-package swtp.clouddemo.inventory.service;
+package swtp.clouddemo.inventory.messaging;
 
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;

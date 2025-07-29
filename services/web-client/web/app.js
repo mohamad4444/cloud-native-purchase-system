@@ -70,6 +70,8 @@ async function callHelloEndpoint(url) {
     document.getElementById('user-info').textContent = `Hello ${keycloak.tokenParsed?.preferred_username}`;
     window.accessToken = keycloak.token;
 
+    fetchInventoryList();
+
     // Refresh token loop
     setInterval(() => {
       keycloak.updateToken(30).then(refreshed => {
@@ -106,4 +108,32 @@ async function callHelloEndpoint(url) {
       }
     });
   }
+  async function fetchInventoryList() {
+    try {
+      const response = await fetch('http://localhost:8081/inventory', {
+        headers: {
+          'Authorization': 'Bearer ' + keycloak.token
+        }
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const inventory = await response.json();
+
+      const inventoryList = document.getElementById('inventoryList');
+      inventoryList.innerHTML = ''; // clear previous list
+
+      inventory.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = `${item.product} (Stock: ${item.quantity})`;
+        inventoryList.appendChild(li);
+      });
+
+      document.getElementById('inventorySection').style.display = 'block';
+    } catch (err) {
+      console.error('Failed to load inventory:', err);
+    }
+  }
+
 });

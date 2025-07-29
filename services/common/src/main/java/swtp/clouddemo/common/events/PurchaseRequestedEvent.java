@@ -2,14 +2,17 @@ package swtp.clouddemo.common.events;
 
 import java.io.Serializable;
 
-public class PurchaseRequestedEvent implements Serializable {
+public class PurchaseRequestedEvent extends BaseEvent {
     private String product;
     private int quantity;
     private String requestId;
 
-    public PurchaseRequestedEvent() {}
+    public PurchaseRequestedEvent() {
+        super("PurchaseRequested");
+    }
 
     public PurchaseRequestedEvent(String product, int quantity, String requestId) {
+        super("PurchaseRequested");
         this.product = product;
         this.quantity = quantity;
         this.requestId = requestId;

@@ -1,4 +1,4 @@
-package swtp.clouddemo.purchase.listener;
+package swtp.clouddemo.purchase.messaging;
 
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;

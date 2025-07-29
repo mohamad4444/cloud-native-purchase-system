@@ -1,15 +1,20 @@
 package swtp.clouddemo.common.events;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
-public class PurchaseResultEvent implements Serializable {
+public class PurchaseResultEvent  extends BaseEvent {
     private String requestId;
     private boolean success;
     private String message;
 
-    public PurchaseResultEvent() {}
+    public PurchaseResultEvent() {
+        super("PurchaseResult");
+    }
 
     public PurchaseResultEvent(String requestId, boolean success, String message) {
+        super("PurchaseResult");
         this.requestId = requestId;
         this.success = success;
         this.message = message;
