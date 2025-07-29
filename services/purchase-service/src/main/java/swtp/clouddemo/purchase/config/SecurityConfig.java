@@ -2,6 +2,7 @@ package swtp.clouddemo.purchase.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +19,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import swtp.clouddemo.purchase.filter.LoggingFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@Slf4j
 public class SecurityConfig {
 
     @Autowired
     private final JwtAuthConverter authConverter;
-    private static final Logger log = LoggerFactory.getLogger(JwtAuthConverter.class);
 
     public SecurityConfig(JwtAuthConverter authConverter) {
         this.authConverter = authConverter;
@@ -38,6 +40,7 @@ public class SecurityConfig {
         log.info("Setting up security filter chain");
 
         http
+                //.addFilterBefore(new LoggingFilter(), org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/helloAdmin").hasRole("ADMIN")
                         .requestMatchers("/helloUser").hasRole("USER")
