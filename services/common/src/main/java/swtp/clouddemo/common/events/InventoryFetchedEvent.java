@@ -1,9 +1,8 @@
-package swtp.clouddemo.events;
+package swtp.clouddemo.common.events;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import swtp.clouddemo.dto.Product;
+import swtp.clouddemo.common.dto.Product;
 
 import java.util.List;
 @Getter

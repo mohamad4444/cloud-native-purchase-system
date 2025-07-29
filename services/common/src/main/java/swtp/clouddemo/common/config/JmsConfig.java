@@ -1,4 +1,4 @@
-package swtp.clouddemo.config;
+package swtp.clouddemo.common.config;
 
 import jakarta.jms.Queue;
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;

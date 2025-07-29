@@ -1,4 +1,4 @@
-package swtp.clouddemo.events;
+package swtp.clouddemo.common.events;
 
 public class FetchInventoryRequestedEvent extends BaseEvent {
     public FetchInventoryRequestedEvent() {

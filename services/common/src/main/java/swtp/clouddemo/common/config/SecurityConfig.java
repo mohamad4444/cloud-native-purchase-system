@@ -1,4 +1,4 @@
-package swtp.clouddemo.config;
+package swtp.clouddemo.common.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,4 +1,4 @@
-package swtp.clouddemo.events;
+package swtp.clouddemo.common.events;
 
 import lombok.Data;
 

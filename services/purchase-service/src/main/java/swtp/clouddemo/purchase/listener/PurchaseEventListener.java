@@ -2,7 +2,7 @@ package swtp.clouddemo.purchase.listener;
 
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
-import swtp.clouddemo.events.InventoryFetchedEvent;
+import swtp.clouddemo.common.events.InventoryFetchedEvent;
 
 @Component
 public class PurchaseEventListener {

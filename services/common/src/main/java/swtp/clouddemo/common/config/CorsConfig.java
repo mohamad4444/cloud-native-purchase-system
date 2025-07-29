@@ -1,4 +1,4 @@
-package swtp.clouddemo.purchase.config;
+package swtp.clouddemo.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package swtp.clouddemo.dto;
+package swtp.clouddemo.common.dto;
 
 import lombok.Data;
 

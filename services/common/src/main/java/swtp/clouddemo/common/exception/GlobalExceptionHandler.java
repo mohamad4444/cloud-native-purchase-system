@@ -1,4 +1,4 @@
-package swtp.clouddemo.purchase.exception;
+package swtp.clouddemo.common.exception;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
