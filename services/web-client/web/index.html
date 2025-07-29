@@ -2,33 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Secure Purchase App</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">  
+  <link rel="stylesheet" href="styles.css" />
+  <!--  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />-->
 </head>
 <body>
-  <h1>Welcome to Purchase System haa</h1>
-  <div id="user-info"></div>
-  <button id="loginBtn">Login</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
-  <button id="callUserHello">Call User Hello</button>
-  <button id="callAdminHello">Call Admin Hello</button>
-  <p id="helloResponse"></p>
+<div class="container mt-4">
+  <h1 class="text-center mb-4">Welcome to Purchase System haa</h1>
+
+  <div class="mb-3">
+    <div id="user-info" class="font-weight-bold"></div>
+    <button id="loginBtn" class="btn btn-primary">Login</button>
+    <button id="logoutBtn" class="btn btn-danger" style="display:none;">Logout</button>
+    <button id="callUserHello" class="btn btn-secondary">Call User Hello</button>
+    <button id="callAdminHello" class="btn btn-secondary">Call Admin Hello</button>
+  </div>
+
+  <p id="helloResponse" class="text-info"></p>
 
   <div id="inventorySection" style="display:none;">
     <h2>Available Products</h2>
-    <ul id="inventoryList" class="list-group"></ul>
+    <div id="inventoryList" class="row"></div>
+    <button id="finalizePurchaseBtn" class="btn btn-success mt-3">🛒 Finalize Purchase</button>
   </div>
 
+  <hr />
 
-  <div id="purchaseSection" style="display:none;">
-    <h2>Make a Purchase</h2>
-    <form id="purchaseForm">
-      <label>Product: <input type="text" id="product" required></label><br>
-      <label>Quantity: <input type="number" id="quantity" required></label><br>
-      <button type="submit">Submit Purchase</button>
-    </form>
-    <p id="result"></p>
+  <div id="purchaseHistorySection" style="display:none;">
+    <h2>Purchase History</h2>
+
+    <div id="pendingPurchases" class="mb-4">
+      <h4 class="text-warning">Pending</h4>
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>Product</th><th>Quantity</th><th>Time</th></tr></thead>
+        <tbody id="pendingTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="completedPurchases" class="mb-4">
+      <h4 class="text-success">Completed</h4>
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>Product</th><th>Quantity</th><th>Time</th></tr></thead>
+        <tbody id="completedTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="rejectedPurchases" class="mb-4">
+      <h4 class="text-danger">Rejected</h4>
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>Product</th><th>Quantity</th><th>Time</th><th>Reason</th></tr></thead>
+        <tbody id="rejectedTableBody"></tbody>
+      </table>
+    </div>
   </div>
-  <script type="module" src="./app.js"></script>
+</div>
+
+<script type="module" src="./app.js"></script>
 </body>
 </html>
