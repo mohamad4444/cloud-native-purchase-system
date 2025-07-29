@@ -89,6 +89,51 @@ services:
       - "8161:8161"     # Web console
     volumes:
       - ./docker/artemis/artemis-data:/var/lib/artemis-instance
+#  springboot-app:
+#    image: your-springboot-app:latest
+#    container_name: springboot-app
+#    environment:
+#      - JAVA_OPTS=-Dlogging.file.name=/logs/app.log
+#    volumes:
+#      - ./logs:/logs
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - prometheus
+#      - loki
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./docker/grafana/grafana-data:/var/lib/grafana
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./docker/promtail/logs:/var/log
+      - ./docker/promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
 
 
 volumes:
@@ -96,6 +141,7 @@ volumes:
   purchase_db_data: null
   inventory_db_data: null
   web-frontend: null
+  grafana-data:
 networks:
   purchase-network:
     driver: bridge
