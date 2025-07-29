@@ -1,7 +1,6 @@
-package swtp.clouddemo.purchase.filter;
+package swtp.clouddemo.common.filter;
 
 import jakarta.servlet.ServletException;
-import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
