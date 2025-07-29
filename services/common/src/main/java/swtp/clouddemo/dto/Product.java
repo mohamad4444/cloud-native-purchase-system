@@ -1,5 +1,8 @@
 package swtp.clouddemo.dto;
 
+import lombok.Data;
+
+@Data
 public class Product {
     private String productName;
     private int quantity;
