@@ -1,9 +1,18 @@
 // ui.js
 export function updateLoginState(username) {
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('logoutBtn').style.display = 'inline';
-    document.getElementById('user-info').textContent = `Hello ${username}`;
-    document.getElementById('purchaseHistorySection').style.display = 'block';
+    if (username) {
+        // Logged in UI
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'inline';
+        document.getElementById('user-info').textContent = `Hello ${username}`;
+        document.getElementById('purchaseHistorySection').style.display = 'block';
+    } else {
+        // Logged out UI
+        document.getElementById('loginBtn').style.display = 'inline';
+        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('user-info').textContent = '';
+        document.getElementById('purchaseHistorySection').style.display = 'none';
+    }
 }
 
 export function renderInventory(inventory) {

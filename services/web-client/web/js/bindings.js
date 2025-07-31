@@ -1,12 +1,12 @@
 // bindings.js
 import { API_ENDPOINTS } from './config.js';
-import { getToken } from './state.js';
 import { addItem, getSelectedItems, clearSelectedItems } from './state.js';
 import { callHello } from './api/hello.js';  // or './api/auth.js'
-import { fetchInventoryList, sendPurchase, fetchPurchaseHistory } from './api/purchase.js';
-import { showHelloResponse } from './ui.js';
+import {sendPurchase, fetchPurchaseHistory } from './api/purchase.js';
+import { fetchInventoryList } from './api/inventory.js';
 
-export function bindGlobalActions(keycloak) {
+
+export function bindLoginLogout(keycloak) {
     document.getElementById('loginBtn').addEventListener('click', () => {
         keycloak.login({ redirectUri: window.location.href });
     });
@@ -14,7 +14,9 @@ export function bindGlobalActions(keycloak) {
     document.getElementById('logoutBtn').addEventListener('click', () => {
         keycloak.logout({ redirectUri: window.location.href });
     });
+}
 
+export function bindGlobalActionsAfterAuth() {
     document.getElementById('callUserHello').addEventListener('click', () => {
         callHello(API_ENDPOINTS.helloUser);
     });
@@ -37,6 +39,7 @@ export function bindGlobalActions(keycloak) {
         await fetchPurchaseHistory();
     });
 }
+
 
 export function bindInventorySelection() {
     document.getElementById('inventoryList').addEventListener('click', e => {
@@ -61,16 +64,4 @@ export function bindInventorySelection() {
 
         qtyInput.value = '';
     });
-}
-
-async function callHello(url) {
-    try {
-        const res = await fetch(url, {
-            headers: { 'Authorization': 'Bearer ' + getToken() }
-        });
-        const text = await res.text();
-        showHelloResponse(`Response: ${text}`);
-    } catch (err) {
-        showHelloResponse(`Error: ${err}`);
-    }
 }
