@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/purchases")
+@RequestMapping("/purchase")
 public class PurchaseController {
 
     private final PurchaseRepository purchaseRepository;
@@ -54,12 +54,5 @@ public class PurchaseController {
     public ResponseEntity<PurchaseDtoOut> createPurchase(@RequestBody PurchaseDtoIn dtoIn) {
         Purchase saved = purchaseRepository.save(PurchaseMapper.toEntity(dtoIn));
         return ResponseEntity.ok(PurchaseMapper.toDto(saved));
-    }
-
-
-    @GetMapping("/fetch-inventory")
-    public String fetchInventory() {
-        purchaseService.fetchInventory();
-        return "Fetch request sent to Inventory Service!";
     }
 }
