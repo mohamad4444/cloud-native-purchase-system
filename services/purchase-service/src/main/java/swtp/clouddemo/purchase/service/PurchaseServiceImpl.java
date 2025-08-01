@@ -19,9 +19,4 @@ public class PurchaseServiceImpl implements PurchaseService {
         //TODO
         return null;
     }
-
-    public void fetchInventory() {
-        FetchInventoryRequestedEvent event = new FetchInventoryRequestedEvent();
-        jmsTemplate.convertAndSend("inventory.events", event);
-    }
 }

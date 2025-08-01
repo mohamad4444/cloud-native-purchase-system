@@ -2,6 +2,7 @@ package swtp.clouddemo.purchase.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import swtp.clouddemo.purchase.util.PurchaseStatus;
 
 import java.time.LocalDateTime;
 
@@ -23,10 +24,14 @@ public class Purchase {
     @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime timestamp;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PurchaseStatus status;
     // Constructors
 
-    public Purchase() {}
-
+    public Purchase() {
+        this.status = PurchaseStatus.PENDING;
+    }
     public Purchase(String productName, int quantity) {
         this.productName = productName;
         this.quantity = quantity;
