@@ -13,13 +13,10 @@ export async function initAuth() {
         onLoad: 'check-sso',
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
         pkceMethod: 'S256',
-        // checkLoginIframe: false,
+        checkLoginIframe: false,
         redirectUri: window.location.origin,
-        // scope: KEYCLOAK_CONFIG.scope,
-        flow: 'standard',
-        // Enable token storage in sessionStorage/localStorage
-        // This ensures token is restored on refresh
-        // The keycloak-js library handles storing tokens internally
+        scope: KEYCLOAK_CONFIG.scope,
+        flow: 'standard'
     });
 
     console.log('[auth] keycloak.init() resolved:', { authenticated, token: keycloak.token });
