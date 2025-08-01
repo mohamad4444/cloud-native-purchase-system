@@ -8,46 +8,47 @@ export async function initAuth() {
 
     const keycloak = new Keycloak(KEYCLOAK_CONFIG);
 
-    // Try to restore token from localStorage (sync with your state.js)
-    const savedToken = sessionStorage.getItem('accessToken');
-    console.log('[auth] Retrieved token from localStorage:', savedToken ? 'FOUND' : 'NOT FOUND');
-    // if (savedToken) {
-    //     keycloak.token = savedToken;
-    // }
-
+    // Initialize Keycloak and attempt silent SSO login
     const authenticated = await keycloak.init({
         onLoad: 'check-sso',
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
         pkceMethod: 'S256',
-        checkLoginIframe: false,
+        // checkLoginIframe: false,
         redirectUri: window.location.origin,
-        scope: KEYCLOAK_CONFIG.scope,
-        flow:'standard'
+        // scope: KEYCLOAK_CONFIG.scope,
+        flow: 'standard',
+        // Enable token storage in sessionStorage/localStorage
+        // This ensures token is restored on refresh
+        // The keycloak-js library handles storing tokens internally
     });
 
     console.log('[auth] keycloak.init() resolved:', { authenticated, token: keycloak.token });
 
-    if (authenticated) {
-        console.log('[auth] User authenticated, setting token and updating UI');
+    if (authenticated && keycloak.token) {
+        // Save token to sessionStorage for your app's state management
+        sessionStorage.setItem('accessToken', keycloak.token);
         setToken(keycloak.token);
         updateLoginState(keycloak.tokenParsed?.preferred_username);
 
-        // Periodically refresh token
+        // Setup token refresh before expiration
         setInterval(() => {
             keycloak.updateToken(30).then(refreshed => {
                 if (refreshed) {
                     console.log('[auth] Token refreshed');
+                    sessionStorage.setItem('accessToken', keycloak.token);
                     setToken(keycloak.token);
                 } else {
-                    console.log('[auth] Token valid, no refresh needed');
+                    console.log('[auth] Token still valid, no refresh needed');
                 }
             }).catch(() => {
                 console.log('[auth] Token refresh failed, logging out');
                 keycloak.logout({ redirectUri: window.location.href });
             });
         }, 60000);
+
     } else {
         console.log('[auth] User NOT authenticated, clearing token and updating UI');
+        sessionStorage.removeItem('accessToken');
         setToken('');
         updateLoginState(null);
     }
