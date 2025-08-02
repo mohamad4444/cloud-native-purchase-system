@@ -1,10 +1,14 @@
 package swtp.clouddemo.purchase.service;
 
+import swtp.clouddemo.purchase.dto.PurchaseDtoIn;
+import swtp.clouddemo.purchase.dto.PurchaseDtoOut;
 import swtp.clouddemo.purchase.entity.Purchase;
 
 import java.util.List;
 
 public interface PurchaseService {
-    List<Purchase> getRecentPurchases();
-
+    List<PurchaseDtoOut> getAllPurchases();
+    List<PurchaseDtoOut> searchByProduct(String product);
+    PurchaseDtoOut createPurchase(PurchaseDtoIn dtoIn);
+    List<PurchaseDtoOut> getPurchasesByStatus(String status);
 }

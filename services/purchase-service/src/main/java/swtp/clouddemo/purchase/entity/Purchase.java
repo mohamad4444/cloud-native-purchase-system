@@ -2,7 +2,6 @@ package swtp.clouddemo.purchase.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import swtp.clouddemo.purchase.util.PurchaseStatus;
 
 import java.time.LocalDateTime;
 

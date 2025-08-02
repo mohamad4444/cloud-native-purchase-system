@@ -1,4 +1,4 @@
-package swtp.clouddemo.purchase.util;
+package swtp.clouddemo.purchase.entity;
 
 public enum PurchaseStatus {
     PENDING,

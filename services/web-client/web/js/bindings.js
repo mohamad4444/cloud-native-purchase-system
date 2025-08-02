@@ -1,7 +1,6 @@
 // bindings.js
 import { API_ENDPOINTS } from './config.js';
 import { addItem, getSelectedItems, clearSelectedItems } from './state.js';
-import { callHello } from './api/hello.js';  // or './api/auth.js'
 import {sendPurchase, fetchPurchaseHistory } from './api/purchase.js';
 import { fetchInventoryList } from './api/inventory.js';
 
@@ -17,13 +16,6 @@ export function bindLoginLogout(keycloak) {
 }
 
 export function bindGlobalActionsAfterAuth() {
-    document.getElementById('callUserHello').addEventListener('click', () => {
-        callHello(API_ENDPOINTS.helloUser);
-    });
-
-    document.getElementById('callAdminHello').addEventListener('click', () => {
-        callHello(API_ENDPOINTS.helloAdmin);
-    });
 
     document.getElementById('finalizePurchaseBtn').addEventListener('click', async () => {
         const items = getSelectedItems();
