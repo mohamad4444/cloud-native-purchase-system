@@ -6,7 +6,6 @@ import swtp.clouddemo.purchase.entity.PurchaseStatus;
 
 import java.util.List;
 
-public interface PurchaseRepository extends JpaRepository<Purchase, Long>, PurchaseRepositoryCustom {
-    List<Purchase> findByProductName(String productName);
+public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
     List<Purchase> findByStatus(PurchaseStatus parsedStatus);
 }
