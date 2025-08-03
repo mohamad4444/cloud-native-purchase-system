@@ -7,6 +7,7 @@ import {
     bindInventorySelection
 } from './bindings.js';
 import {renderPurchaseHistory} from "./ui.js";
+import {loadAndRenderPurchaseHistoryByStatus} from "./util.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('[main] DOMContentLoaded triggered');
@@ -26,13 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('[main] User authenticated, fetching inventory and purchase history');
     await fetchInventoryList();
-    const statuses = ['PENDING', 'CONFIRMED', 'REJECTED'];
-
-    for (const status of statuses) {
-        const purchases = await fetchPurchaseHistory(status);
-        renderPurchaseHistory(purchases, status); // Pass status to help with rendering
-    }
-
+    await loadAndRenderPurchaseHistoryByStatus()
 
     bindGlobalActionsAfterAuth();
     bindInventorySelection();
