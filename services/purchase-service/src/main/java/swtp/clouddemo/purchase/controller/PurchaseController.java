@@ -20,16 +20,13 @@ public class PurchaseController {
     public PurchaseController(PurchaseService purchaseService) {
         this.purchaseService = purchaseService;
     }
-    @GetMapping("/search")
-    public ResponseEntity<List<PurchaseDtoOut>> searchByProduct(@RequestParam String product) {
-        return ResponseEntity.ok(purchaseService.searchByProduct(product));
-    }
 
 
     @PostMapping
     public ResponseEntity<PurchaseDtoOut> createPurchase(@RequestBody PurchaseDtoIn dtoIn) {
         return ResponseEntity.ok(purchaseService.createPurchase(dtoIn));
     }
+    // /purchases?status=...
     @GetMapping
     public ResponseEntity<List<PurchaseDtoOut>> getPurchases(@RequestParam(required = false) String status) {
         if (status == null || status.equalsIgnoreCase("ALL")) {

@@ -10,12 +10,13 @@ public class PurchaseMapper {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    public static Purchase toEntity(PurchaseDtoIn dtoIn) {
-        if (dtoIn == null) return null;
+    public static Purchase toEntity(PurchaseDtoIn dtoIn, String userId) {
+        if (dtoIn == null || userId == null) return null;
 
         Purchase purchase = new Purchase();
-        purchase.setProductName(dtoIn.getProductName());
-        purchase.setQuantity(dtoIn.getQuantity());
+        purchase.setProductName(dtoIn.productName());
+        purchase.setQuantity(dtoIn.quantity());
+        purchase.setUserId(userId);
         return purchase;
     }
 
@@ -23,10 +24,10 @@ public class PurchaseMapper {
         if (purchase == null) return null;
 
         return new PurchaseDtoOut(
-            purchase.getId(),
-            purchase.getProductName(),
-            purchase.getQuantity(),
-            purchase.getTimestamp() != null ? purchase.getTimestamp().format(FORMATTER) : null
+                purchase.getId(),
+                purchase.getProductName(),
+                purchase.getQuantity(),
+                purchase.getTimestamp() != null ? purchase.getTimestamp().format(FORMATTER) : null
         );
     }
 }

@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Import;
 import swtp.clouddemo.common.aop.LoggingAspect;
 import swtp.clouddemo.common.exception.GlobalExceptionHandler;
 import swtp.clouddemo.common.filter.EarlyLoggingValve;
+import swtp.clouddemo.common.service.JwtService;
 
 @Configuration
 @Slf4j
 @Import({JmsConfig.class, CorsConfig.class, OpenApiConfig.class,SecurityConfig.class, LoggingAspect.class
-, GlobalExceptionHandler.class, EarlyLoggingValve.class})
+, GlobalExceptionHandler.class, EarlyLoggingValve.class, JwtService.class})
 public class CommonConfig {
     public CommonConfig() {
         log.info("CommonConfig loaded");

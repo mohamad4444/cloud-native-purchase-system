@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface PurchaseService {
     List<PurchaseDtoOut> getAllPurchases();
-    List<PurchaseDtoOut> searchByProduct(String product);
     PurchaseDtoOut createPurchase(PurchaseDtoIn dtoIn);
     List<PurchaseDtoOut> getPurchasesByStatus(String status);
 }
