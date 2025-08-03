@@ -7,9 +7,6 @@ export const KEYCLOAK_CONFIG = {
 };
 
 export const API_ENDPOINTS = {
-    helloUser: 'http://localhost:8080/helloUser',
-    helloAdmin: 'http://localhost:8080/helloAdmin',
-    purchase: 'http://localhost:8080/api/purchase',
-    purchases: 'http://localhost:8080/api/purchases',
+    purchases: 'http://localhost:8080/purchases',
     inventory: 'http://localhost:8081/inventory'
 };

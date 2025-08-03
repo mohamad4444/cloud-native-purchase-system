@@ -17,7 +17,4 @@ public abstract class BaseEvent {
         this.eventTimestamp = Instant.now();
         this.eventType = eventType;
     }
-
-
-    // Getters / setters
 }
