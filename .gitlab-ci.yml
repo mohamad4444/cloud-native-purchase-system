@@ -8,6 +8,21 @@ stages:
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+cache:
+  key: ${CI_PROJECT_PATH}
+  paths:
+    - .m2/repository
+
+build_common:
+  stage: build
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/common
+    - mvn clean install -DskipTests
+  artifacts:
+    paths:
+      - ~/.m2
+    expire_in: 1h
 
 build_purchase:
   stage: build
@@ -15,14 +30,16 @@ build_purchase:
   script:
     - cd services/purchase-service
     - mvn clean package -DskipTests
-
+  dependencies:
+    - build_common
 build_inventory:
   stage: build
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/inventory-service
     - mvn clean package -DskipTests
-
+  dependencies:
+    - build_common
 test_purchase:
   stage: test
   image: maven:3.9.6-eclipse-temurin-21
