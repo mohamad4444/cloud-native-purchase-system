@@ -1,4 +1,5 @@
 import Keycloak from 'https://cdn.jsdelivr.net/npm/keycloak-js@26.2.0/+esm';
+// import Keycloak from 'keycloak-js';
 import { KEYCLOAK_CONFIG } from '../config.js';
 import { setToken } from '../state.js';
 import { updateLoginState } from '../ui.js';

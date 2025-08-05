@@ -1,5 +1,3 @@
-// bindings.js
-import { addItem, getSelectedItems, clearSelectedItems } from './state.js';
 import { sendPurchase } from './api/purchase.js';
 import { fetchInventoryList } from './api/inventory.js';
 import { loadAndRenderPurchaseHistoryByStatus } from './util.js';
@@ -18,30 +16,48 @@ export function bindGlobalActionsAfterAuth() {
     document.getElementById('finalizePurchaseBtn').addEventListener('click', async () => {
         console.log('[Purchase] Finalize button clicked.');
 
-        const items = getSelectedItems();
-        console.log('[Purchase] Selected items:', items);
-
-        if (Object.keys(items).length === 0) {
-            console.warn('[Purchase] No items selected.');
-            return alert("No items selected.");
+        const selectedButtons = document.querySelectorAll('.select-btn.btn-success');
+        if (selectedButtons.length === 0) {
+            alert("No items selected.");
+            return;
         }
 
-        for (const [id, quantity] of Object.entries(items)) {
-            const purchaseItem = { id, quantity };
-            console.log('[Purchase] Sending purchase for item:', purchaseItem);
+        const purchaseItems = [];
+
+        selectedButtons.forEach(btn => {
+            const id = btn.dataset.id;
+            const name = btn.dataset.name;
+            const qtyInput = document.getElementById(`qty-${id}`);
+            const quantity = parseInt(qtyInput.value, 10);
+
+            if (!quantity || quantity < 1) {
+                console.warn(`[Purchase] Invalid quantity for item ${id}`);
+                return;
+            }
+
+            purchaseItems.push({
+                lagerItemId: parseInt(id, 10),
+                productName: name,
+                quantity
+            });
+        });
+
+        if (purchaseItems.length === 0) {
+            alert("No valid quantities found.");
+            return;
+        }
+
+        for (const item of purchaseItems) {
             try {
-                await sendPurchase(purchaseItem);
-                console.log('[Purchase] Successfully sent purchase:', purchaseItem);
+                await sendPurchase(item);
+                console.log('[Purchase] Successfully sent purchase:', item);
             } catch (err) {
-                console.error('[Purchase] Failed to send purchase:', purchaseItem, err);
+                console.error('[Purchase] Failed to send purchase:', item, err);
             }
         }
 
         alert("Purchase request(s) sent.");
-        console.log('[Purchase] Purchase requests sent alert displayed.');
-
-        clearSelectedItems();
-        console.log('[Purchase] Selected items cleared.');
+        console.log('[Purchase] Purchase requests sent.');
 
         try {
             await fetchInventoryList();
@@ -52,7 +68,7 @@ export function bindGlobalActionsAfterAuth() {
 
         try {
             await loadAndRenderPurchaseHistoryByStatus();
-            console.log('[Purchase] Purchase history reloaded and rendered.');
+            console.log('[Purchase] Purchase history reloaded.');
         } catch (err) {
             console.error('[Purchase] Failed to reload purchase history:', err);
         }
@@ -64,24 +80,17 @@ export function bindInventorySelection() {
         if (!e.target.classList.contains('select-btn')) return;
 
         const btn = e.target;
-        const id = btn.dataset.id;
-        const name = btn.dataset.name;
-        const qtyInput = document.getElementById(`qty-${id}`);
-        const quantity = parseInt(qtyInput.value, 10);
 
-        if (!quantity || quantity < 1) {
-            alert("Please enter a valid quantity");
-            return;
+        const isSelected = btn.classList.contains('btn-success');
+
+        if (isSelected) {
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+            btn.textContent = 'Select';
+        } else {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            btn.textContent = 'Selected';
         }
-
-        // Save quantity only (not full object)
-        addItem(id, quantity);
-
-        btn.classList.remove('btn-outline-primary');
-        btn.classList.add('btn-success');
-        btn.textContent = 'Selected';
-
-        // **Do NOT clear the input value** so user sees what they selected
-        // qtyInput.value = '';  // <-- removed this line
     });
 }

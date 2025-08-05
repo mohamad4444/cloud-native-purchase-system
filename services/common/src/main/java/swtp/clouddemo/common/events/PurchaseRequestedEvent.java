@@ -1,7 +1,14 @@
 package swtp.clouddemo.common.events;
 
-import java.io.Serializable;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
+import java.io.Serializable;
+@Setter
+@Getter
+@ToString
 public class PurchaseRequestedEvent extends BaseEvent {
     private String product;
     private int quantity;
@@ -18,27 +25,4 @@ public class PurchaseRequestedEvent extends BaseEvent {
         this.requestId = requestId;
     }
 
-    public String getProduct() {
-        return product;
-    }
-
-    public void setProduct(String product) {
-        this.product = product;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
 }

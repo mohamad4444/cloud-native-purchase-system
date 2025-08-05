@@ -1,5 +1,6 @@
 package swtp.clouddemo.purchase.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class PurchaseController {
 
 
     @PostMapping
-    public ResponseEntity<PurchaseDtoOut> createPurchase(@RequestBody PurchaseDtoIn dtoIn) {
+    public ResponseEntity<PurchaseDtoOut> createPurchase(@RequestBody PurchaseDtoIn dtoIn) throws JsonProcessingException {
         return ResponseEntity.ok(purchaseService.createPurchase(dtoIn));
     }
     // /purchases?status=...

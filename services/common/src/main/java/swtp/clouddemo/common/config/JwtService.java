@@ -1,4 +1,4 @@
-package swtp.clouddemo.common.service;
+package swtp.clouddemo.common.config;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
