@@ -16,7 +16,7 @@
     <groupId>swtp.clouddemo</groupId>
     <artifactId>swtp-base-pom</artifactId>
     <version>1.0.1</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>Swtp Microservices Parent</name>
     <description>Shared parent POM for Spring Boot microservices</description>
 
