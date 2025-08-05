@@ -1,6 +1,7 @@
 package swtp.clouddemo.purchase.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.transaction.Transactional;
 import swtp.clouddemo.purchase.dto.PurchaseDtoIn;
 import swtp.clouddemo.purchase.dto.PurchaseDtoOut;
 import swtp.clouddemo.purchase.entity.Purchase;
@@ -11,4 +12,7 @@ public interface PurchaseService {
     List<PurchaseDtoOut> getAllPurchases();
     PurchaseDtoOut createPurchase(PurchaseDtoIn dtoIn) throws JsonProcessingException;
     List<PurchaseDtoOut> getPurchasesByStatus(String status);
+
+    @Transactional
+    PurchaseDtoOut updatePurchaseStatus(Integer purchaseId, String statusStr);
 }

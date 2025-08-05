@@ -6,38 +6,34 @@ import swtp.clouddemo.common.events.PurchaseRequestedEvent;
 import swtp.clouddemo.common.events.PurchaseResultEvent;
 import swtp.clouddemo.common.messaging.MessageProducer;
 import swtp.clouddemo.common.messaging.QueueNames;
+import swtp.clouddemo.inventory.service.LagerService;
 
 @Component
 public class PurchaseRequestedListener {
 
     private final MessageProducer messageProducer;
-
-    public PurchaseRequestedListener(MessageProducer messageProducer) {
+    private final LagerService lagerService;
+    public PurchaseRequestedListener(MessageProducer messageProducer, LagerService lagerService) {
         this.messageProducer = messageProducer;
+        this.lagerService = lagerService;
     }
 
     @JmsListener(destination = QueueNames.PURCHASE_REQUESTED)
     public void handlePurchaseRequested(PurchaseRequestedEvent event) {
-        System.out.println("Processing purchase: " + event.getRequestId());
+        System.out.println("Processing purchase: " + event.getPurchaseId());
 
-        // TODO: Replace this with real inventory logic
-        boolean inventoryAvailable = checkInventory(event.getProduct(), event.getQuantity());
+        boolean inventoryAvailable = lagerService.consumeProductIfAvailable(event.getLagerItemId(),event.getQuantity());
 
         String message = inventoryAvailable ? "Inventory reserved successfully"
                                             : "Inventory out of stock";
 
         PurchaseResultEvent resultEvent = new PurchaseResultEvent(
-            event.getRequestId(),
+            event.getPurchaseId(),
             inventoryAvailable,
             message
         );
 
         // Send back to another queue (purchase service listens to this)
         messageProducer.sendMessage(QueueNames.PURCHASE_RESULT, resultEvent);
-    }
-
-    private boolean checkInventory(String product, int quantity) {
-        // Stub logic — always accepts
-        return true;
     }
 }

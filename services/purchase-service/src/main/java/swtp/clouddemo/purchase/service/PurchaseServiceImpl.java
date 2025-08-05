@@ -1,7 +1,7 @@
 package swtp.clouddemo.purchase.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import swtp.clouddemo.common.events.PurchaseRequestedEvent;
@@ -46,7 +46,8 @@ public class PurchaseServiceImpl implements PurchaseService {
         PurchaseRequestedEvent event = new PurchaseRequestedEvent(
                 saved.getProductName(),
                 saved.getQuantity(),
-                String.valueOf(saved.getId())
+                saved.getId(),
+                saved.getLagerItemId()
         );
         log.info("Sending event: {}",event);
         messageProducer.sendMessage(QueueNames.PURCHASE_REQUESTED, event);
@@ -62,4 +63,21 @@ public class PurchaseServiceImpl implements PurchaseService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
+    public PurchaseDtoOut updatePurchaseStatus(Integer purchaseId, String statusStr) {
+        PurchaseStatus status;
+        try {
+            status = PurchaseStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid purchase status: " + statusStr);
+        }
+
+        Purchase purchase = purchaseRepository.findById(purchaseId)
+                .orElseThrow(() -> new IllegalArgumentException("Purchase not found with id: " + purchaseId));
+
+        purchase.setStatus(status);
+        Purchase updated = purchaseRepository.save(purchase);
+        return PurchaseMapper.toDto(updated);
+    }
 }

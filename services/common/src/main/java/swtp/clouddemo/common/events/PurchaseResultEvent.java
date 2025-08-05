@@ -1,11 +1,15 @@
 package swtp.clouddemo.common.events;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
+@Getter
+@Setter
 public class PurchaseResultEvent  extends BaseEvent {
-    private String requestId;
+    private Integer purchaseId;
     private boolean success;
     private String message;
 
@@ -13,34 +17,12 @@ public class PurchaseResultEvent  extends BaseEvent {
         super("PurchaseResult");
     }
 
-    public PurchaseResultEvent(String requestId, boolean success, String message) {
+    public PurchaseResultEvent(Integer purchaseId, boolean success, String message) {
         super("PurchaseResult");
-        this.requestId = requestId;
+        this.purchaseId = purchaseId;
         this.success = success;
         this.message = message;
     }
 
-    public String getRequestId() {
-        return requestId;
-    }
 
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

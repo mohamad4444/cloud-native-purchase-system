@@ -12,17 +12,21 @@ import java.io.Serializable;
 public class PurchaseRequestedEvent extends BaseEvent {
     private String product;
     private int quantity;
-    private String requestId;
+    private Integer purchaseId;
+    private Long lagerItemId;
+
 
     public PurchaseRequestedEvent() {
         super("PurchaseRequested");
     }
 
-    public PurchaseRequestedEvent(String product, int quantity, String requestId) {
+    public PurchaseRequestedEvent(String product, int quantity, Integer purchaseId,Long lagerItemId) {
         super("PurchaseRequested");
         this.product = product;
         this.quantity = quantity;
-        this.requestId = requestId;
+        this.purchaseId = purchaseId;
+        this.lagerItemId=lagerItemId;
     }
+
 
 }
