@@ -3,16 +3,16 @@ stages:
   - build_common
   - build_parent_pom
   - build_services
-  - test
-  - dockerize
-  - tag
+  # - test
+  # - dockerize
+  # - tag
 
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
 
 cache:
-  key: ${CI_PROJECT_PATH}
+  key: maven-${CI_PROJECT_PATH}-${CI_COMMIT_REF_SLUG}
   paths:
     - .m2/repository
 
@@ -29,12 +29,8 @@ build_common:
   script:
     - cd services/common
     - mvn clean install -DskipTests
-  dependencies:
+  needs:
     - build_base_pom
-  artifacts:
-    paths:
-      - ~/.m2/repository
-    expire_in: 1h
 
 build_parent_pom:
   stage: build_parent_pom
@@ -42,12 +38,8 @@ build_parent_pom:
   script:
     - cd services/swtp-parent-pom
     - mvn clean install -DskipTests
-  dependencies:
+  needs:
     - build_common
-  artifacts:
-    paths:
-      - ~/.m2/repository
-    expire_in: 1h
 
 build_purchase:
   stage: build_services
@@ -55,12 +47,8 @@ build_purchase:
   script:
     - cd services/purchase-service
     - mvn clean package -DskipTests
-  dependencies:
+  needs:
     - build_parent_pom
-  artifacts:
-    paths:
-      - ~/.m2/repository
-    expire_in: 1h
 
 build_inventory:
   stage: build_services
@@ -68,12 +56,8 @@ build_inventory:
   script:
     - cd services/inventory-service
     - mvn clean package -DskipTests
-  dependencies:
+  needs:
     - build_parent_pom
-  artifacts:
-    paths:
-      - ~/.m2/repository
-    expire_in: 1h
 
 test_purchase:
   stage: test
