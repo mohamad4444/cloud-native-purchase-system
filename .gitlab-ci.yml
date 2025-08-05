@@ -3,7 +3,8 @@ stages:
   - build_common
   - build_parent_pom
   - build_services
-
+  - test
+  - dockerize
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
@@ -56,3 +57,36 @@ build_inventory:
     - mvn clean package -DskipTests
   needs:
     - build_parent_pom
+test_purchase:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/purchase-service
+    - mvn test
+
+test_inventory:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/inventory-service
+    - mvn test
+
+dockerize_purchase:
+  stage: dockerize
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $REGISTRY/purchase:$IMAGE_TAG services/purchase-service
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker push $REGISTRY/purchase:$IMAGE_TAG
+
+dockerize_inventory:
+  stage: dockerize
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $REGISTRY/inventory:$IMAGE_TAG services/inventory-service
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker push $REGISTRY/inventory:$IMAGE_TAG
