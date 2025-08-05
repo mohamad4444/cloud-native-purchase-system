@@ -13,16 +13,30 @@ cache:
   paths:
     - .m2/repository
 
+build_base_pom:
+  stage: build
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/swtp-base-pom
+    - mvn clean install -DskipTests
+
+build_parent_pom:
+  stage: build
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/swtp-parent-pom
+    - mvn clean install -DskipTests
+  dependencies:
+    - build_base_pom
+
 build_common:
   stage: build
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/common
     - mvn clean install -DskipTests
-  artifacts:
-    paths:
-      - ~/.m2
-    expire_in: 1h
+  dependencies:
+    - build_parent_pom
 
 build_purchase:
   stage: build
@@ -32,6 +46,7 @@ build_purchase:
     - mvn clean package -DskipTests
   dependencies:
     - build_common
+
 build_inventory:
   stage: build
   image: maven:3.9.6-eclipse-temurin-21
