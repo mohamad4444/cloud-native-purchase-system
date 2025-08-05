@@ -28,6 +28,10 @@ build_common:
     - mvn clean install -DskipTests
   dependencies:
     - build_base_pom
+  artifacts:
+    paths:
+      - ~/.m2/repository
+    expire_in: 1h
 
 
 build_parent_pom:
@@ -38,6 +42,11 @@ build_parent_pom:
     - mvn clean install -DskipTests
   dependencies:
     - build_common
+  artifacts:
+    paths:
+      - ~/.m2/repository
+    expire_in: 1h
+
 
 
 
@@ -48,8 +57,11 @@ build_purchase:
     - cd services/purchase-service
     - mvn clean package -DskipTests
   dependencies:
-    - build_common
-
+    - build_parent_pom
+  artifacts:
+    paths:
+      - ~/.m2/repository
+    expire_in: 1h
 build_inventory:
   stage: build
   image: maven:3.9.6-eclipse-temurin-21
@@ -57,7 +69,11 @@ build_inventory:
     - cd services/inventory-service
     - mvn clean package -DskipTests
   dependencies:
-    - build_common
+    - build_parent_pom
+  artifacts:
+    paths:
+      - ~/.m2/repository
+    expire_in: 1h
 test_purchase:
   stage: test
   image: maven:3.9.6-eclipse-temurin-21
