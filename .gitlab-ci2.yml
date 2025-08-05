@@ -1,0 +1,133 @@
+stages:
+  - build_base_pom
+  - build_common
+  - build_parent_pom
+  - build_services
+  - test
+  - dockerize
+  - tag
+
+variables:
+  REGISTRY: registry.gitlab.com/mohamad4444/uni-project
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+cache:
+  key: maven-${CI_PROJECT_PATH}-${CI_COMMIT_REF_SLUG}
+  paths:
+    - .m2/repository
+
+build_base_pom:
+  stage: build_base_pom
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/swtp-base-pom
+    - mvn clean install -DskipTests
+
+build_common:
+  stage: build_common
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/common
+    - mvn clean install -DskipTests
+  needs:
+    - build_base_pom
+
+build_parent_pom:
+  stage: build_parent_pom
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/swtp-parent-pom
+    - mvn clean install -DskipTests
+  needs:
+    - build_common
+
+build_purchase:
+  stage: build_services
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/purchase-service
+    - mvn clean package -DskipTests
+  needs:
+    - build_parent_pom
+
+build_inventory:
+  stage: build_services
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/inventory-service
+    - mvn clean package -DskipTests
+  needs:
+    - build_parent_pom
+
+test_purchase:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/purchase-service
+    - mvn test
+
+test_inventory:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - cd services/inventory-service
+    - mvn test
+
+dockerize_purchase:
+  stage: dockerize
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $REGISTRY/purchase:$IMAGE_TAG services/purchase-service
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker push $REGISTRY/purchase:$IMAGE_TAG
+
+dockerize_inventory:
+  stage: dockerize
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $REGISTRY/inventory:$IMAGE_TAG services/inventory-service
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker push $REGISTRY/inventory:$IMAGE_TAG
+
+version_tag:
+  stage: tag
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache git
+  script:
+    - VERSION=$(cat VERSION)
+    - echo "VERSION=$VERSION"
+    - NEW_VERSION=$(echo $VERSION | awk -F. -v OFS=. '{$3+=1;print}')
+    - echo $NEW_VERSION > VERSION
+    - git config --global user.name "GitLab CI"
+    - git config --global user.email "ci@example.com"
+    - git add VERSION
+    - git commit -m "Bump version to $NEW_VERSION"
+    - git tag "v$NEW_VERSION"
+    - git push origin main --tags
+    - git push origin main
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+# deploy:
+#   stage: deploy
+#   image: alpine:latest
+#   before_script:
+#     - apk add --no-cache openssh
+#   script:
+#     - mkdir -p ~/.ssh
+#     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+#     - chmod 700 ~/.ssh
+#     - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+
+#     - ssh $SSH_USER@$SSH_HOST "
+#         cd /home/ubuntu/uni-project &&
+#         docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY &&
+#         docker-compose pull &&
+#         docker-compose up -d
+#       "
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH == "main"'
