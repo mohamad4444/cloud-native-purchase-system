@@ -1,27 +1,30 @@
 stages:
-  - build      # Compiles and builds services
-  - test       # Runs unit tests
-  - dockerize  # Builds & pushes Docker images
-  - tag        # Writes a version
-  # - deploy     # Deploys to server
+  - build_base_pom
+  - build_common
+  - build_parent_pom
+  - build_services
+  - test
+  - dockerize
+  - tag
 
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
 cache:
   key: ${CI_PROJECT_PATH}
   paths:
     - .m2/repository
 
 build_base_pom:
-  stage: build
+  stage: build_base_pom
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/swtp-base-pom
     - mvn clean install -DskipTests
-      
+
 build_common:
-  stage: build
+  stage: build_common
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/common
@@ -33,9 +36,8 @@ build_common:
       - ~/.m2/repository
     expire_in: 1h
 
-
 build_parent_pom:
-  stage: build
+  stage: build_parent_pom
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/swtp-parent-pom
@@ -47,11 +49,8 @@ build_parent_pom:
       - ~/.m2/repository
     expire_in: 1h
 
-
-
-
 build_purchase:
-  stage: build
+  stage: build_services
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/purchase-service
@@ -62,8 +61,9 @@ build_purchase:
     paths:
       - ~/.m2/repository
     expire_in: 1h
+
 build_inventory:
-  stage: build
+  stage: build_services
   image: maven:3.9.6-eclipse-temurin-21
   script:
     - cd services/inventory-service
@@ -74,6 +74,7 @@ build_inventory:
     paths:
       - ~/.m2/repository
     expire_in: 1h
+
 test_purchase:
   stage: test
   image: maven:3.9.6-eclipse-temurin-21
