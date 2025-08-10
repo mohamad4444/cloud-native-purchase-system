@@ -19,6 +19,7 @@ RUN mvn -f swtp-parent-pom/pom.xml clean install -DskipTests
 
 # Step 4: Build purchase-service (depends on common and swtp-base-pom)
 COPY purchase-service/pom.xml purchase-service/pom.xml
+COPY purchase-service/src purchase-service/src
 RUN mvn -f purchase-service/pom.xml clean package -DskipTests
 
 # ---------- RUNTIME STAGE ----------

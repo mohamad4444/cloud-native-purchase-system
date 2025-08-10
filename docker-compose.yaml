@@ -117,7 +117,47 @@ services:
     command: -config.file=/etc/promtail/config.yml
     depends_on:
       - loki
+  inventory-service:
+    build:
+      context: ./services
+      dockerfile: inventory-service/Dockerfile
+    container_name: inventory-service
+    ports:
+      - "${INVENTORY_SERVICE_PORT}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://inventory-db:5432/${POSTGRES_DB_INVENTORY}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER_INVENTORY}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD_INVENTORY}
+      KEYCLOAK_URL: http://keycloak:${KEYCLOAK_PORT}
+      ARTEMIS_BROKER_URL: tcp://artemis-broker:61616
+      # Add more env vars as needed
+    depends_on:
+      - inventory-db
+      - keycloak
+      - artemis
+    networks:
+      - purchase-network
 
+  purchase-service:
+    build:
+      context: ./services
+      dockerfile: purchase-service/Dockerfile
+    container_name: purchase-service
+    ports:
+      - "${PURCHASE_SERVICE_PORT}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://purchase-db:5432/${POSTGRES_DB_PURCHASE}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER_PURCHASE}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD_PURCHASE}
+      KEYCLOAK_URL: http://keycloak:${KEYCLOAK_PORT}
+      ARTEMIS_BROKER_URL: tcp://artemis-broker:61616
+      # Add more env vars as needed
+    depends_on:
+      - purchase-db
+      - keycloak
+      - artemis
+    networks:
+      - purchase-network
 networks:
   purchase-network:
     driver: bridge
