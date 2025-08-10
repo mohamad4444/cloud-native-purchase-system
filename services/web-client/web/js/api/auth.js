@@ -1,12 +1,10 @@
-import Keycloak from 'https://cdn.jsdelivr.net/npm/keycloak-js@26.2.0/+esm';
-// import Keycloak from 'keycloak-js';
 import { KEYCLOAK_CONFIG } from '../config.js';
 import { setToken } from '../state.js';
 import { updateLoginState } from '../ui.js';
-
+import Keycloak from '../lib/keycloak.js'; 
 export async function initAuth() {
     console.log('[auth] Starting initAuth');
-
+    //const Keycloak = window.Keycloak;
     const keycloak = new Keycloak(KEYCLOAK_CONFIG);
 
     // Initialize Keycloak and attempt silent SSO login

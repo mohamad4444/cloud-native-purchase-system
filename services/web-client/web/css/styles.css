@@ -1,0 +1,76 @@
+/* Basic reset */
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  padding: 0;
+  background-color: #f9f9f9;
+}
+
+/* Container for page content */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+/* Headings */
+h1, h2, h4 {
+  margin-bottom: 10px;
+}
+
+/* Section spacing */
+section, div {
+  margin-bottom: 20px;
+}
+
+/* Buttons */
+button {
+  padding: 6px 12px;
+  margin: 4px;
+  border: 1px solid #888;
+  background-color: #eee;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+/* Inventory product list */
+#inventoryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+th, td {
+  border: 1px solid #aaa;
+  padding: 8px;
+  text-align: left;
+}
+
+thead {
+  background-color: #ddd;
+}
+
+/* Purchase status colors */
+#pendingPurchases h4 {
+  color: orange;
+}
+
+#completedPurchases h4 {
+  color: green;
+}
+
+#rejectedPurchases h4 {
+  color: red;
+}
