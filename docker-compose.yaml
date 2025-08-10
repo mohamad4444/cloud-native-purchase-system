@@ -1,43 +1,27 @@
----
+version: "3.8"
+
 services:
   nginx-frontend:
-    build:
-      context: ./services/web-client
-      dockerfile: Dockerfile
+    image: purchasesystem/frontend:latest
     container_name: purchasesystem-frontend
     ports:
-      - "4200:80"
-    volumes:
-      # Mount your built static files
-      - ./services/web-client/web:/usr/share/nginx/html:ro
-      # Optional: mount a custom nginx.conf if you have one
-      # - ./web-frontend-nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - "${FRONTEND_PORT}:80"
     networks:
       - purchase-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2.5
     container_name: keycloak
-    command: start
-    restart: always
     ports:
-      - '8443:8443'
+      - "${KEYCLOAK_PORT}:8080"
     environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloakpass
-      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak.p12
-      KC_HTTPS_CERTIFICATE_KEY_FILE: ''  # Not used when PKCS12 is provided
-      KC_HTTPS_KEY_STORE_FILE: /opt/keycloak/conf/keycloak.p12
-      KC_HTTPS_KEY_STORE_PASSWORD: changeit
-      KC_HTTPS_KEY_STORE_TYPE: PKCS12
-      KC_HOSTNAME: localhost
-      KC_HTTPS_PORT: 8443
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    volumes:
-      - ./certs/keycloak.p12:/opt/keycloak/conf/keycloak.p12:ro
+      KC_DB: ${KC_DB}
+      KC_DB_URL: ${KC_DB_URL}
+      KC_DB_USERNAME: ${KC_DB_USERNAME}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_HOSTNAME: ${KC_HOSTNAME}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     depends_on:
       - keycloak-db
     networks:
@@ -46,93 +30,84 @@ services:
   keycloak-db:
     image: postgres:17.5
     container_name: keycloak-db
-    restart: always
     environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: keycloakpass
+      POSTGRES_DB: ${POSTGRES_DB_KEYCLOAK}
+      POSTGRES_USER: ${POSTGRES_USER_KEYCLOAK}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_KEYCLOAK}
     ports:
-      - '5432:5432'
+      - "${KEYCLOAK_DB_PORT}:5432"
     volumes:
       - ./docker/keycloak/keycloak_db_data:/var/lib/postgresql/data
     networks:
       - purchase-network
+
   purchase-db:
     image: postgres:17.5
     container_name: purchase-db
-    restart: always
     environment:
-      POSTGRES_DB: purchase
-      POSTGRES_USER: purchase_user
-      POSTGRES_PASSWORD: purchase_pass
+      POSTGRES_DB: ${POSTGRES_DB_PURCHASE}
+      POSTGRES_USER: ${POSTGRES_USER_PURCHASE}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PURCHASE}
     ports:
-      - '5433:5432'
+      - "${PURCHASE_DB_PORT}:5432"
     volumes:
       - ./docker/purchase/purchase_db_data:/var/lib/postgresql/data
     networks:
       - purchase-network
+
   inventory-db:
     image: postgres:17.5
     container_name: inventory-db
-    restart: always
     environment:
-      POSTGRES_DB: inventory
-      POSTGRES_USER: inventory_user
-      POSTGRES_PASSWORD: inventory_pass
+      POSTGRES_DB: ${POSTGRES_DB_INVENTORY}
+      POSTGRES_USER: ${POSTGRES_USER_INVENTORY}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_INVENTORY}
     ports:
-      - '5434:5432'
+      - "${INVENTORY_DB_PORT}:5432"
     volumes:
       - ./docker/inventory/inventory_db_data:/var/lib/postgresql/data
     networks:
       - purchase-network
+
   artemis:
-    build: ./docker/artemis/.
+    image: purchasesystem/artemis:latest
     container_name: artemis-broker
-    restart: unless-stopped
     environment:
-      ARTEMIS_USER: admin
-      ARTEMIS_PASSWORD: admin
-      ANONYMOUS_LOGIN: "false"
+      ARTEMIS_USER: ${ARTEMIS_USER}
+      ARTEMIS_PASSWORD: ${ARTEMIS_PASSWORD}
+      ANONYMOUS_LOGIN: ${ANONYMOUS_LOGIN}
     ports:
-      - "61616:61616"   # Core messaging
-      - "8161:8161"     # Web console
+      - "${ARTEMIS_CORE_PORT}:61616"
+      - "${ARTEMIS_WEB_PORT}:8161"
     volumes:
       - ./docker/artemis/artemis-data:/var/lib/artemis-instance
-#  springboot-app:
-#    image: your-springboot-app:latest
-#    container_name: springboot-app
-#    environment:
-#      - JAVA_OPTS=-Dlogging.file.name=/logs/app.log
-#    volumes:
-#      - ./logs:/logs
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - prometheus
-#      - loki
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT}:9090"
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT}:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
       - ./docker/grafana/grafana-data:/var/lib/grafana
+
   loki:
     image: grafana/loki:latest
     container_name: loki
     ports:
-      - "3100:3100"
+      - "${LOKI_PORT}:3100"
     command: -config.file=/etc/loki/local-config.yaml
+
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
@@ -143,14 +118,6 @@ services:
     depends_on:
       - loki
 
-
-
-volumes:
-  keycloak_db_data: null
-  purchase_db_data: null
-  inventory_db_data: null
-  web-frontend: null
-  grafana-data:
 networks:
   purchase-network:
     driver: bridge

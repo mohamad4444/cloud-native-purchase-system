@@ -1,0 +1,18 @@
+services:
+  nginx-frontend:
+    build:
+      context: ./services/web-client
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/web-client/web:/usr/share/nginx/html:ro
+  artemis:
+    build:
+      context: ./docker/artemis
+    image: purchasesystem/artemis:latest
+  keycloak:
+    command: start-dev
+
+  # TODO: mount logs in dev for debugging
+  # springboot-app:
+  #   volumes:
+  #     - ./logs:/logs

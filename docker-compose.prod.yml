@@ -1,0 +1,10 @@
+services:
+  nginx-frontend:
+    image: purchasesystem/frontend:latest
+    volumes:
+      - ./services/web-client/dist:/usr/share/nginx/html:ro
+
+  keycloak:
+    command:
+      - start
+      - --optimized
