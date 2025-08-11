@@ -12,3 +12,7 @@ prod:
 
 stop:
 	docker compose down
+
+
+	
+docker build -f Dockerfile -t purchase-service-image ..

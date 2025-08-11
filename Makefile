@@ -42,5 +42,8 @@ prod: build
 stop:
 	$(DOCKER_COMPOSE) down
 
+clean:
+	$(DOCKER_COMPOSE) down --volumes --remove-orphans
+
 logs:
 	$(DOCKER_COMPOSE) logs -f
