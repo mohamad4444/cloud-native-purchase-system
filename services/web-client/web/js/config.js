@@ -9,6 +9,6 @@ export const KEYCLOAK_CONFIG = {
 };
 
 export const API_ENDPOINTS = {
-    purchases: 'http://localhost:8280/purchase',
-    inventory: 'http://localhost:8280/inventory'
+    purchases: 'http://localhost:8280/purchase-service/purchases',
+    inventory: 'http://localhost:8280/inventory-service/inventory'
 };
