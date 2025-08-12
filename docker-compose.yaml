@@ -19,10 +19,9 @@ services:
       KC_DB_URL: ${KC_DB_URL}
       KC_DB_USERNAME: ${KC_DB_USERNAME}
       KC_DB_PASSWORD: ${KC_DB_PASSWORD}
-      KC_HOSTNAME: ${KC_HOSTNAME}          # e.g. localhost (no port)
-      KC_HOSTNAME_PORT: ${KC_HOSTNAME_PORT}
-      KC_PROXY: ${KC_PROXY}
-      KEYCLOAK_FRONTEND_URL: "http://${KC_HOSTNAME}:${KEYCLOAK_PORT}"  # explicit full URL with port
+      KC_PROXY_HEADERS: xforwarded
+      PROXY_ADDRESS_FORWARDING: "true"
+      KEYCLOAK_FRONTEND_URL: http://localhost:8280
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     command:
