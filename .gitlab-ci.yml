@@ -4,12 +4,13 @@ stages:
   - build_parent_pom
   - build_services
   - test
-  - dockerize
+#  - dockerize
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
   IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
-
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_TLS_CERTDIR: ""
 cache:
   key: maven-${CI_PROJECT_PATH}-${CI_COMMIT_REF_SLUG}
   paths:
@@ -71,22 +72,22 @@ test_inventory:
     - cd services/inventory-service
     - mvn test
 
-dockerize_purchase:
-  stage: dockerize
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - docker build -t $REGISTRY/purchase:$IMAGE_TAG services/purchase-service
-    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
-    - docker push $REGISTRY/purchase:$IMAGE_TAG
-
-dockerize_inventory:
-  stage: dockerize
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - docker build -t $REGISTRY/inventory:$IMAGE_TAG services/inventory-service
-    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
-    - docker push $REGISTRY/inventory:$IMAGE_TAG
+#dockerize_purchase:
+#  stage: dockerize
+#  image: docker:latest
+#  services:
+#    - docker:dind
+#  script:
+#    - docker build -t $REGISTRY/purchase:$IMAGE_TAG services/purchase-service
+#    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+#    - docker push $REGISTRY/purchase:$IMAGE_TAG
+#
+#dockerize_inventory:
+#  stage: dockerize
+#  image: docker:latest
+#  services:
+#    - docker:dind
+#  script:
+#    - docker build -t $REGISTRY/inventory:$IMAGE_TAG services/inventory-service
+#    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+#    - docker push $REGISTRY/inventory:$IMAGE_TAG
