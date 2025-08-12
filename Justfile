@@ -48,6 +48,11 @@ clean:
 # Tail logs from all containers
 logs:
     {{DOCKER_COMPOSE}} logs -f
+# Restart only keycloak and api services
+restart-keycloak-api:
+    {{DOCKER_COMPOSE}} stop keycloak api-proxy
+    {{DOCKER_COMPOSE}} rm -f keycloak api-proxy
+    {{DOCKER_COMPOSE}} up -d keycloak api-proxy
 
 # Help text
 help:

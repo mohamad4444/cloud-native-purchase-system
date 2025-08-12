@@ -32,6 +32,8 @@ public class SecurityConfig {
         log.info("Setting up security filter chain");
 
         http
+                .cors()
+                .and()
                 //.addFilterBefore(new LoggingFilter(), org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/helloAdmin").hasRole("ADMIN")
