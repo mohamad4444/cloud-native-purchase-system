@@ -15,28 +15,33 @@ export function updateLoginState(username) {
     }
 }
 
-export function renderInventory(inventory) {
-    const list = document.getElementById('inventoryList');
-    list.innerHTML = '';
+export function renderInventory(products) {
+    const inventorySection = document.getElementById("inventorySection");
+    const inventoryList = document.getElementById("inventoryList");
 
-    inventory.forEach(item => {
-        const col = document.createElement('div');
-        col.className = 'col-md-4';
-        col.innerHTML = `
-      <div class="card mb-3 border-primary">
-        <div class="card-body">
-          <h5 class="card-title">${item.product}</h5>
-          <p class="card-text">Stock: ${item.quantity}</p>
-          <input type="number" min="1" max="${item.quantity}" class="form-control mb-2" id="qty-${item.id}" placeholder="Quantity">
-          <button class="btn btn-outline-primary btn-sm select-btn" data-id="${item.id}" data-name="${item.product}">Select</button>
-        </div>
-      </div>
-    `;
-        list.appendChild(col);
+    inventorySection.style.display = "block";
+    inventoryList.innerHTML = "";
+    console.log(products);
+    if (!products || products.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="4">No products available</td>`;
+        inventoryList.appendChild(row);
+        return;
+    }
+
+    products.forEach(product => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${product.product}</td>
+            <td>${product.quantity}</td>
+            <td><input type="number" min="1" max="${product.quantity}" value="1" class="purchase-qty"></td>
+            <td><input type="checkbox" data-id="${product.id}"></td>
+        `;
+        inventoryList.appendChild(row);
     });
-
-    document.getElementById('inventorySection').style.display = 'block';
 }
+
+
 
 export function renderPurchaseHistory(history, status) {
     const pending = document.getElementById('pendingTableBody');

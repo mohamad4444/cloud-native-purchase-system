@@ -20,7 +20,20 @@
 
   <div id="inventorySection" style="display:none;">
     <h2>Available Products</h2>
-    <div id="inventoryList"></div>
+    <table id="inventoryTable" class="inventory-table">
+      <thead>
+      <tr>
+        <th>Product</th>
+        <th>Available</th>
+        <th>Purchase Qty</th>
+        <th>Select</th>
+      </tr>
+      </thead>
+      <tbody id="inventoryList">
+      <!-- Rows will be inserted here dynamically -->
+      </tbody>
+    </table>
+
     <button id="finalizePurchaseBtn">Finalize Purchase</button>
   </div>
 
