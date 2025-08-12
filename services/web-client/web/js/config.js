@@ -1,12 +1,14 @@
 // config.js
+
 export const KEYCLOAK_CONFIG = {
-    url: 'http://localhost:8280/',
+    // Use the /auth path because NGINX maps that to Keycloak
+    url: 'http://localhost:8280/auth/',
     realm: 'purchase-service-realm',
     clientId: 'web-frontend-client',
     scope: 'openid profile email offline_access'
 };
 
 export const API_ENDPOINTS = {
-    purchases: 'http://purchase-service:8080/purchases',
-    inventory: 'http://inventory-service:8080/inventory'
+    purchases: 'http://localhost:8280/purchases',
+    inventory: 'http://localhost:8280/inventory'
 };
