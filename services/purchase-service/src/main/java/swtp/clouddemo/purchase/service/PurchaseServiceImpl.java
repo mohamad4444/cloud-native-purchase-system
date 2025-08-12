@@ -2,7 +2,6 @@ package swtp.clouddemo.purchase.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.transaction.Transactional;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import swtp.clouddemo.common.events.PurchaseRequestedEvent;
 import swtp.clouddemo.common.config.JwtService;
@@ -14,12 +13,12 @@ import swtp.clouddemo.purchase.entity.Purchase;
 import swtp.clouddemo.purchase.entity.PurchaseStatus;
 import swtp.clouddemo.purchase.mapper.PurchaseMapper;
 import swtp.clouddemo.purchase.repository.PurchaseRepository;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Log4j2
+@Slf4j
 public class PurchaseServiceImpl implements PurchaseService {
 
     private final PurchaseRepository purchaseRepository;

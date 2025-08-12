@@ -14,7 +14,13 @@ public class CorsConfig {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of("http://localhost:4200"));
+    config.setAllowedOrigins(List.of(
+    "http://localhost:4200",
+    "http://nginx-frontend",       // container-to-container
+    "http://nginx-frontend:80",    // explicit port
+    "http://127.0.0.1:4200",
+    "http://192.168.1.100:4200"    // your dev LAN IP
+));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true); // only if necessary

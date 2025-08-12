@@ -3,7 +3,8 @@ services:
     image: purchasesystem/frontend:latest
     volumes:
       - ./services/web-client/dist:/usr/share/nginx/html:ro
-
+    networks:
+      - purchase-network
   keycloak:
     command:
       - start

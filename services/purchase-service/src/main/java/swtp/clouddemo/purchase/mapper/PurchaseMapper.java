@@ -1,12 +1,11 @@
 package swtp.clouddemo.purchase.mapper;
 
-import lombok.extern.log4j.Log4j2;
 import swtp.clouddemo.purchase.dto.PurchaseDtoIn;
 import swtp.clouddemo.purchase.dto.PurchaseDtoOut;
 import swtp.clouddemo.purchase.entity.Purchase;
-
+import lombok.extern.slf4j.Slf4j;
 import java.time.format.DateTimeFormatter;
-@Log4j2
+@Slf4j
 public class PurchaseMapper {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
