@@ -1,6 +1,7 @@
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
+  log_level: info
 
 positions:
   filename: /promtail/positions.yaml
@@ -15,7 +16,7 @@ scrape_configs:
         refresh_interval: 5s
     relabel_configs:
       - source_labels: [__meta_docker_container_name]
-        regex: '/(.*)'
+        regex: '(.*)'
         target_label: container
       - source_labels: [__meta_docker_container_log_stream]
         target_label: stream
