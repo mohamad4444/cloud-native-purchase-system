@@ -2,8 +2,24 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'springboot'
+  - job_name: 'purchase-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-    #- targets: ['springboot-app:8080']
-      #- targets: ['host.docker.internal:8080']
+      - targets: ['purchase-service:8080']
+
+  - job_name: 'inventory-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['inventory-service:8080']
+
+  # Keycloak does not expose /metrics by default, and requires enabling metrics SPI.
+  # Temporarily commented out until metrics are enabled and secured.
+  # - job_name: 'keycloak'
+  #   metrics_path: '/metrics'
+  #   static_configs:
+  #     - targets: ['keycloak:8080']
+
+  - job_name: 'prometheus'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['localhost:9090']

@@ -137,8 +137,12 @@ services:
     ports:
       - "${LOKI_PORT}:3100"
     command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./docker/loki/loki-data:/loki   # persistent storage for logs/indexes
+      - ./docker/loki/local-config.yaml:/etc/loki/local-config.yaml  # config file
     networks:
       - purchase-network
+
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
