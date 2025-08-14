@@ -2,6 +2,7 @@
 **/inventory_db_data
 **/purchase_db_data
 **/grafana-data
+**/loki-data/*
 **/artemis-data/*
 !**/artemis-data/etc-override/
 !**/artemis-data/etc-override/**

@@ -150,7 +150,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./docker/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
-      - ./docker/promtail/positions.yaml:/promtail/positions.yaml
+      - promtail-positions:/promtail
     command: -config.file=/etc/promtail/promtail-config.yaml
     depends_on:
       - loki
@@ -207,3 +207,5 @@ services:
 networks:
   purchase-network:
     driver: bridge
+volumes:
+  promtail-positions:
