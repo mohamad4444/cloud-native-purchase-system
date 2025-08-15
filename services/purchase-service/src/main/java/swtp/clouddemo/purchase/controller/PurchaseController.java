@@ -30,6 +30,7 @@ public class PurchaseController {
     // /purchases?status=...
     @GetMapping
     public ResponseEntity<List<PurchaseDtoOut>> getPurchases(@RequestParam(required = false) String status) {
+        
         if (status == null || status.equalsIgnoreCase("ALL")) {
             return ResponseEntity.ok(purchaseService.getAllPurchases());
         } else {

@@ -27,8 +27,14 @@ export async function sendPurchase(item) {
 
 export async function fetchPurchaseHistory(status = 'ALL') {
     try {
-        const url = new URL(API_ENDPOINTS.purchases);
-        if (status) url.searchParams.set('status', status);
+        const url = new URL(API_ENDPOINTS.purchases, window.location.origin);
+        console.log('[fetchPurchaseHistory] Initial URL:', url.toString(), 'status param:', status);
+
+        if (status !== undefined && status !== null) {
+            url.searchParams.set('status', status);
+        }
+
+        console.log('[fetchPurchaseHistory] Final URL:', url.toString());
 
         const res = await fetch(url.toString(), {
             headers: {
@@ -49,11 +55,12 @@ export async function fetchPurchaseHistory(status = 'ALL') {
             return [];
         }
 
-        return await res.json();
+        const data = await res.json();
+        console.log(`[fetchPurchaseHistory] Received ${data.length} items`);
+        return data;
     } catch (err) {
         console.error("Failed to fetch purchase history:", err);
         return [];
     }
 }
-
 

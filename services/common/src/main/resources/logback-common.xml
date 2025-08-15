@@ -1,16 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>
-        %cyan(%d{HH:mm:ss.SSS}) %highlight(%-5level) [%thread] %blue(%logger{36}) - %msg%n%ex
-      </pattern>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>{"app":"purchase-system"}</customFields>
     </encoder>
   </appender>
 
   <root level="INFO">
     <appender-ref ref="Console"/>
   </root>
-
 </configuration>

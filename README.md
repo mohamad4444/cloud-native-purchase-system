@@ -22,24 +22,23 @@ The system includes:
 ### Technologies Used
 
 #### Core
-![Spring Boot](https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original-wordmark.svg) **Spring Boot** – Java microservices  
-![PostgreSQL](https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original-wordmark.svg) **PostgreSQL** – Relational database  
-![Keycloak](https://www.keycloak.org/resources/images/keycloak_icon_512px.png) **Keycloak** – Identity and access management  
-![ActiveMQ Artemis](https://activemq.apache.org/assets/img/activemq-logo.png) **ActiveMQ Artemis** – Messaging broker  
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" alt="Spring Boot" height="40"/> **Spring Boot** – Java microservices  
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" height="40"/> **PostgreSQL** – Relational database  
+<img src="https://www.keycloak.org/resources/images/keycloak_icon_512px.png" alt="Keycloak" height="40"/> **Keycloak** – Identity and access management  
+<img src="https://activemq.apache.org/assets/img/activemq-logo.png" alt="ActiveMQ Artemis" height="40"/> **ActiveMQ Artemis** – Messaging broker  
 
 #### Infrastructure & Deployment
-![Docker](https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original-wordmark.svg) **Docker Compose** – Local development  
-![Kubernetes](https://raw.githubusercontent.com/devicons/devicon/master/icons/kubernetes/kubernetes-plain-wordmark.svg) **Kubernetes** – Container orchestration  
-![Helm](https://helm.sh/img/helm.svg) **Helm** – Kubernetes application packaging  
-![Istio](https://istio.io/latest/favicons/android-192x192.png) **Istio** – Service mesh for routing, security, observability  
-![Just](https://just.systems/images/logo.png) **Just** – Command runner  
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" height="40"/> **Docker Compose** – Local development  
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/kubernetes/kubernetes-plain.svg" alt="Kubernetes" height="40"/> **Kubernetes** – Container orchestration  
+<img src="https://helm.sh/img/helm.svg" alt="Helm" height="40"/> **Helm** – Kubernetes application packaging  
+<img src="https://istio.io/latest/favicons/android-192x192.png" alt="Istio" height="40"/> **Istio** – Service mesh for routing, security, observability  
+<img src="https://just.systems/images/logo.png" alt="Just" height="40"/> **Just** – Command runner  
 
 #### Monitoring & Logging
-![Prometheus](https://raw.githubusercontent.com/prometheus/prometheus/main/documentation/images/prometheus-logo.png) **Prometheus** – Metrics collection  
-![Grafana](https://grafana.com/static/img/grafana_logo_transparent_400x.png) **Grafana** – Visualization  
-![Loki](https://grafana.com/static/img/logos/logo-loki.svg) **Loki** – Log aggregation  
-![Promtail](https://grafana.com/static/img/logos/icon-promtail.svg) **Promtail** – Log shipping
-
+<img src="https://raw.githubusercontent.com/prometheus/prometheus/main/documentation/images/prometheus-logo.png" alt="Prometheus" height="40"/> **Prometheus** – Metrics collection  
+<img src="https://grafana.com/static/assets/img/fav32.png" alt="Grafana" height="40"/> **Grafana** – Visualization  
+<img src="https://grafana.com/static/assets/img/logos/logo-loki.svg" alt="Loki" height="40"/> **Loki** – Log aggregation  
+<img src="https://grafana.com/static/assets/img/logos/icon-promtail.svg" alt="Promtail" height="40"/> **Promtail** – Log shipping
 
 
 # commands
@@ -55,3 +54,14 @@ stop:
 
 	
 docker build -f Dockerfile -t purchase-service-image ..
+
+
+Grafana
+{service="$service", stream="stdout"} |= "INFO"
+
+
+{service="$service", stream="stdout"}
+| json
+| level="INFO"
+| app="purchase-system"
+| line_format "{{.timestamp}} {{.level}} {{.app}} {{.message}}"

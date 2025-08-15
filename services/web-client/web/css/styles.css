@@ -1,86 +1,58 @@
-/* Basic reset */
+/* Base */
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  padding: 0;
-  background-color: #f9f9f9;
+  background: #f9f9f9;
 }
 
-/* Container for page content */
 .container {
   max-width: 900px;
-  margin: 0 auto;
+  margin: auto;
   background: white;
   padding: 20px;
   border: 1px solid #ccc;
 }
 
-/* Headings */
-h1, h2, h4 {
-  margin-bottom: 10px;
-}
-
-/* Section spacing */
-section, div {
-  margin-bottom: 20px;
-}
+/* Headings & spacing */
+h1, h2, h4 { margin-bottom: 10px; }
+section, div { margin-bottom: 20px; }
 
 /* Buttons */
-button {
-  padding: 6px 12px;
-  margin: 4px;
+button, input[type="button"], input[type="submit"] {
+  padding: 4px 8px;
   border: 1px solid #888;
-  background-color: #eee;
+  background: #eee;
   cursor: pointer;
 }
-
-button:hover {
-  background-color: #ddd;
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover {
+  background: #ddd;
 }
 
-/* Tables */
-.inventory-table {
-  width: 100%;
+/* Tables - ultra compact */
+table {
   border-collapse: collapse;
-  margin: 15px 0;
-  font-family: Arial, sans-serif;
+  width: auto; /* table will be only as wide as needed */
+  table-layout: auto; /* let browser size based on content */
 }
-
-.inventory-table th,
-.inventory-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-
-.inventory-table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
-}
-
-.inventory-table tr:nth-child(even) {
-  background-color: #fafafa;
-}
-
-.inventory-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-/* Purchase status colors */
-#pendingPurchases h4 {
-  color: orange;
-}
-
-#completedPurchases h4 {
-  color: green;
-}
-
-#rejectedPurchases h4 {
-  color: red;
-}
-.inventory-table input[type="number"] {
-  width: 60px;
-  padding: 4px;
+th, td {
   border: 1px solid #ccc;
-  border-radius: 3px;
+  padding: 0;
+  text-align: left;
+  white-space: nowrap; /* prevents wrapping so width matches content */
 }
+
+
+/* Number inputs */
+table input[type="number"] {
+  width: 100%;
+  padding: 0;
+  border: none;
+  box-sizing: border-box;
+}
+
+/* Status colors */
+#pendingPurchases h4 { color: orange; }
+#completedPurchases h4 { color: green; }
+#rejectedPurchases h4 { color: red; }

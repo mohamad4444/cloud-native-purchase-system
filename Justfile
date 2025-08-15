@@ -28,6 +28,12 @@ build-purchase-service: build-java-deps
 
 # Build all: artemis + inventory + purchase
 build: build-artemis build-inventory-service build-purchase-service
+# Rebuild both inventory and purchase service + dependencies (build-java-deps runs only once)
+rebuild: build-java-deps
+    @echo "Building inventory-service..."
+    cd services/inventory-service && mvn clean package -DskipTests
+    @echo "Building purchase-service..."
+    cd services/purchase-service && mvn clean package -DskipTests
 
 # Start development environment (depends on build)
 dev: build

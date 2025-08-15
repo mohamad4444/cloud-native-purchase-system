@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
-  <!-- Console appender with color support -->
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>
-        %highlight(%d{HH:mm:ss.SSS}) %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n%ex
-      </pattern>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>{"app":"purchase-system"}</customFields>
+      <flattenThrowable>true</flattenThrowable>
+      <includeCallerData>true</includeCallerData>
+      <!-- Rename default fields -->
+      <fieldNames>
+        <timestamp>timestamp</timestamp>   <!-- replaces @timestamp -->
+        <version>version</version>         <!-- replaces @version -->
+      </fieldNames>
     </encoder>
   </appender>
 
-  <!-- Loggers with debug level, optional if you want specific configs -->
-  <logger name="swtp.clouddemo.purchase.controller" level="DEBUG" additivity="false">
-    <appender-ref ref="Console"/>
-  </logger>
-
-  <logger name="swtp.clouddemo.common.aop" level="DEBUG" additivity="false">
-    <appender-ref ref="Console"/>
-  </logger>
-
-  <!-- Root logger logs everything at DEBUG level -->
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="Console"/>
   </root>
-
 </configuration>

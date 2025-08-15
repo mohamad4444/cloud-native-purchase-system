@@ -3,94 +3,41 @@ import { fetchInventoryList } from './api/inventory.js';
 import { loadAndRenderPurchaseHistoryByStatus } from './util.js';
 
 export function bindLoginLogout(keycloak) {
-    document.getElementById('loginBtn').addEventListener('click', () => {
-        keycloak.login({ redirectUri: window.location.href });
-    });
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        keycloak.logout({ redirectUri: window.location.href });
-    });
+    document.getElementById('loginBtn').addEventListener('click', () => keycloak.login({ redirectUri: window.location.href }));
+    document.getElementById('logoutBtn').addEventListener('click', () => keycloak.logout({ redirectUri: window.location.href }));
 }
 
-export function bindGlobalActionsAfterAuth() {
+export function bindPostAuthActions() {
+    // finalize purchase button
     document.getElementById('finalizePurchaseBtn').addEventListener('click', async () => {
-        console.log('[Purchase] Finalize button clicked.');
+        const selected = document.querySelectorAll('.select-checkbox:checked');
+        if (!selected.length) return alert('No items selected');
 
-        const selectedButtons = document.querySelectorAll('.select-btn.btn-success');
-        if (selectedButtons.length === 0) {
-            alert("No items selected.");
-            return;
+        const purchases = Array.from(selected).map(cb => {
+            const qty = parseInt(document.getElementById(`qty-${cb.dataset.id}`).value, 10);
+            return { lagerItemId: parseInt(cb.dataset.id, 10), productName: cb.dataset.name, quantity: qty };
+        }).filter(item => item.quantity > 0);
+
+        if (!purchases.length) return alert('No valid quantities');
+
+        for (const item of purchases) {
+            try { await sendPurchase(item); } 
+            catch(e) { console.error('Purchase failed', item, e); }
         }
 
-        const purchaseItems = [];
-
-        selectedButtons.forEach(btn => {
-            const id = btn.dataset.id;
-            const name = btn.dataset.name;
-            const qtyInput = document.getElementById(`qty-${id}`);
-            const quantity = parseInt(qtyInput.value, 10);
-
-            if (!quantity || quantity < 1) {
-                console.warn(`[Purchase] Invalid quantity for item ${id}`);
-                return;
-            }
-
-            purchaseItems.push({
-                lagerItemId: parseInt(id, 10),
-                productName: name,
-                quantity
-            });
+        alert('Purchase sent!');
+        selected.forEach(cb => {
+            cb.checked = false;
+            cb.closest('tr').style.backgroundColor = '';
         });
 
-        if (purchaseItems.length === 0) {
-            alert("No valid quantities found.");
-            return;
-        }
-
-        for (const item of purchaseItems) {
-            try {
-                await sendPurchase(item);
-                console.log('[Purchase] Successfully sent purchase:', item);
-            } catch (err) {
-                console.error('[Purchase] Failed to send purchase:', item, err);
-            }
-        }
-
-        alert("Purchase request(s) sent.");
-        console.log('[Purchase] Purchase requests sent.');
-
-        try {
-            await fetchInventoryList();
-            console.log('[Purchase] Inventory list refreshed.');
-        } catch (err) {
-            console.error('[Purchase] Failed to refresh inventory list:', err);
-        }
-
-        try {
-            await loadAndRenderPurchaseHistoryByStatus();
-            console.log('[Purchase] Purchase history reloaded.');
-        } catch (err) {
-            console.error('[Purchase] Failed to reload purchase history:', err);
-        }
+        await fetchInventoryList();
+        await loadAndRenderPurchaseHistoryByStatus();
     });
-}
 
-export function bindInventorySelection() {
-    document.getElementById('inventoryList').addEventListener('click', e => {
-        if (!e.target.classList.contains('select-btn')) return;
-
-        const btn = e.target;
-
-        const isSelected = btn.classList.contains('btn-success');
-
-        if (isSelected) {
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-outline-primary');
-            btn.textContent = 'Select';
-        } else {
-            btn.classList.remove('btn-outline-primary');
-            btn.classList.add('btn-success');
-            btn.textContent = 'Selected';
-        }
+    // row highlight
+    document.getElementById('inventoryList').addEventListener('change', e => {
+        if (!e.target.classList.contains('select-checkbox')) return;
+        e.target.closest('tr').style.backgroundColor = e.target.checked ? '#e0ffe0' : '';
     });
 }
