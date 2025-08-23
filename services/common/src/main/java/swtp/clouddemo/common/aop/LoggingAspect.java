@@ -3,14 +3,27 @@ package swtp.clouddemo.common.aop;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.*;
-import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.stereotype.Component;
+import org.slf4j.MDC;
+
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * LoggingAspect provides a central AOP-based logging and metrics mechanism.
+ *
+ * Features:
+ *  - Logs method entry with parameters
+ *  - Logs method exit with result
+ *  - Logs exceptions
+ *  - Records execution time in Micrometer with detailed tags
+ *  - Includes MDC context (userId, username) in logs and metrics
+ */
 @Slf4j
 @Aspect
 @Component
@@ -19,63 +32,87 @@ public class LoggingAspect {
 
     private final MeterRegistry meterRegistry;
 
+    /**
+     * Pointcut matching all methods in service, controller, and repository packages.
+     *
+     * Usage: applied in @Around advice to wrap method execution.
+     */
+    @Pointcut("within(swtp.clouddemo..service..*) || " +
+            "within(swtp.clouddemo..controller..*) || " +
+            "within(swtp.clouddemo..repository..*)")
+    public void applicationPackagePointcut() {}
 
-    @Pointcut("execution(* swtp.clouddemo..service..*(..)) " +
-            "|| execution(* swtp.clouddemo..controller..*(..)) " +
-            "|| execution(* swtp.clouddemo..repository..*(..))")
-    public void applicationPackagePointcut() {
-        // matches service, controller, and repository packages
-    }
-
-
-    @Before("applicationPackagePointcut()")
-    public void logMethodEntry(JoinPoint joinPoint) {
-        String methodName = joinPoint.getSignature().toShortString();
-        Object[] args = joinPoint.getArgs();
-        log.info("Entering: {} with args {}", methodName, Arrays.toString(args));
-    }
-
-    @AfterReturning(pointcut = "applicationPackagePointcut()", returning = "result")
-    public void logMethodExit(JoinPoint joinPoint, Object result) {
-        String methodName = joinPoint.getSignature().toShortString();
-        log.info("Exiting: {} with result {}", methodName, result);
-    }
-
-    @AfterThrowing(pointcut = "applicationPackagePointcut()", throwing = "ex")
-    public void logException(JoinPoint joinPoint, Throwable ex) {
-        String methodName = joinPoint.getSignature().toShortString();
-        log.error("Exception in {}: {}", methodName, ex.getMessage(), ex);
-    }
+    /**
+     * Around advice that wraps method execution.
+     *
+     * Responsibilities:
+     *  - Logs method entry and parameters
+     *  - Executes the actual method via joinPoint.proceed()
+     *  - Logs method exit and result
+     *  - Logs exceptions if thrown
+     *  - Records execution time in Micrometer with tags:
+     *      class, method, userId, username
+     *
+     * @param joinPoint the method being intercepted
+     * @return the result of the target method
+     * @throws Throwable if the target method throws an exception
+     */
     @Around("applicationPackagePointcut()")
-    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
-        long start = System.currentTimeMillis();
-        Object result = joinPoint.proceed();
-        long duration = System.currentTimeMillis() - start;
-        String methodName = joinPoint.getSignature().toShortString();
-        log.info("Executed {} in {} ms", methodName, duration);
-        return result;
-    }
-
-    @Around("execution(* swtp.clouddemo..*.*(..))")
-    public Object logAndTime(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object logMethod(ProceedingJoinPoint joinPoint) throws Throwable {
+        // Extract method signature and class
         String method = joinPoint.getSignature().toShortString();
-        long start = System.nanoTime();
-        log.debug("Enter: {}", method);
+        String className = joinPoint.getSignature().getDeclaringTypeName();
+        Object[] args = joinPoint.getArgs();
 
+        // Extract user context from MDC
+        String userId = MDC.get("userId");
+        String username = MDC.get("username");
+
+        // Log method entry with parameters and user context
+        log.info("Entering {} with args {} | userId={} username={}",
+                method, Arrays.toString(args),
+                userId != null ? userId : "anonymous",
+                username != null ? username : "anonymous");
+
+        long start = System.nanoTime();
         try {
+            // Execute the target method
             Object result = joinPoint.proceed();
-            log.debug("Exit : {}", method);
+
+            // Log method exit with result and user context
+            log.info("Exiting {} with result {} | userId={} username={}",
+                    method, result,
+                    userId != null ? userId : "anonymous",
+                    username != null ? username : "anonymous");
+
             return result;
         } catch (Throwable ex) {
-            log.error("Error in {}: {}", method, ex.getMessage(), ex);
+            // Log any exception thrown during method execution
+            log.error("Exception in {} | userId={} username={} : {}",
+                    method,
+                    userId != null ? userId : "anonymous",
+                    username != null ? username : "anonymous",
+                    ex.getMessage(), ex);
             throw ex;
         } finally {
+            // Compute execution duration
             long duration = System.nanoTime() - start;
-            Timer.builder("method.execution")
-                    .description("Execution time of service methods")
-                    .tag("method", method)
+
+            // Record metrics in Micrometer with tags for filtering
+            Timer.builder("app.method.execution")
+                    .description("Execution time of application methods")
+                    .tags("class", className,
+                            "method", method,
+                            "userId", userId != null ? userId : "anonymous",
+                            "username", username != null ? username : "anonymous")
                     .register(meterRegistry)
                     .record(duration, TimeUnit.NANOSECONDS);
+
+            // Optional: log execution time separately
+            log.info("Executed {} in {} ms | userId={} username={}",
+                    method, duration / 1_000_000,
+                    userId != null ? userId : "anonymous",
+                    username != null ? username : "anonymous");
         }
     }
 }

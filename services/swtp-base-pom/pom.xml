@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +13,7 @@
 
     <groupId>swtp.clouddemo</groupId>
     <artifactId>swtp-base-pom</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.5</version>
     <packaging>pom</packaging>
     <name>Swtp Microservices Parent</name>
     <description>Shared parent POM for Spring Boot microservices</description>
@@ -29,6 +29,9 @@
         <springdoc.version>2.8.9</springdoc.version>
         <logstash.encoder.version>7.4</logstash.encoder.version>
         <mockito.version>5.5.0</mockito.version> <!-- latest recommended -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>

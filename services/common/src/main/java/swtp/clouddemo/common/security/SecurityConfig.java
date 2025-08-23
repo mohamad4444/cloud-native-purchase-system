@@ -21,22 +21,28 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
 @Slf4j
 public class SecurityConfig {
 
-    @Autowired
     private final JwtAuthConverter authConverter;
 
+    @Autowired
     public SecurityConfig(JwtAuthConverter authConverter) {
         this.authConverter = authConverter;
     }
+
+    /**
+     * Configures Spring Security filter chain.
+     * - /actuator/prometheus is public
+     * - all other endpoints require authentication
+     * - JWT authentication with custom converter
+     * - logs request details early in the filter chain
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("Setting up security filter chain");
 
         http
-                //.addFilterBefore(new LoggingFilter(), org.springframework.security.web.context.SecurityContextHolderFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/prometheus").permitAll()
                         .anyRequest().authenticated()
-
                 )
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler(customAccessDeniedHandler())
@@ -44,6 +50,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(authConverter))
                 )
+                // Log request details before security filters
                 .addFilterBefore((servletRequest, response, chain) -> {
                     HttpServletRequest request = (HttpServletRequest) servletRequest;
                     logRequestDetails(request);
@@ -53,6 +60,9 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Returns a simple JSON response when access is denied (403)
+     */
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
         return (request, response, accessDeniedException) -> {
@@ -66,6 +76,10 @@ public class SecurityConfig {
                     """);
         };
     }
+
+    /**
+     * Logs HTTP method, URI, and user details if authenticated.
+     */
     private void logRequestDetails(HttpServletRequest request) {
         String method = request.getMethod();
         String uri = request.getRequestURI();
@@ -77,5 +91,4 @@ public class SecurityConfig {
             log.info("Processing {} {} | unauthenticated request", method, uri);
         }
     }
-
 }

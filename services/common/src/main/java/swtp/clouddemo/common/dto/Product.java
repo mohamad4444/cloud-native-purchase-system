@@ -11,6 +11,4 @@ public class Product {
         this.productName = product;
         this.quantity = quantity;
     }
-
-    // Constructors, getters, setters
 }
