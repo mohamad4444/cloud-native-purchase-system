@@ -1,0 +1,8 @@
+# helmfile.yaml
+releases:
+- name: myapp
+  namespace: default
+  chart: ./charts
+  values:
+  - ./charts/values.yaml
+  installed: true
