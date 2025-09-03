@@ -65,3 +65,9 @@ Grafana
 | level="INFO"
 | app="purchase-system"
 | line_format "{{.timestamp}} {{.level}} {{.app}} {{.message}}"
+
+
+
+kubectl create configmap prometheus-config --from-file=./docker/configs/prometheus/prometheus.yml
+kubectl create configmap loki-config --from-file=./docker/configs/loki/loki-config.yaml
+kubectl create configmap promtail-config --from-file=./docker/configs/promtail/promtail-config.yaml

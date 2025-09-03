@@ -1,0 +1,66 @@
+# artemis-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: artemis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: artemis
+  template:
+    metadata:
+      labels:
+        app: artemis
+    spec:
+      containers:
+      - name: artemis
+        image: purchasesystem/artemis:latest
+        env:
+        - name: ARTEMIS_USER
+          valueFrom:
+            secretKeyRef:
+              name: artemis-secrets
+              key: username
+        - name: ARTEMIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: artemis-secrets
+              key: password
+        - name: ANONYMOUS_LOGIN
+          valueFrom:
+            configMapKeyRef:
+              name: artemis-config
+              key: anonymous-login
+        ports:
+        - containerPort: 61616
+        - containerPort: 8161
+        volumeMounts:
+        - name: artemis-data
+          mountPath: /var/lib/artemis-instance
+        livenessProbe:
+          tcpSocket:
+            port: 61616
+          initialDelaySeconds: 30
+          periodSeconds: 5
+      volumes:
+      - name: artemis-data
+        persistentVolumeClaim:
+          claimName: artemis-pvc
+---
+# artemis-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: artemis-service
+spec:
+  selector:
+    app: artemis
+  ports:
+  - name: core
+    port: 61616
+    targetPort: 61616
+  - name: web
+    port: 8161
+    targetPort: 8161
+  type: ClusterIP
