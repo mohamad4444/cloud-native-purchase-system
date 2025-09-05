@@ -1,35 +1,34 @@
 # values/dev.yaml
+globalConfig:
+  # These are available as .Values.globalConfig.* - NO conflicts!
+  registry:
+    url: "registry.example.com"
+    username: "admin"
+    password: "secret123"
+  api:
+    endpoint: "https://api.dev.example.com"
+    key: "dev-api-key-123"
+
 globalBefore:
-  # These can be overridden by anything
+  # Low priority: can be overridden by anything
   logLevel: "info"
   monitoring: true
-
-globals:
-  # Standard globals (medium priority)
-  environment: dev
-  commonSetting: "global-value"
-  replicaCount: 37
-  image:
-    pullPolicy: IfNotPresent
-
+  replicaCount: 6
 globalAfter:
-  # These override EVERYTHING (highest priority)
-  # Use for emergency overrides or enforced settings
+  # High priority: overrides everything
   security:
     enabled: true
-    scan: daily
+    scan: "daily"
+  #replicaCount: 777
 
 frontend:
-  # Release-specific values (high priority)
-  replicaCount: 3 # Overrides globals.replicaCount
+  # Release-specific values (medium priority)
+  #replicaCount: 612
   image:
-    pullPolicy: Always # Overrides globals.image.pullPolicy
-  foo: "dev-bar"
+    pullPolicy: Always
 
 keycloak:
   # Release-specific values
-  replicaCount: 1 # Overrides globals.replicaCount
+  #replicaCount: 1
   service:
     type: ClusterIP
-  auth:
-    enabled: true
