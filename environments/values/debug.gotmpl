@@ -1,0 +1,10 @@
+# values/debug.gotmpl
+{{- $releaseValues := .Values | get .Release.Name dict | default dict }}
+{{- $globalValues := .Values | get "globals" dict | default dict }}
+{{- $merged := merge $globalValues $releaseValues }}
+
+{{- /* This will output valid YAML with debug info as comments */}}
+{{- printf "# DEBUG: Release: %s\n" .Release.Name }}
+{{- printf "# Release values: %s\n" ($releaseValues | toJson) }}
+{{- printf "# Global values: %s\n" ($globalValues | toJson) }}
+{{- $merged | toYaml }}

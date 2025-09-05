@@ -9,32 +9,27 @@ helmDefaults:
 #   url: https://charts.bitnami.com/bitnami
 ---
 environments:
+  default:
+    values:
+    - values/default.yaml
   dev:
     kubeContext: minikube
     values:
     - values/dev.yaml
-
   prod:
     kubeContext: minikube
     values:
     - values/prod.yaml
 ---
 releases:
-# Create app namespace
-# - name: app-namespace # for frontend
-#   chart: bitnami/null
-#   namespace: app
-#   createNamespace: true
-# - name: keycloak-namespace # for keycloak or other services
-#   chart: bitnami/null
-#   namespace: keycloak
-#   createNamespace: true
 - name: frontend
   chart: ../charts/frontend-chart
   namespace: frontend
   createNamespace: true
   labels:
     tier: ready
+  values:
+  - values/env-magic.gotmpl # Add Go template for value merging
 
 - name: keycloak
   chart: ../charts/keycloak-chart
@@ -42,27 +37,37 @@ releases:
   createNamespace: false
   labels:
     tier: ready
+  values:
+  - values/env-magic.gotmpl # Add Go template for value merging
 
-- name: inventory-service
-  chart: ../charts/inventory-service-chart
-  namespace: app
-  labels:
-    tier: dev-notready,prod-ready
+# - name: inventory-service
+#   chart: ../charts/inventory-service-chart
+#   namespace: app
+#   labels:
+#     tier: dev-notready,prod-ready
+#   values:
+#   - values/env-magic.gotmpl
 
-- name: purchase-service
-  chart: ../charts/purchase-service-chart
-  namespace: app
-  labels:
-    tier: dev-notready,prod-ready
+# - name: purchase-service
+#   chart: ../charts/purchase-service-chart
+#   namespace: app
+#   labels:
+#     tier: dev-notready,prod-ready
+#   values:
+#   - values/env-magic.gotmpl
 
-- name: message-broker
-  chart: ../charts/message-broker-chart
-  namespace: infra
-  labels:
-    tier: dev-notready,prod-ready
+# - name: message-broker
+#   chart: ../charts/message-broker-chart
+#   namespace: infra
+#   labels:
+#     tier: dev-notready,prod-ready
+#   values:
+#   - values/env-magic.gotmpl
 
-- name: monitoring-stack
-  chart: ../charts/monitoring-stack-chart
-  namespace: monitoring
-  labels:
-    tier: dev-notready,prod-ready
+# - name: monitoring-stack
+#   chart: ../charts/monitoring-stack-chart
+#   namespace: monitoring
+#   labels:
+#     tier: dev-notready,prod-ready
+#   values:
+#   - values/env-magic.gotmpl

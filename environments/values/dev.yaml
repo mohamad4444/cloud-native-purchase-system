@@ -1,0 +1,35 @@
+# values/dev.yaml
+globalBefore:
+  # These can be overridden by anything
+  logLevel: "info"
+  monitoring: true
+
+globals:
+  # Standard globals (medium priority)
+  environment: dev
+  commonSetting: "global-value"
+  replicaCount: 37
+  image:
+    pullPolicy: IfNotPresent
+
+globalAfter:
+  # These override EVERYTHING (highest priority)
+  # Use for emergency overrides or enforced settings
+  security:
+    enabled: true
+    scan: daily
+
+frontend:
+  # Release-specific values (high priority)
+  replicaCount: 3 # Overrides globals.replicaCount
+  image:
+    pullPolicy: Always # Overrides globals.image.pullPolicy
+  foo: "dev-bar"
+
+keycloak:
+  # Release-specific values
+  replicaCount: 1 # Overrides globals.replicaCount
+  service:
+    type: ClusterIP
+  auth:
+    enabled: true

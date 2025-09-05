@@ -18,11 +18,21 @@ keycloak:
   httpRelativePath: /auth
   proxyHeaders: xforwarded
   hostnameStrict: false
-  proxyAddressForwarding: true
-  proxyMode: edge
-  serviceType: NodePort
-  nodePort: 32080
-  frontendUrl: http://keycloak.local:8280/auth
+  proxyAddressForwarding: false
+  proxyMode: standalone #edge
+  frontendUrl: http://keycloak.home/auth
+  # Service settings
+  service:
+    type: ClusterIP # Internal service
+    port: 8080 # Container port for Keycloak
+    nodePort: 32080 # Optional for dev if NodePort is needed
+
+# Ingress settings
+ingress:
+  enabled: true
+  host: keycloak.home
+  paths:
+  - /auth
 
 # Deployment settings
 replicaCount: 1

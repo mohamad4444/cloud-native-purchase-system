@@ -52,5 +52,7 @@ spec:
                   key: KEYCLOAK_ADMIN_PASSWORD
             - name: KC_PROXY
               value: {{ .Values.keycloak.proxyMode }}
+            - name: KEYCLOAK_FRONTEND_URL
+              value: {{ .Values.keycloak.frontendUrl }}
           ports:
             - containerPort: 8080

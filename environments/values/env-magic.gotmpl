@@ -1,0 +1,25 @@
+# values/env-magic.gotmpl
+{{- $releaseValues := .Values | get .Release.Name dict | default dict }}
+{{- $globalValues := .Values | get "globals" dict | default dict }}
+{{- $globalBefore := .Values | get "globalBefore" dict | default dict }}
+{{- $globalAfter := .Values | get "globalAfter" dict | default dict }}
+
+{{- /* 
+Merge order (later values override earlier ones):
+1. globalBefore (lowest priority - can be overridden by anything)
+2. globals (medium priority)
+3. release-specific values (high priority - overrides globals)
+4. globalAfter (highest priority - overrides everything)
+*/}}
+{{- $merged := dict }}
+{{- $merged = merge $merged $globalBefore }}
+{{- $merged = merge $merged $globalValues }}
+{{- $merged = merge $merged $releaseValues }}
+{{- $merged = merge $merged $globalAfter }}
+
+{{- /* Add global values as a separate namespace */}}
+{{- if $globalValues }}
+{{-   $_ := set $merged "global" $globalValues }}
+{{- end }}
+
+{{- $merged | toYaml }}

@@ -10,6 +10,3 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
-      {{- if eq .Values.keycloak.serviceType "NodePort" }}
-      nodePort: {{ .Values.keycloak.nodePort }}
-      {{- end }}
