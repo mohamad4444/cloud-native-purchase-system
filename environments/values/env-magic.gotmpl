@@ -3,22 +3,20 @@
 {{- $globalBefore := .Values | get "globalBefore" dict | default dict -}}
 {{- $globalAfter := .Values | get "globalAfter" dict | default dict -}}
 
-{{- /* Start with empty merged dict */ -}}
+{{- /* Start with empty dict (chart defaults already exist in .Values) */ -}}
 {{- $merged := dict -}}
 
-{{- /* Merge globalBefore at top level: only add missing keys */ -}}
+{{- /* Merge globalBefore: low-priority defaults */ -}}
 {{- range $k, $v := $globalBefore -}}
-  {{- if not (hasKey $merged $k) -}}
-    {{- $_ := set $merged $k $v -}}
-  {{- end -}}
+  {{- $_ := set $merged $k $v -}}
 {{- end -}}
 
-{{- /* Merge releaseValues at top level: overwrite chart defaults */ -}}
+{{- /* Merge releaseValues: medium-priority, overwrite globalBefore */ -}}
 {{- range $k, $v := $releaseValues -}}
   {{- $_ := set $merged $k $v -}}
 {{- end -}}
 
-{{- /* Merge globalAfter at top level: overwrite and add */ -}}
+{{- /* Merge globalAfter: high-priority, overwrite everything */ -}}
 {{- range $k, $v := $globalAfter -}}
   {{- $_ := set $merged $k $v -}}
 {{- end -}}
@@ -28,5 +26,4 @@
 {{- $_ := set $merged "globalConfig" $globalConfig -}}
 {{- end }}
 
-{{- /* Output final YAML */ -}}
 {{- $merged | toYaml -}}
