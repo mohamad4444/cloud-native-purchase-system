@@ -1,0 +1,68 @@
+# helmfile.yaml
+helmDefaults:
+  timeout: 600
+  wait: true
+  atomic: true
+
+# repositories:
+# - name: bitnami
+#   url: https://charts.bitnami.com/bitnami
+---
+environments:
+  dev:
+    kubeContext: minikube
+    values:
+    - values/dev.yaml
+
+  prod:
+    kubeContext: minikube
+    values:
+    - values/prod.yaml
+---
+releases:
+# Create app namespace
+# - name: app-namespace # for frontend
+#   chart: bitnami/null
+#   namespace: app
+#   createNamespace: true
+# - name: keycloak-namespace # for keycloak or other services
+#   chart: bitnami/null
+#   namespace: keycloak
+#   createNamespace: true
+- name: frontend
+  chart: ../charts/frontend-chart
+  namespace: frontend
+  createNamespace: true
+  labels:
+    tier: ready
+
+- name: keycloak
+  chart: ../charts/keycloak-chart
+  namespace: auth
+  createNamespace: false
+  labels:
+    tier: ready
+
+- name: inventory-service
+  chart: ../charts/inventory-service-chart
+  namespace: app
+  labels:
+    tier: dev-notready,prod-ready
+
+- name: purchase-service
+  chart: ../charts/purchase-service-chart
+  namespace: app
+  labels:
+    tier: dev-notready,prod-ready
+
+- name: message-broker
+  chart: ../charts/message-broker-chart
+  namespace: infra
+  labels:
+    tier: dev-notready,prod-ready
+
+- name: monitoring-stack
+  chart: ../charts/monitoring-stack-chart
+  namespace: monitoring
+  labels:
+    tier: dev-notready,prod-ready

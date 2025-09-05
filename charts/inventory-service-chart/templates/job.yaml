@@ -1,0 +1,39 @@
+{{- if .Values.database.bootstrap.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-bootstrap
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
+  labels:
+    {{- include "inventory-db.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: psql
+          image: "{{ .Values.database.bootstrap.image.repository }}:{{ .Values.database.bootstrap.image.tag }}"
+          imagePullPolicy: {{ .Values.database.bootstrap.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-secret
+          command: ["sh", "-c"]
+          args:
+            - |
+              until pg_isready -h {{ .Release.Name }} -U postgres; do
+                echo "Waiting for Postgres..."
+                sleep 2
+              done
+              psql -h {{ .Release.Name }} -U postgres -c "DO
+              $do$
+              BEGIN
+                IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$POSTGRES_USER') THEN
+                  CREATE USER $POSTGRES_USER WITH PASSWORD '$POSTGRES_PASSWORD';
+                END IF;
+                IF NOT EXISTS (SELECT FROM pg_database WHERE datname = '$POSTGRES_DB') THEN
+                  CREATE DATABASE $POSTGRES_DB OWNER $POSTGRES_USER;
+                END IF;
+              END
+              $do$;"
+      restartPolicy: OnFailure
+  backoffLimit: 4
+{{- end }}

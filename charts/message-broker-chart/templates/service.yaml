@@ -1,15 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "message-broker-chart.fullname" . }}
+  name: {{ .Release.Name }}-service
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
   labels:
-    {{- include "message-broker-chart.labels" . | nindent 4 }}
+    {{- include "artemis.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+  type: {{ .Values.artemis.service.type }}
   selector:
-    {{- include "message-broker-chart.selectorLabels" . | nindent 4 }}
+    {{- include "artemis.selectorLabels" . | nindent 4 }}
+  ports:
+  {{- range .Values.artemis.service.ports }}
+  - name: {{ .name }}
+    port: {{ .port }}
+    targetPort: {{ .targetPort }}
+  {{- end }}

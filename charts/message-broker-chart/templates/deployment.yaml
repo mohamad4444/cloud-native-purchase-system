@@ -1,78 +1,65 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "message-broker-chart.fullname" . }}
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
   labels:
-    {{- include "message-broker-chart.labels" . | nindent 4 }}
+    {{- include "artemis.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  replicas: {{ .Values.artemis.replicas }}
   selector:
     matchLabels:
-      {{- include "message-broker-chart.selectorLabels" . | nindent 6 }}
+      {{- include "artemis.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "message-broker-chart.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "artemis.selectorLabels" . | nindent 8 }}
+        {{- include "artemis.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "message-broker-chart.serviceAccountName" . }}
-      {{- with .Values.podSecurityContext }}
-      securityContext:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          {{- with .Values.securityContext }}
-          securityContext:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-          {{- with .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.resources }}
-          resources:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-      {{- with .Values.volumes }}
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.artemis.image.repository }}:{{ .Values.artemis.image.tag }}"
+        imagePullPolicy: {{ .Values.artemis.image.pullPolicy }}
+        env:
+        - name: ARTEMIS_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "artemis.secretName" . }}
+              key: username
+        - name: ARTEMIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "artemis.secretName" . }}
+              key: password
+        - name: ANONYMOUS_LOGIN
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "artemis.configmapName" . }}
+              key: anonymous-login
+        ports:
+        - containerPort: {{ .Values.artemis.ports.core }}
+        - containerPort: {{ .Values.artemis.ports.web }}
+        {{- if .Values.artemis.storage.enabled }}
+        volumeMounts:
+        - name: artemis-data
+          mountPath: {{ .Values.artemis.storage.mountPath }}
+        {{- end }}
+        {{- if .Values.artemis.livenessProbe.enabled }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.artemis.livenessProbe.port }}
+          initialDelaySeconds: {{ .Values.artemis.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.artemis.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.artemis.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.artemis.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- with .Values.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      {{- if .Values.artemis.storage.enabled }}
       volumes:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
+      - name: artemis-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pvc
       {{- end }}
