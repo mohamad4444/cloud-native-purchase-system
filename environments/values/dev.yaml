@@ -1,4 +1,8 @@
 # values/dev.yaml
+
+# default chart values are always loaded first then they are loaded in this order
+# defaults < globalBefore(overrides default) <releasSpecific (overrides globalBefore) <gloablAfter (overrides releaseSpecific)
+# globalConfig is unrelated to overriding , it is a seperate namespace that serves as global values
 globalConfig:
   # These are available as .Values.globalConfig.* - NO conflicts!
   registry:
@@ -13,22 +17,22 @@ globalBefore:
   # Low priority: can be overridden by anything
   logLevel: "info"
   monitoring: true
-  replicaCount: 6
+  replicaCount: 1
 globalAfter:
   # High priority: overrides everything
   security:
     enabled: true
     scan: "daily"
-  #replicaCount: 777
+  replicaCount: 5
 
 frontend:
   # Release-specific values (medium priority)
-  #replicaCount: 612
+  replicaCount: 612
   image:
     pullPolicy: Always
 
 keycloak:
   # Release-specific values
-  #replicaCount: 1
+  replicaCount: 999
   service:
     type: ClusterIP
