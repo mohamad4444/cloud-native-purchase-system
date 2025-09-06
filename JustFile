@@ -1,0 +1,17 @@
+# justfile
+
+image := "localhost:5000/frontend:dev"
+context := "services/web-client"
+
+# Start registry port-forward
+registry:
+	kubectl port-forward --namespace kube-system svc/registry 5000:80
+
+delete:
+	docker rmi --force {{image}} || true
+
+build: delete
+	docker build -t {{image}} {{context}}
+
+push: build
+	docker push {{image}}
