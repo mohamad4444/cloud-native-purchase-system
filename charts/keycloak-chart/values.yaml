@@ -20,7 +20,7 @@ keycloak:
   hostnameStrict: false
   proxyAddressForwarding: false
   proxyMode: standalone #edge
-  frontendUrl: http://keycloak.home/auth
+  frontendUrl: http://keycloak.localhost/auth
   # Service settings
   service:
     type: ClusterIP # Internal service

@@ -25,4 +25,11 @@ spec:
           env:
             - name: FOO
               value: {{ .Values.foo | quote }}
-
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/nginx/html/js/config.json
+              subPath: config.json
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "frontend-chart.fullname" . }}-config

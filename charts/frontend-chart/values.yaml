@@ -1,3 +1,4 @@
+# values.yaml - Base configuration
 replicaCount: 1
 
 image:
@@ -11,11 +12,23 @@ service:
   targetPort: 80
 
 ingress:
-  enabled: true
-  host: frontend.minikube.local
-ingress2:
-  enabled: true
-  host: frontend.com
-serviceAccount:
-  create: true
-  name: ""
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+keycloak:
+  url: "http://keycloak.home/auth"
+  realm: "purchase-service-realm"
+  clientId: "web-frontend-client"
+
+api:
+  purchases: "http://api.local.test/purchase-service/purchases"
+  inventory: "http://api.local.test/inventory-service/inventory"
+
+# Environment-specific settings
+environment: "local" # local, dev, prod
+tls:
+  enabled: false
+  secretName: ""

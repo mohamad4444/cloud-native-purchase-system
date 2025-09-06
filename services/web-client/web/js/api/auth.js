@@ -1,7 +1,7 @@
 import { KEYCLOAK_CONFIG } from '../config.js';
 import { setToken } from '../state.js';
 import { updateLoginState } from '../ui.js';
-import Keycloak from '../lib/keycloak.js'; 
+import Keycloak from './lib/keycloak.js';
 export async function initAuth() {
     console.log('[auth] Starting initAuth');
     //const Keycloak = window.Keycloak;
