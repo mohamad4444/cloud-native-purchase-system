@@ -3,20 +3,22 @@
 {{- $globalBefore := .Values | get "globalBefore" dict | default dict -}}
 {{- $globalAfter := .Values | get "globalAfter" dict | default dict -}}
 
-{{- /* Start with empty dict (chart defaults already exist in .Values) */ -}}
+{{- /* Start with empty dict */ -}}
 {{- $merged := dict -}}
 
-{{- /* Merge globalBefore: low-priority defaults */ -}}
+{{- /* Merge globalBefore at top level: only add keys that don't exist yet */ -}}
 {{- range $k, $v := $globalBefore -}}
-  {{- $_ := set $merged $k $v -}}
+  {{- if not (hasKey $merged $k) -}}
+    {{- $_ := set $merged $k $v -}}
+  {{- end -}}
 {{- end -}}
 
-{{- /* Merge releaseValues: medium-priority, overwrite globalBefore */ -}}
+{{- /* Merge releaseValues at top level: overwrite */ -}}
 {{- range $k, $v := $releaseValues -}}
   {{- $_ := set $merged $k $v -}}
 {{- end -}}
 
-{{- /* Merge globalAfter: high-priority, overwrite everything */ -}}
+{{- /* Merge globalAfter at top level: overwrite */ -}}
 {{- range $k, $v := $globalAfter -}}
   {{- $_ := set $merged $k $v -}}
 {{- end -}}

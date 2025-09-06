@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: local-ca-issuer
+spec:
+  ca:
+    secretName: local-ca-secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: local-ca-secret
+  namespace: cert-manager
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Files.Get "../certs/ca.crt" | b64enc }}
+  tls.key: {{ .Files.Get "../certs/ca.key" | b64enc }}

@@ -1,0 +1,24 @@
+environment: "dev"
+tls:
+  enabled: true
+  secretName: "frontend-tls"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+  - host: "frontend.local.test"
+    paths:
+    - path: "/"
+      pathType: "Prefix"
+  tls:
+  - hosts:
+    - "frontend.local.test"
+    secretName: "frontend-tls"
+
+keycloak:
+  url: "https://keycloak.local.test/auth"
+
+api:
+  purchases: "https://purchase-service.local.test/purchase-service/purchases"
+  inventory: "https://inventory-service.local.test/inventory-service/inventory"

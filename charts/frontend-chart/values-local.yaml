@@ -1,0 +1,10 @@
+environment: "local"
+tls:
+  enabled: false
+
+keycloak:
+  url: "http://localhost:8080/auth"
+
+api:
+  purchases: "http://localhost:8081/purchase-service/purchases"
+  inventory: "http://localhost:8082/inventory-service/inventory"

@@ -1,38 +1,60 @@
 # values/dev.yaml
 
-# default chart values are always loaded first then they are loaded in this order
-# defaults < globalBefore(overrides default) <releasSpecific (overrides globalBefore) <gloablAfter (overrides releaseSpecific)
-# globalConfig is unrelated to overriding , it is a seperate namespace that serves as global values
 globalConfig:
-  # These are available as .Values.globalConfig.* - NO conflicts!
   registry:
     url: "registry.example.com"
     username: "admin"
     password: "secret123"
   api:
-    endpoint: "https://api.dev.example.com"
+    endpoint: "http://localhost:5000/api" # dev-local API
     key: "dev-api-key-123"
 
 globalBefore:
-  # Low priority: can be overridden by anything
-  logLevel: "info"
-  monitoring: true
+  logLevel: "debug"
+  monitoring: false
   replicaCount: 1
+
 globalAfter:
-  # High priority: overrides everything
   security:
-    enabled: true
-    scan: "daily"
-  replicaCount: 5
+    enabled: false
+    scan: "none"
+  replicaCount: 1
 
 frontend:
-  # Release-specific values (medium priority)
-  replicaCount: 612
+  replicaCount: 1
   image:
-    pullPolicy: Always
-
-keycloak:
-  # Release-specific values
-  replicaCount: 999
+    repository: localhost:5000/frontend
+    tag: dev
+    pullPolicy: IfNotPresent
   service:
     type: ClusterIP
+    port: 80
+    targetPort: 80
+  ingress:
+    enabled: true
+    host: localhost # plain localhost
+  ingress2:
+    enabled: false
+  frontendUrl: http://localhost # dev frontend URL
+
+keycloak:
+  replicaCount: 1
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: 26.2.5
+  adminUser: admin
+  adminPassword: adminpassword
+  httpRelativePath: /auth
+  proxyMode: standalone
+  proxyHeaders: xforwarded
+  proxyAddressForwarding: false
+  hostnameStrict: false
+  frontendUrl: http://localhost/auth # Keycloak dev URL
+  service:
+    type: ClusterIP
+    port: 8080
+  ingress:
+    enabled: true
+    host: localhost # plain localhost
+    paths:
+    - /auth
