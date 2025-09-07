@@ -1,9 +1,9 @@
 stages:
-  - build_base_pom
-  - build_common
-  - build_parent_pom
-  - build_services
-  - test
+- build_base_pom
+- build_common
+- build_parent_pom
+- build_services
+- test
 #  - dockerize
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
@@ -14,63 +14,64 @@ variables:
 cache:
   key: maven-${CI_PROJECT_PATH}-${CI_COMMIT_REF_SLUG}
   paths:
-    - .m2/repository
+  - .m2/repository
 
 build_base_pom:
   stage: build_base_pom
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/swtp-base-pom
-    - mvn clean install -DskipTests
-
+  - cd services/swtp-base-pom
+  - mvn clean install -DskipTests
+  tags:
+  - kubernetes
 build_common:
   stage: build_common
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/common
-    - mvn clean install -DskipTests
+  - cd services/common
+  - mvn clean install -DskipTests
   needs:
-    - build_base_pom
+  - build_base_pom
 
 build_parent_pom:
   stage: build_parent_pom
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/swtp-parent-pom
-    - mvn clean install -DskipTests
+  - cd services/swtp-parent-pom
+  - mvn clean install -DskipTests
   needs:
-    - build_common
+  - build_common
 
 build_purchase:
   stage: build_services
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/purchase-service
-    - mvn clean package -DskipTests
+  - cd services/purchase-service
+  - mvn clean package -DskipTests
   needs:
-    - build_parent_pom
+  - build_parent_pom
 
 build_inventory:
   stage: build_services
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/inventory-service
-    - mvn clean package -DskipTests
+  - cd services/inventory-service
+  - mvn clean package -DskipTests
   needs:
-    - build_parent_pom
+  - build_parent_pom
 test_purchase:
   stage: test
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/purchase-service
-    - mvn test
+  - cd services/purchase-service
+  - mvn test
 
 test_inventory:
   stage: test
   image: maven:3.9.6-eclipse-temurin-21
   script:
-    - cd services/inventory-service
-    - mvn test
+  - cd services/inventory-service
+  - mvn test
 
 #dockerize_purchase:
 #  stage: dockerize
