@@ -1,9 +1,10 @@
 stages:
-- build_base_pom
-- build_common
-- build_parent_pom
-- build_services
-- test
+- deploy
+# - build_base_pom
+# - build_common
+# - build_parent_pom
+# - build_services
+# - test
 #  - dockerize
 variables:
   REGISTRY: registry.gitlab.com/mohamad4444/uni-project
@@ -15,6 +16,12 @@ cache:
   key: maven-${CI_PROJECT_PATH}-${CI_COMMIT_REF_SLUG}
   paths:
   - .m2/repository
+deploy:
+  stage: deploy
+  tags:
+  - kubernetes
+  script:
+  - echo "Deploying..."
 
 build_base_pom:
   stage: build_base_pom
