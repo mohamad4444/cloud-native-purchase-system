@@ -1,21 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-# Create broker instance if it does not exist
-if [ ! -f "/var/lib/artemis-instance/etc/broker.xml" ]; then
-  /opt/apache-artemis/bin/artemis create \
-    --user "${ARTEMIS_USER}" \
-    --password "${ARTEMIS_PASSWORD}" \
-    --silent \
-    $( [ "${ANONYMOUS_LOGIN}" = "true" ] && echo "--allow-anonymous" || echo "--require-login") \
-    ${EXTRA_ARGS} \
-    /var/lib/artemis-instance
+# Use the same paths as the official docker-run.sh
+BROKER_HOME=/var/lib/artemis-instance
+CONFIG_PATH=$BROKER_HOME/etc
+export BROKER_HOME CONFIG_PATH
+
+if [[ ${ANONYMOUS_LOGIN,,} == "true" ]]; then
+  LOGIN_OPTION="--allow-anonymous"
+else
+  LOGIN_OPTION="--require-login"
 fi
 
-# Copy user overrides if any
-if [ -d "/var/lib/artemis-instance/etc-override" ]; then
-  cp -r /var/lib/artemis-instance/etc-override/* /var/lib/artemis-instance/etc/ 2>/dev/null || true
+# Create broker instance if it does not exist
+if ! [ -f $BROKER_HOME/etc/broker.xml ]; then
+    echo "Creating new Artemis broker instance..."
+    CREATE_ARGUMENTS="--user ${ARTEMIS_USER} --password ${ARTEMIS_PASSWORD} --silent ${LOGIN_OPTION} ${EXTRA_ARGS}"
+    /opt/activemq-artemis/bin/artemis create ${CREATE_ARGUMENTS} $BROKER_HOME
+else
+    echo "Using existing Artemis broker instance..."
+fi
+
+# Copy user overrides if any (this is your custom addition)
+if [ -d $BROKER_HOME/etc-override ]; then
+    echo "Copying configuration overrides..."
+    for file in `ls $BROKER_HOME/etc-override`; do
+        echo "Copying override file: $file"
+        cp $BROKER_HOME/etc-override/$file $BROKER_HOME/etc/ 2>/dev/null || true
+    done
 fi
 
 # Run the broker from the instance folder
-exec /var/lib/artemis-instance/bin/artemis run
+echo "Starting Artemis broker..."
+cd $BROKER_HOME
+exec ./bin/artemis run

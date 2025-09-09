@@ -6,7 +6,7 @@
 **/artemis-data/*
 !**/artemis-data/etc-override/
 !**/artemis-data/etc-override/**
-
+**/docker/volumes/*
 
 
 

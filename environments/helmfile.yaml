@@ -3,10 +3,15 @@ helmDefaults:
   timeout: 600
   wait: true
   atomic: true
+  createNamespace: true
+  force: false
 
 # repositories:
 # - name: bitnami
 #   url: https://charts.bitnami.com/bitnami
+repositories:
+- name: gitlab
+  url: https://charts.gitlab.io
 ---
 environments:
   default:
@@ -21,7 +26,23 @@ environments:
     values:
     - values/prod.yaml
 ---
+
 releases:
+- name: gitlab-runner-sa
+  namespace: gitlab-runner
+  chart: ../charts/gitlab-runner-sa
+  labels:
+    tier: ready
+- name: gitlab-runner
+  namespace: gitlab-runner
+  chart: gitlab/gitlab-runner
+  version: 0.80.1 # matches latest in repo
+  createNamespace: true
+  labels:
+    tier: ready
+  values:
+  - values/runner.yaml
+
 - name: frontend
   chart: ../charts/frontend-chart
   namespace: frontend
@@ -40,6 +61,14 @@ releases:
   values:
   - values/env-magic.gotmpl # Add Go template for value merging
 
+- name: message-broker
+  chart: ../charts/message-broker-chart
+  namespace: infra
+  labels:
+    tier: ready
+  values:
+  - values/env-magic.gotmpl
+
 # - name: inventory-service
 #   chart: ../charts/inventory-service-chart
 #   namespace: app
@@ -56,13 +85,7 @@ releases:
 #   values:
 #   - values/env-magic.gotmpl
 
-# - name: message-broker
-#   chart: ../charts/message-broker-chart
-#   namespace: infra
-#   labels:
-#     tier: dev-notready,prod-ready
-#   values:
-#   - values/env-magic.gotmpl
+
 
 # - name: monitoring-stack
 #   chart: ../charts/monitoring-stack-chart

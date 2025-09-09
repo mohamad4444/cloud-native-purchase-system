@@ -16,14 +16,4 @@ spec:
                 name:  {{ include "frontend-chart.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
-    - host: {{ .Values.ingress2.host }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name:  {{ include "frontend-chart.fullname" . }}
-                port:
-                  number: {{ .Values.service.port }}
 {{- end }}

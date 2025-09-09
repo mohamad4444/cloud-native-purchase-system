@@ -16,3 +16,8 @@ helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{- define "frontend-chart.configmap" -}}
+{{- include "frontend-chart.fullname" . }}-config
+{{- end -}}
+

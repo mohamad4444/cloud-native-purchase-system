@@ -6,10 +6,9 @@ global:
 artemis:
   # Image settings
   image:
-    repository: purchasesystem/artemis
+    repository: localhost:5000/artemis
     tag: latest
     pullPolicy: IfNotPresent
-
   # Replica count
   replicas: 1
 

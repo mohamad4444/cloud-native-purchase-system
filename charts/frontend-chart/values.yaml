@@ -1,9 +1,9 @@
-# values.yaml - Base configuration
 replicaCount: 1
+environment: "development" # Added
 
 image:
-  repository: localhost:5000/frontend
-  tag: dev
+  repository: localhost:5000/web-client
+  tag: latest
   pullPolicy: IfNotPresent
 
 service:
@@ -11,15 +11,19 @@ service:
   port: 80
   targetPort: 80
 
+serviceAccount:
+  create: true
+
 ingress:
-  enabled: false
+  enabled: true
   className: ""
   annotations: {}
   hosts: []
   tls: []
+  host: frontend.com
 
 keycloak:
-  url: "http://keycloak.home/auth"
+  url: "http://localhost:8080/auth"
   realm: "purchase-service-realm"
   clientId: "web-frontend-client"
 
@@ -27,8 +31,5 @@ api:
   purchases: "http://api.local.test/purchase-service/purchases"
   inventory: "http://api.local.test/inventory-service/inventory"
 
-# Environment-specific settings
-environment: "local" # local, dev, prod
-tls:
-  enabled: false
-  secretName: ""
+# Optional: if you want to keep the foo environment variable
+foo: "default-value"

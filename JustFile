@@ -1,17 +1,51 @@
-# justfile
+# Justfile - Simple wrapper for shell scripts
 
-image := "localhost:5000/frontend:dev"
-context := "services/web-client"
+# Default task - show available commands
+default:
+    just --list
 
-# Start registry port-forward
-registry:
-	kubectl port-forward --namespace kube-system svc/registry 5000:80
+# Restart everything
+restart-all:
+    ./scripts/restart-all.sh
 
-delete:
-	docker rmi --force {{image}} || true
+# Restart only frontend
+restart-frontend:
+    ./scripts/restart-frontend.sh
 
-build: delete
-	docker build -t {{image}} {{context}}
+# Start port-forwarding
+portforward-start:
+    ./scripts/portforward-start.sh
 
-push: build
-	docker push {{image}}
+# Stop port-forwarding
+portforward-stop:
+    ./scripts/portforward-stop.sh
+
+# Check port-forward status
+portforward-status:
+    ./scripts/portforward-status.sh
+
+# Complete development workflow
+dev-workflow:
+    ./scripts/dev-workflow.sh
+
+# Show logs from port-forward
+portforward-logs:
+    tail -f port-forward.log
+
+# Clean up any port-forward processes
+portforward-cleanup:
+    pkill -f "port-forward.*3000" 2>/dev/null || true
+    rm -f port-forward.pid port-forward.log 2>/dev/null || true
+    @echo "✅ Cleanup complete"
+
+# List all pods in frontend namespace
+pods:
+    kubectl get pods -n frontend
+
+# Watch pods in real-time
+pods-watch:
+    kubectl get pods -n frontend --watch
+
+# Get pod logs
+logs frontend-pod="frontend-frontend-chart-*":
+    kubectl logs -n frontend $(kubectl get pods -n frontend -o name | grep "{{frontend-pod}}" | head -1) --follow
