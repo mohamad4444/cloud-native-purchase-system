@@ -2,6 +2,7 @@ variable "REGISTRY" {
   default = "localhost:5000/"
 }
 
+
 variable "TAG" {
   default = "latest"
 }
