@@ -28,13 +28,6 @@ public class SecurityConfig {
         this.authConverter = authConverter;
     }
 
-    /**
-     * Configures Spring Security filter chain.
-     * - /actuator/prometheus is public
-     * - all other endpoints require authentication
-     * - JWT authentication with custom converter
-     * - logs request details early in the filter chain
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("Setting up security filter chain");
@@ -50,7 +43,7 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(authConverter))
                 )
-                // Log request details before security filters
+                // Enhanced logging filter
                 .addFilterBefore((servletRequest, response, chain) -> {
                     HttpServletRequest request = (HttpServletRequest) servletRequest;
                     logRequestDetails(request);
@@ -60,12 +53,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * Returns a simple JSON response when access is denied (403)
-     */
     @Bean
     public AccessDeniedHandler customAccessDeniedHandler() {
         return (request, response, accessDeniedException) -> {
+            log.warn("Access denied for request: {} {} | Error: {}", 
+                    request.getMethod(), request.getRequestURI(), accessDeniedException.getMessage());
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
             response.getWriter().write("""
@@ -78,17 +70,55 @@ public class SecurityConfig {
     }
 
     /**
-     * Logs HTTP method, URI, and user details if authenticated.
+     * Enhanced request logging with JWT header details
      */
     private void logRequestDetails(HttpServletRequest request) {
         String method = request.getMethod();
         String uri = request.getRequestURI();
+        String authHeader = request.getHeader("Authorization");
+        String clientIp = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth != null && auth.isAuthenticated()) {
-            log.info("Processing {} {} | user: {} | authorities: {}", method, uri, auth.getName(), auth.getAuthorities());
+        log.info("=== REQUEST DEBUG ===");
+        log.info("Method: {} | URI: {}", method, uri);
+        log.info("Client IP: {} | User-Agent: {}", clientIp, userAgent);
+        
+        if (authHeader != null) {
+            log.info("Authorization header present: {}", 
+                     authHeader.length() > 50 ? authHeader.substring(0, 50) + "..." : authHeader);
+            
+            // Log JWT details if present
+            if (authHeader.startsWith("Bearer ")) {
+                String jwtToken = authHeader.substring(7);
+                logJwtDetails(jwtToken);
+            }
         } else {
-            log.info("Processing {} {} | unauthenticated request", method, uri);
+            log.warn("No Authorization header found - unauthenticated request");
+        }
+
+        if (auth != null && auth.isAuthenticated()) {
+            log.info("Authenticated user: {} | authorities: {}", auth.getName(), auth.getAuthorities());
+        } else {
+            log.warn("Unauthenticated request - no authentication found in SecurityContext");
+        }
+        log.info("=== END REQUEST DEBUG ===");
+    }
+
+    /**
+     * Log basic JWT details without parsing (safe logging)
+     */
+    private void logJwtDetails(String jwtToken) {
+        try {
+            String[] jwtParts = jwtToken.split("\\.");
+            if (jwtParts.length >= 2) {
+                log.info("JWT present - Header: {}... | Payload: {}...", 
+                        jwtParts[0].substring(0, Math.min(20, jwtParts[0].length())),
+                        jwtParts[1].substring(0, Math.min(30, jwtParts[1].length())));
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract JWT details: {}", e.getMessage());
         }
     }
 }
