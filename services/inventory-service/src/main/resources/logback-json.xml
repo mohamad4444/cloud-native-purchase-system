@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>{"app":"purchase-system"}</customFields>
+      <flattenThrowable>true</flattenThrowable>
+      <includeCallerData>true</includeCallerData>
+      <!-- Rename default fields -->
+      <fieldNames>
+        <timestamp>timestamp</timestamp>   <!-- replaces @timestamp -->
+        <version>version</version>         <!-- replaces @version -->
+      </fieldNames>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="Console"/>
+  </root>
+</configuration>
