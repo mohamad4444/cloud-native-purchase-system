@@ -10,18 +10,21 @@ else
   LOGIN_OPTION="--require-login"
 fi
 
-# Create broker instance if it does not exist
+# Check if broker instance already exists - if broker.xml exists, instance is already set up
 if [ ! -f "${ARTEMIS_INSTANCE}/etc/broker.xml" ]; then
+  echo "Creating new Artemis instance at: ${ARTEMIS_INSTANCE}"
   ${ARTEMIS_HOME}/bin/artemis create \
     --user "${ARTEMIS_USER:-artemis}" \
     --password "${ARTEMIS_PASSWORD:-artemis}" \
     --silent \
+    --force \
     ${LOGIN_OPTION} \
     ${EXTRA_ARGS:---http-host 0.0.0.0 --relax-jolokia} \
     "${ARTEMIS_INSTANCE}"
 
   # Copy user overrides if any
   if [ -d "${ARTEMIS_INSTANCE}/etc-override" ]; then
+    echo "Applying configuration overrides..."
     cp -r "${ARTEMIS_INSTANCE}/etc-override/"* "${ARTEMIS_INSTANCE}/etc/" 2>/dev/null || true
   fi
 else
