@@ -23,7 +23,7 @@ target "nginx-frontend" {
 }
 
 target "artemis" {
-  context = "docker/services/artemis"
+  context = "services/artemis"
   dockerfile = "Dockerfile"
   tags = ["${REGISTRY}artemis:${TAG}"]
   platforms = ["linux/amd64"]
@@ -32,7 +32,7 @@ target "artemis" {
 
 target "builder-common" {
   context = "."
-  dockerfile = "libraries/common/Dockerfile"
+  dockerfile = "services/common/Dockerfile"
   tags = ["${REGISTRY}builder-common:${TAG}"]
   platforms = ["linux/amd64"]
 }

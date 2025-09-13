@@ -1,51 +1,72 @@
-# Justfile - Simple wrapper for shell scripts
+# Variables
+REGISTRY_URL := "localhost:5000/"
+COMPOSE_FILE := "docker-compose.yaml"
+DEV_COMPOSE_FILE := "docker-compose.yaml"
 
-# Default task - show available commands
+# Commands
 default:
     just --list
 
-# Restart everything
-restart-all:
-    ./scripts/restart-all.sh
+help:
+    @echo "Available commands:"
+    @echo "  MINIKUBE:"
+    @echo "    start-minikube     - Start Minikube with docker driver (8GB RAM, 4 CPUs) + enable addons"
+    @echo "    stop-minikube      - Stop Minikube instance"
+    @echo "    delete-minikube    - Delete Minikube instance"
+    @echo "  REGISTRY:"
+    @echo "    start-registry     - Start registry (HTTP version)"
+    @echo "    start-registry-https - Start registry with HTTPS (port 5443)"
+    @echo "    stop-registry      - Stop registry"
+    @echo "  BUILD:"
+    @echo "    build-base         - Build and push base images using buildx"
+    @echo "    build-app          - Build and push application images using buildx"
+    @echo "    build-all          - Build both base and application images in sequence"
+    @echo "  DEVELOPMENT:"
+    @echo "    dev-docker-build   - Build development images"
+    @echo "    dev-docker-start   - Start development environment"
+    @echo "    dev-docker-stop    - Stop development environment"
+    @echo "    dev-docker-clean   - Stop and remove containers, volumes, networks"
+    @echo "    dev-docker-restart - Restart development environment (stop, clean, build, start)"
+    @echo "  help               - Show this help message"
 
-# Restart only frontend
-restart-frontend:
-    ./scripts/restart-frontend.sh
+# Minikube commands
+start-minikube:
+    ./scripts/start-minikube.sh
 
-# Start port-forwarding
-portforward-start:
-    ./scripts/portforward-start.sh
+stop-minikube:
+    ./scripts/stop-minikube.sh
 
-# Stop port-forwarding
-portforward-stop:
-    ./scripts/portforward-stop.sh
+delete-minikube:
+    ./scripts/delete-minikube.sh
 
-# Check port-forward status
-portforward-status:
-    ./scripts/portforward-status.sh
+# Registry commands
+start-registry:
+    docker-compose -f {{COMPOSE_FILE}} up -d registry-http
 
-# Complete development workflow
-dev-workflow:
-    ./scripts/dev-workflow.sh
+start-registry-https:
+    ./scripts/start-registry-https.sh
 
-# Show logs from port-forward
-portforward-logs:
-    tail -f port-forward.log
+stop-registry:
+    docker-compose -f {{COMPOSE_FILE}} down
 
-# Clean up any port-forward processes
-portforward-cleanup:
-    pkill -f "port-forward.*3000" 2>/dev/null || true
-    rm -f port-forward.pid port-forward.log 2>/dev/null || true
-    @echo "✅ Cleanup complete"
+# Build commands
+build-base:
+    REGISTRY={{REGISTRY_URL}} docker buildx bake base-images --push
 
-# List all pods in frontend namespace
-pods:
-    kubectl get pods -n frontend
+build-app:
+    REGISTRY={{REGISTRY_URL}} docker buildx bake application-images --push
 
-# Watch pods in real-time
-pods-watch:
-    kubectl get pods -n frontend --watch
+build-all: build-base build-app
 
-# Get pod logs
-logs frontend-pod="frontend-frontend-chart-*":
-    kubectl logs -n frontend $(kubectl get pods -n frontend -o name | grep "{{frontend-pod}}" | head -1) --follow
+# Development commands
+dev-docker-build: build-all
+dev-docker-start:
+    docker-compose -f {{DEV_COMPOSE_FILE}} up -d
+
+dev-docker-stop:
+    docker-compose -f {{DEV_COMPOSE_FILE}} stop
+
+dev-docker-clean:
+    docker-compose -f {{DEV_COMPOSE_FILE}} down -v --remove-orphans
+
+dev-docker-restart: dev-docker-stop dev-docker-clean dev-docker-build dev-docker-start
