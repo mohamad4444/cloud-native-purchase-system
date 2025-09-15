@@ -2,7 +2,7 @@
 REGISTRY_URL := "localhost:5000/"
 COMPOSE_FILE := "docker-compose.yaml"
 DEV_COMPOSE_FILE := "docker-compose.yaml"
-
+COMPOSE_FILE_REGISTRY := "./registry/docker-compose.yml"
 # Commands
 default:
     just --list
@@ -41,13 +41,13 @@ delete-minikube:
 
 # Registry commands
 start-registry:
-    docker-compose -f {{COMPOSE_FILE}} up -d registry-http
+    docker-compose -f {{COMPOSE_FILE_REGISTRY}} up -d registry-http
 
 start-registry-https:
     ./scripts/start-registry-https.sh
 
 stop-registry:
-    docker-compose -f {{COMPOSE_FILE}} down
+    docker-compose -f {{COMPOSE_FILE_REGISTRY}} down
 
 # Build commands
 build-base:

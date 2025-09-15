@@ -2,7 +2,7 @@ replicaCount: 1
 environment: "development" # Added
 
 image:
-  repository: localhost:5000/web-client
+  repository: registry:5000/web-client
   tag: latest
   pullPolicy: IfNotPresent
 

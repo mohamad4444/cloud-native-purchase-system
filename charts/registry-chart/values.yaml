@@ -1,0 +1,67 @@
+# Default values for docker-registry with registry.test domain
+replicaCount: 1
+
+image:
+  repository: registry
+  tag: 2.8.3
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    # Force HTTP only - prevent HTTPS redirects
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    # Ensure HTTP is allowed
+    kubernetes.io/ingress.allow-http: "true"
+  hosts:
+  - host: registry.test
+    paths:
+    - path: /
+      pathType: Prefix
+  tls: [] # Empty to disable TLS
+
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+auth:
+  enabled: false
+  htpasswd: ""
+
+# No resource limits - minimal configuration
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+config:
+  version: 0.1
+  log:
+    fields:
+      service: registry
+  storage:
+    filesystem:
+      rootdirectory: /var/lib/registry
+  http:
+    addr: :5000
+    headers:
+      X-Content-Type-Options: [ nosniff ]
+  health:
+    storagedriver:
+      enabled: true
+      interval: 10s
+      threshold: 3
