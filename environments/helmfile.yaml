@@ -65,15 +65,6 @@ releases:
   values:
   - values/runner.yaml
 
-- name: registry
-  chart: ../charts/registry-chart
-  namespace: registry
-  createNamespace: true
-  labels:
-    tier: ready
-  values:
-  - values/env-magic.gotmpl # Add Go template for value merging
-
 - name: frontend
   chart: ../charts/frontend-chart
   namespace: frontend
