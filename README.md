@@ -71,3 +71,130 @@ Grafana
 kubectl create configmap prometheus-config --from-file=./docker/configs/prometheus/prometheus.yml
 kubectl create configmap loki-config --from-file=./docker/configs/loki/loki-config.yaml
 kubectl create configmap promtail-config --from-file=./docker/configs/promtail/promtail-config.yaml
+
+
+
+
+
+# Creating Certificate Authority and Cert-Manager
+
+First You need to create Certificate Authorities Keys (Private and Public key)
+
+```bash
+cd certificate-authority
+openssl genrsa -out ca7.key 4096
+#Certificate for 10 years
+openssl req -x509 -new -nodes -key ca7.key -sha256 -days 3650 \
+  -out ca7.crt \
+  -subj "/CN=My Local Root CA 7"
+#Verify
+openssl x509 -in ca7.crt -noout -subject -issuer -dates
+```
+
+make the ca trusted on your operation system and in browsers, for firefox this needs to be done manually, chrome automatically takes certificate authorities from system
+
+```bash
+# Copy your CA certificate to the trust source directory
+sudo cp ca7.crt /etc/ca-certificates/trust-source/anchors/
+
+# Update the trust store
+sudo update-ca-trust
+#verify with ca common name
+trust list | grep -i "My Local Root CA 7"
+
+```
+
+now create secret that issuer will user of our CA files
+```bash
+# namespace can be anything since it is a clusterissuer but need to be specified in clusterissuer
+kubectl create my-issuer
+kubectl create secret tls my-ca-secret \
+  --cert=ca.crt \
+  --key=ca.key \
+  -n my-issuer
+
+```
+
+now we need to install cert-manager 
+```yaml
+- name: cert-manager
+  namespace: cert-manager
+  createNamespace: true
+  version: v1.18.2
+  chart: oci://quay.io/jetstack/charts/cert-manager
+  verify: true
+  keyring: ./cert-manager-keyring-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.gpg
+  values:
+  - crds:
+      enabled: true
+
+# Your CA setup resources
+- name: ca-issuer
+  namespace: cert-manager #probably extra as it is a cluster issuer
+  chart: ./charts/ca-issuer
+  needs:
+  - cert-manager/cert-manager
+  ```
+
+then you need to save it as a secret in helm under any namespace , but issuers can only access secrets in their own namespace and clusterissuers can access any name space but the secret namespace needs to be specified
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: my-ca-issuer
+spec:
+  ca:
+    secretName: my-ca-secret
+    secretNamespace: my-issuer
+```
+
+now you make make for each application that uses ingress a certificate file
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: hello-tls #certificate resouce name
+  namespace: default     # <- same namespace as ingress
+spec:
+  commonName: hello.local #must be added for certificate to work
+  secretName: hello-local-tls-secret # <- must match ingress.spec.tls.secretName
+  dnsNames: #extra names beside common
+    - www.hello.local
+  issuerRef:
+    name: my-ca-issuer #must match IssuerName
+    kind: ClusterIssuer
+```
+
+now we must add these in our ingress.yaml
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-nginx
+  labels:
+    app: hello-nginx
+  annotations:
+  #.class # Tells Kubernetes to use the "nginx" ingress controller 
+    # (must match the controller deployed in your cluster)
+    kubernetes.io/ingress.class: nginx 
+    cert-manager.io/cluster-issuer: my-ca-issuer #must match issuer name
+    nginx.ingress.kubernetes.io/ssl-redirect: "true" #redirect http to https
+spec:
+  tls:
+    - hosts:
+        - hello.local
+      secretName: hello-local-tls-secret #this must match what is in certificate
+  rules:
+    - host: hello.local #url expected 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-nginx #service name must match service
+                port:
+                  number: 80
+
+```

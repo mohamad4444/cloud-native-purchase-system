@@ -28,6 +28,24 @@ environments:
 ---
 
 releases:
+- name: cert-manager
+  namespace: cert-manager
+  createNamespace: true
+  version: v1.18.2
+  chart: oci://quay.io/jetstack/charts/cert-manager
+  verify: true
+  keyring: ./cert-manager-keyring-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.gpg
+  values:
+  - crds:
+      enabled: true
+
+# Your CA setup resources
+- name: ca-issuer
+  namespace: cert-manager #probably extra as it is a cluster issuer
+  chart: ../charts/ca-issuer
+  needs:
+  - cert-manager/cert-manager
+
 - name: gitlab-runner-sa
   namespace: gitlab-runner
   chart: ../charts/gitlab-runner-sa
@@ -43,14 +61,14 @@ releases:
   values:
   - values/runner.yaml
 
-- name: frontend
-  chart: ../charts/frontend-chart
-  namespace: frontend
-  createNamespace: true
-  labels:
-    tier: ready
-  values:
-  - values/env-magic.gotmpl # Add Go template for value merging
+# - name: frontend
+#   chart: ../charts/frontend-chart
+#   namespace: frontend
+#   createNamespace: true
+#   labels:
+#     tier: ready
+#   values:
+#   - values/env-magic.gotmpl # Add Go template for value merging
 
 # - name: keycloak
 #   chart: ../charts/keycloak-chart

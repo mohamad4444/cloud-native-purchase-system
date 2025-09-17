@@ -17,17 +17,15 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
-    # Force HTTP only - prevent HTTPS redirects
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    # Ensure HTTP is allowed
-    kubernetes.io/ingress.allow-http: "true"
   hosts:
   - host: registry.test
     paths:
     - path: /
       pathType: Prefix
-  tls: [] # Empty to disable TLS
+  tls:
+  - hosts:
+    - registry.test
+  secretName: registry-tls
 
 persistence:
   enabled: true
