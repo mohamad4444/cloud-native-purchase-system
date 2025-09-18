@@ -32,6 +32,8 @@ artemis:
   security:
     username: artemis
     password: artemis
+    existingConfigMap: false # Add this
+    existingSecret: false # Add this
     anonymousLogin: "false"
 
   # Storage configuration

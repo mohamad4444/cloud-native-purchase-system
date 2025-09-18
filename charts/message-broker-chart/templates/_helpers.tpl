@@ -38,3 +38,10 @@ Create configmap name
 {{- printf "%s-config" .Release.Name }}
 {{- end }}
 {{- end -}}
+
+{{/*
+PVC name
+*/}}
+{{- define "artemis.pvcName" -}}
+{{- printf "%s-pvc" .Release.Name }}
+{{- end -}}

@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}
+  name: artemis-broker
   namespace: {{ .Values.global.namespace | default .Release.Namespace }}
   labels:
-    {{- include "artemis.labels" . | nindent 4 }}
+    {{- include "artemis.selectorLabels" . | nindent 8 }}
 spec:
   replicas: {{ .Values.artemis.replicas }}
   selector:
@@ -61,5 +61,5 @@ spec:
       volumes:
       - name: artemis-data
         persistentVolumeClaim:
-          claimName: {{ .Release.Name }}-pvc
+          claimName: {{ include "artemis.pvcName" . }}
       {{- end }}

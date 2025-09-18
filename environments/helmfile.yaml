@@ -69,27 +69,29 @@ releases:
   chart: ../charts/frontend-chart
   namespace: frontend
   createNamespace: true
+  timeout: 60 # Increase to 20 minutes
+  atomic: true
   labels:
     tier: ready
   values:
   - values/env-magic.gotmpl # Add Go template for value merging
 
-# - name: keycloak
-#   chart: ../charts/keycloak-chart
-#   namespace: auth
-#   createNamespace: true
-#   labels:
-#     tier: ready
-#   values:
-#   - values/env-magic.gotmpl # Add Go template for value merging
+- name: keycloak
+  chart: ../charts/keycloak-chart
+  namespace: auth
+  createNamespace: true
+  labels:
+    tier: ready
+  values:
+  - values/env-magic.gotmpl # Add Go template for value merging
 
-# - name: message-broker
-#   chart: ../charts/message-broker-chart
-#   namespace: infra
-#   labels:
-#     tier: ready
-#   values:
-#   - values/env-magic.gotmpl
+- name: message-broker
+  chart: ../charts/message-broker-chart
+  namespace: infra
+  labels:
+    tier: ready
+  values:
+  - values/env-magic.gotmpl
 
 # - name: inventory-service
 #   chart: ../charts/inventory-service-chart
