@@ -1,5 +1,5 @@
 variable "REGISTRY" {
-  default = "registry.local/"
+  default = "localhost:5000/"
 }
 
 variable "TAG" {

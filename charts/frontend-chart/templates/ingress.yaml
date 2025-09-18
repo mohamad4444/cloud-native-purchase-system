@@ -4,7 +4,17 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
   namespace: {{ .Release.Namespace | default "frontend" }}
+  annotations:
+  #.class # Tells Kubernetes to use the "nginx" ingress controller 
+    # (must match the controller deployed in your cluster)
+    kubernetes.io/ingress.class: nginx 
+    cert-manager.io/cluster-issuer: my-ca-issuer #must match issuer name
+    nginx.ingress.kubernetes.io/ssl-redirect: "true" #redirect http to https
 spec:
+  tls:
+  - hosts:
+      - frontend.local
+    secretName: frontend-tls #this must match what is in certificate
   rules:
     - host: {{ .Values.ingress.host }}
       http:

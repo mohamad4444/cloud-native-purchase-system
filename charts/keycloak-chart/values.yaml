@@ -15,24 +15,29 @@ keycloak:
   image: quay.io/keycloak/keycloak:26.2.5
   adminUser: admin
   adminPassword: adminpassword
-  httpRelativePath: /auth
+  httpRelativePath: /
   proxyHeaders: xforwarded
   hostnameStrict: false
-  proxyAddressForwarding: false
-  proxyMode: standalone #edge
-  frontendUrl: http://localhost:8080/auth
+  proxyAddressForwarding: true # required for ingress
+  proxyMode: edge # edge/reencrypt recommended behind ingress
+  frontendUrl: http://keycloak.local # update from localhost
+
   # Service settings
   service:
-    type: ClusterIP # Internal service
-    port: 8080 # Container port for Keycloak
-    nodePort: 32080 # Optional for dev if NodePort is needed
+    type: ClusterIP # Internal service (let ingress expose it)
+    port: 8080
+    nodePort: null # not needed if using ingress
 
 # Ingress settings
 ingress:
   enabled: true
-  host: localhost
+  host: keycloak.local
   paths:
-  - /auth
+  - /
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/ssl-redirect: "false" # keep HTTP for now
 
 # Deployment settings
 replicaCount: 1

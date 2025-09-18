@@ -2,7 +2,7 @@ replicaCount: 1
 environment: "development" # Added
 
 image:
-  repository: registry.local/nginx-frontend
+  repository: localhost:5000/nginx-frontend
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -20,10 +20,10 @@ ingress:
   annotations: {}
   hosts: []
   tls: []
-  host: frontend.com
+  host: frontend.local
 
 keycloak:
-  url: "http://localhost:8080/auth"
+  url: "https://keycloak.local"
   realm: "purchase-service-realm"
   clientId: "web-frontend-client"
 
