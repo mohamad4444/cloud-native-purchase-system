@@ -11,14 +11,14 @@ import swtp.clouddemo.inventory.service.LagerService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/inventory")
+@RequestMapping("/inventory-api")
 @RequiredArgsConstructor
 public class ProductController {
 
     private final LagerService productService;
 
     @PreAuthorize("hasRole('USER')")
-    @GetMapping
+    @GetMapping("/inventory")
     public List<ProductDto> getAllProducts() {
         return productService.getAllProducts();
     }
