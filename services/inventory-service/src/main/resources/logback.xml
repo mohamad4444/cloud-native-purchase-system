@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+  <!-- Console appender with color support -->
   <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <pattern>%level %logger.%M\(%F:%L\) - %msg%n%ex{full}</pattern>
+    <encoder>
+      <pattern>
+        %highlight(%d{HH:mm:ss.SSS}) %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n%ex
+      </pattern>
     </encoder>
   </appender>
 
-  <!-- Extra logging for debugging authentication -->
-  <logger name="swtp.clouddemo.common.config" level="TRACE" additivity="false">
-    <appender-ref ref="Console"/>
-  </logger>
-  <logger name="org.springframework.security" level="TRACE" additivity="false">
-    <appender-ref ref="Console"/>
-  </logger>
-  <logger name="org.springframework.web.filter" level="TRACE" additivity="false">
-    <appender-ref ref="Console"/>
-  </logger>
-  <logger name="org.springframework.security.oauth2" level="TRACE" additivity="false">
+  <!-- Loggers with debug level, optional if you want specific configs -->
+  <logger name="swtp.clouddemo.purchase.controller" level="DEBUG" additivity="false">
     <appender-ref ref="Console"/>
   </logger>
 
+  <logger name="swtp.clouddemo.common.aop" level="DEBUG" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <!-- Root logger logs everything at DEBUG level -->
   <root level="DEBUG">
     <appender-ref ref="Console"/>
   </root>
+
 </configuration>

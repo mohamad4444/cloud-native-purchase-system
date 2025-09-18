@@ -19,7 +19,8 @@ public class CorsConfig {
     "http://nginx-frontend",       // container-to-container
     "http://nginx-frontend:80",    // explicit port
     "http://127.0.0.1:4200",
-    "http://192.168.1.100:4200"    // your dev LAN IP
+    "http://192.168.1.100:4200",
+    "https://frontend.local"//     // your dev LAN IP
 ));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));

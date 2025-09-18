@@ -1,14 +1,10 @@
 # helmfile.yaml
 helmDefaults:
-  timeout: 600
+  timeout: 300
   wait: true
-  atomic: true
+  atomic: false
   createNamespace: true
   force: false
-
-# repositories:
-# - name: bitnami
-#   url: https://charts.bitnami.com/bitnami
 repositories:
 - name: gitlab
   url: https://charts.gitlab.io
@@ -43,7 +39,8 @@ releases:
 
 # Your CA setup resources
 - name: ca-issuer
-  namespace: cert-manager #probably extra as it is a cluster issuer
+  namespace: cert-manager
+  createNamespace: true
   chart: ../charts/ca-issuer
   labels:
     tier: ready
@@ -52,54 +49,68 @@ releases:
 
 - name: gitlab-runner-sa
   namespace: gitlab-runner
+  createNamespace: true
   chart: ../charts/gitlab-runner-sa
   labels:
     tier: ready
+  needs:
+  - cert-manager/cert-manager
+
 - name: gitlab-runner
   namespace: gitlab-runner
   chart: gitlab/gitlab-runner
-  version: 0.80.1 # matches latest in repo
+  version: 0.80.1
   createNamespace: true
   labels:
     tier: ready
   values:
   - values/runner.yaml
+  needs:
+  - cert-manager/cert-manager
 
 - name: frontend
   chart: ../charts/frontend-chart
-  namespace: frontend
+  namespace: purchase-app
   createNamespace: true
-  timeout: 60 # Increase to 20 minutes
-  atomic: true
-  labels:
-    tier: ready
-  values:
-  - values/env-magic.gotmpl # Add Go template for value merging
-
-- name: keycloak
-  chart: ../charts/keycloak-chart
-  namespace: auth
-  createNamespace: true
-  labels:
-    tier: ready
-  values:
-  - values/env-magic.gotmpl # Add Go template for value merging
-
-- name: message-broker
-  chart: ../charts/message-broker-chart
-  namespace: infra
   labels:
     tier: ready
   values:
   - values/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
 
-# - name: inventory-service
-#   chart: ../charts/inventory-service-chart
-#   namespace: app
-#   labels:
-#     tier: dev-notready,prod-ready
-#   values:
-#   - values/env-magic.gotmpl
+- name: keycloak
+  chart: ../charts/keycloak-chart
+  namespace: purchase-app
+  createNamespace: true
+  labels:
+    tier: ready
+  values:
+  - values/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
+
+- name: message-broker
+  chart: ../charts/message-broker-chart
+  namespace: purchase-app
+  createNamespace: true
+  labels:
+    tier: ready
+  values:
+  - values/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
+
+- name: inventory-service
+  chart: ../charts/inventory-service-chart
+  namespace: purchase-app
+  createNamespace: true
+  labels:
+    tier: dev-notready,prod-ready
+  values:
+  - values/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
 
 # - name: purchase-service
 #   chart: ../charts/purchase-service-chart
@@ -108,8 +119,8 @@ releases:
 #     tier: dev-notready,prod-ready
 #   values:
 #   - values/env-magic.gotmpl
-
-
+#   needs:
+#   - cert-manager/cert-manager
 
 # - name: monitoring-stack
 #   chart: ../charts/monitoring-stack-chart
@@ -118,3 +129,5 @@ releases:
 #     tier: dev-notready,prod-ready
 #   values:
 #   - values/env-magic.gotmpl
+#   needs:
+#   - cert-manager/cert-manager

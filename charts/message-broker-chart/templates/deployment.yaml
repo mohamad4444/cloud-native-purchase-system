@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: artemis-broker
-  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
+  namespace: purchase-app
   labels:
     {{- include "artemis.selectorLabels" . | nindent 8 }}
 spec:

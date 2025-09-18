@@ -2,11 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "frontend-chart.fullname" . }}
+  namespace: purchase-app
   labels:
     {{- include "frontend-chart.labels" . | nindent 4 }}
   annotations:
     checksum/config: {{ include ("frontend-chart.configmap") . | sha256sum }}
     debug/values: {{ .Values | toJson | sha256sum | trunc 8 }}
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:

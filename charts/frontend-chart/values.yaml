@@ -28,8 +28,8 @@ keycloak:
   clientId: "web-frontend-client"
 
 api:
-  purchases: "http://api.local.test/purchase-service/purchases"
-  inventory: "http://api.local.test/inventory-service/inventory"
+  purchases: "purchase-api/purchases"
+  inventory: "inventory-api/inventory"
 
 # Optional: if you want to keep the foo environment variable
 foo: "default-value"

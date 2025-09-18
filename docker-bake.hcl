@@ -11,7 +11,7 @@ group "base-images" {
 }
 
 group "application-images" {
-  targets = ["nginx-frontend", "artemis", "inventory-service", "purchase-service"]
+  targets = ["keycloak","nginx-frontend", "artemis", "inventory-service", "purchase-service"]
 }
 
 target "nginx-frontend" {
@@ -49,6 +49,14 @@ target "purchase-service" {
   context = "services/purchase-service"
   dockerfile = "Dockerfile"
   tags = ["${REGISTRY}purchase-service:${TAG}"]
+  platforms = ["linux/amd64"]
+  push = true
+}
+
+target "keycloak" {
+  context = "services/keycloak"
+  dockerfile = "Dockerfile"
+  tags = ["${REGISTRY}keycloak:${TAG}"]
   platforms = ["linux/amd64"]
   push = true
 }

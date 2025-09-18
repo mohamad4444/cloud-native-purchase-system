@@ -3,27 +3,46 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
-  namespace: {{ .Release.Namespace | default "frontend" }}
+  namespace: purchase-app
   annotations:
-  #.class # Tells Kubernetes to use the "nginx" ingress controller 
-    # (must match the controller deployed in your cluster)
-    kubernetes.io/ingress.class: nginx 
-    cert-manager.io/cluster-issuer: my-ca-issuer #must match issuer name
-    nginx.ingress.kubernetes.io/ssl-redirect: "true" #redirect http to https
+    cert-manager.io/cluster-issuer: my-ca-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://frontend.local"
 spec:
+  ingressClassName: nginx
   tls:
   - hosts:
       - frontend.local
-    secretName: frontend-tls #this must match what is in certificate
+    secretName: frontend-tls
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: frontend.local
       http:
         paths:
+          # Inventory API - all paths under /inventory-api
+          - path: /inventory-api
+            pathType: Prefix
+            backend:
+              service:
+                name: inventory-service-app
+                port:
+                  number: 8080
+          
+          # Purchase API - all paths under /purchase-api
+          - path: /purchase-api
+            pathType: Prefix
+            backend:
+              service:
+                name: purchase-api
+                port:
+                  number: 8080
+          # Frontend application
           - path: /
             pathType: Prefix
             backend:
               service:
-                name:  {{ include "frontend-chart.fullname" . }}
+                name: {{ include "frontend-chart.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
+          
+
 {{- end }}

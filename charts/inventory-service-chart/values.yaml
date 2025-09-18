@@ -1,35 +1,27 @@
-# Global values
-global:
-  namespace: default
+namespace: purchase-app
 
-# Database configuration
+app:
+  name: inventory-service
+  port: 8080
+  # Add the two missing values for the app key
+  securityLogLevel: INFO
+  queueName: my-queue
+  image: "localhost:5000/inventory-service:latest"
+
 database:
   name: inventorydb
   user: inventoryuser
-  password: inventorypassword
+  password: inventorypass
   port: 5432
-  image:
-    repository: postgres
-    tag: 17.5
-    pullPolicy: IfNotPresent
-  storage:
-    size: 1Gi
-    accessModes: [ "ReadWriteOnce" ]
-    storageClass: ""
-  service:
-    type: NodePort # Use ClusterIP for production
-    nodePort: 30432
-  bootstrap:
-    enabled: true
-    image:
-      repository: postgres
-      tag: 17.5
-      pullPolicy: IfNotPresent
+  image: "postgres:17.5"
+  storage: 1Gi
 
-resources:
-  requests:
-    memory: "256Mi"
-    cpu: "250m"
-  limits:
-    memory: "512Mi"
-    cpu: "500m"
+keycloak:
+  service: "keycloak:8080"
+  realm: "purchase-service-realm"
+
+artemis:
+  service: "message-broker-service:61616"
+  # Add the two missing values for the artemis key
+  user: artemis
+  password: artemis

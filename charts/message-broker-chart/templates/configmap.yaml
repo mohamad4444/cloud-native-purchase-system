@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "artemis.configmapName" . }}
-  namespace: {{ .Values.global.namespace | default .Release.Namespace }}
+  namespace: purchase-app
   labels:
     {{- include "artemis.labels" . | nindent 4 }}
 data:

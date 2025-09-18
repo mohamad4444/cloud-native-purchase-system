@@ -21,6 +21,7 @@ spec:
             - --http-relative-path={{ .Values.keycloak.httpRelativePath }}
             - --proxy-headers={{ .Values.keycloak.proxyHeaders }}
             - --hostname-strict={{ .Values.keycloak.hostnameStrict | toString | lower }}
+            - --import-realm
           env:
             - name: KC_DB
               value: postgres

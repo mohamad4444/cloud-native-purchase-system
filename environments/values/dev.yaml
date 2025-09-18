@@ -8,7 +8,6 @@ globalConfig:
   api:
     endpoint: "http://localhost:5000/api" # dev-local API
     key: "dev-api-key-123"
-
 globalBefore:
   logLevel: "debug"
   monitoring: false

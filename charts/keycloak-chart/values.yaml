@@ -1,5 +1,5 @@
 # Global settings
-namespace: auth
+namespace: purchase-app
 
 # Database settings
 postgres:
@@ -12,7 +12,7 @@ postgres:
 
 # Keycloak settings
 keycloak:
-  image: quay.io/keycloak/keycloak:26.2.5
+  image: localhost:5000/keycloak:latest
   adminUser: admin
   adminPassword: adminpassword
   httpRelativePath: /
@@ -20,7 +20,7 @@ keycloak:
   hostnameStrict: false
   proxyAddressForwarding: true # required for ingress
   proxyMode: edge # edge/reencrypt recommended behind ingress
-  frontendUrl: http://keycloak.local # update from localhost
+  frontendUrl: https://keycloak.local # update from localhost
 
   # Service settings
   service:
