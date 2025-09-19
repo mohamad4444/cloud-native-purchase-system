@@ -11,7 +11,7 @@
   </appender>
 
   <!-- Loggers with debug level, optional if you want specific configs -->
-  <logger name="swtp.clouddemo.purchase.controller" level="DEBUG" additivity="false">
+  <logger name="swtp.clouddemo" level="DEBUG" additivity="false">
     <appender-ref ref="Console"/>
   </logger>
 
@@ -20,7 +20,7 @@
   </logger>
 
   <!-- Root logger logs everything at DEBUG level -->
-  <root level="DEBUG">
+  <root level="WARN">
     <appender-ref ref="Console"/>
   </root>
 

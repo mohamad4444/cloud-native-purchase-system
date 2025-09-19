@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+      <customFields>{"app":"purchase-system"}</customFields>
+      <flattenThrowable>true</flattenThrowable>
+      <includeCallerData>true</includeCallerData>
+      <!-- Rename default fields -->
+      <fieldNames>
+        <timestamp>timestamp</timestamp>
+        <version>version</version>
+      </fieldNames>
+    </encoder>
+  </appender>
+
+  <!-- Set specific packages to TRACE level for detailed debugging -->
+  <logger name="swtp.clouddemo.common.config" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+  <logger name="org.springframework.security" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+  <logger name="org.springframework.web.filter" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <root level="INFO">
+    <appender-ref ref="Console"/>
+  </root>
+</configuration>

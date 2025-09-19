@@ -122,12 +122,12 @@ releases:
   needs:
   - cert-manager/cert-manager
 
-# - name: monitoring-stack
-#   chart: ../charts/monitoring-stack-chart
-#   namespace: monitoring
-#   labels:
-#     tier: dev-notready,prod-ready
-#   values:
-#   - values/env-magic.gotmpl
-#   needs:
-#   - cert-manager/cert-manager
+- name: monitoring-stack
+  chart: ../charts/monitoring-stack-chart
+  namespace: monitoring
+  labels:
+    tier: dev-notready,prod-ready
+  values:
+  - values/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
