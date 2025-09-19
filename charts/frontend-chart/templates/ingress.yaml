@@ -32,7 +32,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: purchase-api
+                name: purchase-service-app
                 port:
                   number: 8080
           # Frontend application

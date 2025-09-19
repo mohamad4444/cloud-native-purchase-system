@@ -112,15 +112,15 @@ releases:
   needs:
   - cert-manager/cert-manager
 
-# - name: purchase-service
-#   chart: ../charts/purchase-service-chart
-#   namespace: app
-#   labels:
-#     tier: dev-notready,prod-ready
-#   values:
-#   - values/env-magic.gotmpl
-#   needs:
-#   - cert-manager/cert-manager
+- name: purchase-service
+  chart: ../charts/purchase-service-chart
+  namespace: purchase-app
+  labels:
+    tier: dev-notready,prod-ready
+  values:
+  - values/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
 
 # - name: monitoring-stack
 #   chart: ../charts/monitoring-stack-chart

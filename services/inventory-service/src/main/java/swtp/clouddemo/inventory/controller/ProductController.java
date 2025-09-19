@@ -11,7 +11,7 @@ import swtp.clouddemo.inventory.service.LagerService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/inventory-api")
+@RequestMapping("inventory-api")
 @RequiredArgsConstructor
 public class ProductController {
 

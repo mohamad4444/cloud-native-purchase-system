@@ -12,8 +12,7 @@ import swtp.clouddemo.purchase.service.PurchaseService;
 import java.util.List;
 
 @RestController
-@PreAuthorize("hasRole('USER')")
-@RequestMapping("/purchases")
+@RequestMapping("purchase-api")
 public class PurchaseController {
 
     private final PurchaseService purchaseService;
@@ -22,13 +21,14 @@ public class PurchaseController {
         this.purchaseService = purchaseService;
     }
 
-
-    @PostMapping
+    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/purchases")
     public ResponseEntity<PurchaseDtoOut> createPurchase(@RequestBody PurchaseDtoIn dtoIn) throws JsonProcessingException {
         return ResponseEntity.ok(purchaseService.createPurchase(dtoIn));
     }
     // /purchases?status=...
-    @GetMapping
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/purchases")
     public ResponseEntity<List<PurchaseDtoOut>> getPurchases(@RequestParam(required = false) String status) {
         
         if (status == null || status.equalsIgnoreCase("ALL")) {
