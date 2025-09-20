@@ -8,6 +8,8 @@ helmDefaults:
 repositories:
 - name: gitlab
   url: https://charts.gitlab.io
+- name: grafana
+  url: https://grafana.github.io/helm-charts
 ---
 environments:
   default:
@@ -122,12 +124,30 @@ releases:
   needs:
   - cert-manager/cert-manager
 
-- name: monitoring-stack
-  chart: ../charts/monitoring-stack-chart
+- name: loki
   namespace: monitoring
-  labels:
-    tier: dev-notready,prod-ready
+  chart: grafana/loki
+  version: 6.40.0
   values:
-  - values/env-magic.gotmpl
+  - ./values/loki-values.yaml
+
+# Install Grafana
+- name: grafana
+  namespace: monitoring
+  chart: grafana/grafana
+  version: 9.4.5
+  values:
+  - ./values/grafana-values.yaml
   needs:
-  - cert-manager/cert-manager
+  - loki
+
+# Install Grafana Alloy (K8s Monitoring)
+- name: k8s-monitoring
+  namespace: monitoring
+  chart: grafana/k8s-monitoring
+  version: 3.5.1
+  values:
+  - ./values/k8s-monitoring.yaml
+  needs:
+  - loki
+  - grafana
