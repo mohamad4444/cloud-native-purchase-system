@@ -1,0 +1,43 @@
+services:
+  # HTTPS Registry (secure)
+  registry-https:
+    image: registry:2
+    container_name: docker-registry-https
+    ports:
+      - "5443:5443"  # HTTPS port
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5443
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/localhost+2.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/localhost+2-key.pem
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - ../certs:/certs
+      - registry-https-data:/var/lib/registry
+    networks:
+      - registry-net
+    restart: unless-stopped
+
+  # HTTP Registry (insecure - for easy testing)
+  registry-http:
+    image: registry:2
+    container_name: docker-registry-http
+    ports:
+      - "5000:5000"  # HTTP port
+    environment:
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+    volumes:
+      - registry-http-data:/var/lib/registry
+    networks:
+      - registry-net
+    restart: unless-stopped
+
+networks:
+  registry-net:
+    driver: bridge
+
+volumes:
+  registry-https-data:
+    driver: local
+  registry-http-data:
+    driver: local
