@@ -16,6 +16,7 @@ public class PurchaseMapper {
         Purchase purchase = new Purchase();
         purchase.setProductName(dtoIn.productName());
         purchase.setQuantity(dtoIn.quantity());
+        //log.info("lager item id is 4124123123: {}",dtoIn.lagerItemId());
         purchase.setLagerItemId(dtoIn.lagerItemId());
         purchase.setUserId(userId);
         return purchase;

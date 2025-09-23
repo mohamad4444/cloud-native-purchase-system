@@ -1,4 +1,4 @@
-package swtp.clouddemo.common.config;
+package swtp.clouddemo.purchase;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
