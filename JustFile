@@ -1,72 +1,17 @@
-# Variables
-REGISTRY_URL := "registry.test/"
-COMPOSE_FILE := "docker-compose.yaml"
-DEV_COMPOSE_FILE := "docker-compose.yaml"
-COMPOSE_FILE_REGISTRY := "./registry/docker-compose.yml"
-# Commands
-default:
-    just --list
+# Justfile
 
-help:
-    @echo "Available commands:"
-    @echo "  MINIKUBE:"
-    @echo "    start-minikube     - Start Minikube with docker driver (8GB RAM, 4 CPUs) + enable addons"
-    @echo "    stop-minikube      - Stop Minikube instance"
-    @echo "    delete-minikube    - Delete Minikube instance"
-    @echo "  REGISTRY:"
-    @echo "    start-registry     - Start registry (HTTP version)"
-    @echo "    start-registry-https - Start registry with HTTPS (port 5443)"
-    @echo "    stop-registry      - Stop registry"
-    @echo "  BUILD:"
-    @echo "    build-base         - Build and push base images using buildx"
-    @echo "    build-app          - Build and push application images using buildx"
-    @echo "    build-all          - Build both base and application images in sequence"
-    @echo "  DEVELOPMENT:"
-    @echo "    dev-docker-build   - Build development images"
-    @echo "    dev-docker-start   - Start development environment"
-    @echo "    dev-docker-stop    - Stop development environment"
-    @echo "    dev-docker-clean   - Stop and remove containers, volumes, networks"
-    @echo "    dev-docker-restart - Restart development environment (stop, clean, build, start)"
-    @echo "  help               - Show this help message"
+# Default target
+default: release
 
-# Minikube commands
-start-minikube:
-    ./scripts/start-minikube.sh
+# Build and push Docker images using Buildx
+build-and-push:
+    @echo "Building and pushing Docker images..."
+    docker buildx bake --push
 
-stop-minikube:
-    ./scripts/stop-minikube.sh
+# Deploy Helm charts using Helmfile
+deploy:
+    @echo "Deploying Helm charts with Helmfile..."
+    helmfile --file ./environments sync
 
-delete-minikube:
-    ./scripts/delete-minikube.sh
-
-# Registry commands
-start-registry:
-    docker-compose -f {{COMPOSE_FILE_REGISTRY}} up -d registry-http
-
-start-registry-https:
-    ./scripts/start-registry-https.sh
-
-stop-registry:
-    docker-compose -f {{COMPOSE_FILE_REGISTRY}} down
-
-# Build commands
-build-base:
-    REGISTRY={{REGISTRY_URL}} docker buildx bake base-images --push
-
-build-app:
-    REGISTRY={{REGISTRY_URL}} docker buildx bake application-images --push
-
-build-all: build-base build-app
-
-# Development commands
-dev-docker-build: build-all
-dev-docker-start:
-    docker-compose -f {{DEV_COMPOSE_FILE}} up -d
-
-dev-docker-stop:
-    docker-compose -f {{DEV_COMPOSE_FILE}} stop
-
-dev-docker-clean:
-    docker-compose -f {{DEV_COMPOSE_FILE}} down -v --remove-orphans
-
-dev-docker-restart: dev-docker-stop dev-docker-clean dev-docker-build dev-docker-start
+# Build images and deploy in one go
+release: build-and-push deploy
