@@ -23,5 +23,5 @@ keycloak:
 artemis:
   service: "message-broker-service:61616"
   # Add the two missing values for the artemis key
-  user: artemis
-  password: artemis
+  user: inventoryUser
+  password: inventoryPass

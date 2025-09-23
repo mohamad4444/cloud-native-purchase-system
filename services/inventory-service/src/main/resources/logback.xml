@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- returns a normal output not json-->
 <configuration>
 
   <!-- Console appender with color support -->
@@ -10,16 +11,37 @@
     </encoder>
   </appender>
 
-  <!-- Loggers with debug level, optional if you want specific configs -->
+  <!-- Package-specific loggers -->
+  <!-- <logger name="org.springframework.security" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <logger name="org.springframework.web" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <logger name="org.apache.http" level="DEBUG" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <logger name="org.apache.http.wire" level="DEBUG" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <logger name="org.springframework.security.oauth2" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger>
+
+  <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+    <appender-ref ref="Console"/>
+  </logger> -->
+
+  <!-- Custom loggers from your app -->
   <logger name="swtp.clouddemo" level="DEBUG" additivity="false">
     <appender-ref ref="Console"/>
   </logger>
 
-  <logger name="swtp.clouddemo.common.aop" level="DEBUG" additivity="false">
-    <appender-ref ref="Console"/>
-  </logger>
-
-  <!-- Root logger logs everything at DEBUG level -->
+  <!-- Root logger logs warnings and above -->
   <root level="WARN">
     <appender-ref ref="Console"/>
   </root>

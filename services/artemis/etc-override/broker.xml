@@ -162,6 +162,10 @@ under the License.
 
       </acceptors>
 
+      <security>
+        <role name="purchase"/>
+        <role name="inventory"/>
+      </security>
 
       <security-settings>
          <security-setting match="#">
@@ -176,6 +180,14 @@ under the License.
             <permission type="send" roles="amq"/>
             <!-- we need this otherwise ./artemis data imp wouldn't work -->
             <permission type="manage" roles="amq"/>
+         </security-setting>
+         <security-setting match="purchase.requested">
+           <permission type="send" roles="purchase"/>
+           <permission type="consume" roles="inventory"/>
+         </security-setting>
+         <security-setting match="purchase.result">
+           <permission type="send" roles="inventory"/>
+           <permission type="consume" roles="purchase"/>
          </security-setting>
       </security-settings>
 
@@ -236,7 +248,16 @@ under the License.
                <queue name="ExpiryQueue" />
             </anycast>
          </address>
-
+         <address name="purchase.requested">
+           <anycast>
+             <queue name="purchase.requested"/>
+           </anycast>
+         </address>
+         <address name="purchase.result">
+           <anycast>
+             <queue name="purchase.result"/>
+           </anycast>
+         </address>
       </addresses>
 
 
