@@ -3,19 +3,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
-  namespace: {{ .Values.globalConfig.namespace }}
+  namespace: purchase-app
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.globalConfig.caIssuerName }}
+    cert-manager.io/cluster-issuer: my-ca-issuer
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.globalConfig.certificates.frontend.commonName }}"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://frontend.local"
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-      - {{ .Values.globalConfig.certificates.frontend.commonName }}
-    secretName: {{ .Values.globalConfig.certificates.frontend.secretName }}
+      - frontend.local
+    secretName: frontend-tls
   rules:
-    - host: {{ .Values.globalConfig.certificates.frontend.commonName }}
+    - host: frontend.local
       http:
         paths:
           # Inventory API - all paths under /inventory-api
@@ -23,7 +23,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: inventory-service
+                name: inventory-service-app
                 port:
                   number: 8080
           
@@ -32,7 +32,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: purchase-service
+                name: purchase-service-app
                 port:
                   number: 8080
           # Frontend application
@@ -40,7 +40,9 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Release.Name }}-service
+                name: {{ include "frontend-chart.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
+          
+
 {{- end }}

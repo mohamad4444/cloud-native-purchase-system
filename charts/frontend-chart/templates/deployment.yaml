@@ -1,31 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-deployment
-  namespace: {{ .Values.globalConfig.namespace }}
+  name: {{ include "frontend-chart.fullname" . }}
+  namespace: purchase-app
   labels:
-    {{- include "lib-helpers.labels" . | nindent 4 }}
+    {{- include "frontend-chart.labels" . | nindent 4 }}
   annotations:
-    checksum/config: {{ include (printf "%s-config" .Release.Name) . | sha256sum }}    debug/values: {{ .Values | toJson | sha256sum | trunc 8 }}
+    checksum/config: {{ include ("frontend-chart.configmap") . | sha256sum }}
+    debug/values: {{ .Values | toJson | sha256sum | trunc 8 }}
     reloader.stakater.com/auto: "true"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "lib-helpers.name" . }}
+      app.kubernetes.io/name: {{ include "frontend-chart.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        {{- include "lib-helpers.labels" . | nindent 8 }}
+        {{- include "frontend-chart.labels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ .Release.Name }}-serviceaccount
+      serviceAccountName: {{ include "frontend-chart.serviceAccountName" . }}
       containers:
-        - name: frontend
-          image: "{{ .Values.globalConfig.image-registry }}/{{ .Values.image.name }}:{{ .Values.globalConfig.images.tag }}"
-          imagePullPolicy: {{ .Values.globalConfig.image-pullPolicy | quote }}
+        - name: {{ include "frontend-chart.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: FOO
+              value: {{ .Values.foo | quote }}
           volumeMounts:
             - name: config
               mountPath: /usr/share/nginx/html/js/config.js
@@ -33,4 +37,4 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ .Release.Name }}-config
+            name: {{ include "frontend-chart.fullname" . }}-config

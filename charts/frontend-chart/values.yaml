@@ -2,7 +2,7 @@ replicaCount: 1
 environment: "development" # Added
 
 image:
-  name: nginx-frontend
+  repository: localhost:5000/nginx-frontend
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -30,3 +30,6 @@ keycloak:
 api:
   purchases: "purchase-api/purchases"
   inventory: "inventory-api/inventory"
+
+# Optional: if you want to keep the foo environment variable
+foo: "default-value"

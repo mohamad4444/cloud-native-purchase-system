@@ -1,0 +1,20 @@
+# values/dev.yaml
+
+globalConfig:
+  registry:
+    url: "registry.example.com"
+    username: "admin"
+    password: "secret123"
+  api:
+    endpoint: "http://localhost:5000/api" # dev-local API
+    key: "dev-api-key-123"
+globalBefore:
+  logLevel: "debug"
+  monitoring: false
+  replicaCount: 1
+
+globalAfter:
+  security:
+    enabled: false
+    scan: "none"
+  replicaCount: 1
