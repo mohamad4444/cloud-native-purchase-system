@@ -1,8 +1,8 @@
 minikube delete
 minikube start --driver=docker --memory=8g --cpus=4
 minikube addons enable ingress
-# minikube addons enable dashboard
-# minikube addons enable metrics-server
+minikube addons enable dashboard
+minikube addons enable metrics-server
 minikube addons enable registry
 
 nohup kubectl port-forward -n kube-system service/registry 5000:80 > portforward.log 2>&1 &

@@ -12,17 +12,14 @@ repositories:
   url: https://grafana.github.io/helm-charts
 ---
 environments:
-  default:
-    values:
-    - values/default.yaml
   dev:
     kubeContext: minikube
     values:
-    - values/dev.yaml
+    - values/env/env/dev.yaml
   prod:
     kubeContext: minikube
     values:
-    - values/prod.yaml
+    - values/env/env/prod.yaml
 ---
 
 releases:
@@ -66,7 +63,7 @@ releases:
   labels:
     tier: ready
   values:
-  - values/runner.yaml
+  - values/charts/runner.yaml
   needs:
   - cert-manager/cert-manager
 
@@ -77,7 +74,7 @@ releases:
   labels:
     tier: ready
   values:
-  - values/env-magic.gotmpl
+  - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
 
@@ -88,7 +85,7 @@ releases:
   labels:
     tier: ready
   values:
-  - values/env-magic.gotmpl
+  - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
 
@@ -99,7 +96,7 @@ releases:
   labels:
     tier: ready
   values:
-  - values/env-magic.gotmpl
+  - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
 
@@ -110,7 +107,7 @@ releases:
   labels:
     tier: dev-notready,prod-ready
   values:
-  - values/env-magic.gotmpl
+  - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
 
@@ -120,7 +117,7 @@ releases:
   labels:
     tier: dev-notready,prod-ready
   values:
-  - values/env-magic.gotmpl
+  - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
 
@@ -129,7 +126,7 @@ releases:
 #   chart: grafana/alloy
 #   version: 1.2.1
 #   values:
-#   - values/alloy-values.yaml
+#   - values/env/alloy-values.yaml
 #   wait: true
 #   timeout: 300
 #   needs:
@@ -141,7 +138,7 @@ releases:
 #   installed: true
 #   version: 6.40.0
 #   values:
-#   - values/loki-values.yaml
+#   - values/env/loki-values.yaml
 #   wait: true
 #   timeout: 600
 
@@ -150,16 +147,6 @@ releases:
 #   chart: grafana/grafana
 #   version: 10.0.0
 #   values:
-#   - values/grafana-values.yaml
+#   - values/env/grafana-values.yaml
 #   wait: true
 #   timeout: 300
-
-# - name: monitoring-stack
-#   chart: ../charts/monitoring-stack-chart
-#   namespace: monitoring
-#   labels:
-#     tier: dev-notready,prod-ready
-#   values:
-#   - values/env-magic.gotmpl
-#   needs:
-#   - cert-manager/cert-manager
