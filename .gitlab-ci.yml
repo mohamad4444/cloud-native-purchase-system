@@ -16,6 +16,8 @@ build_image:
   tags:
   - kubernetes
   script:
+  - dockerd-entrypoint.sh & # start Docker daemon
+  - sleep 30 # wait for it to be ready
   - echo "Using cluster-local registry"
   - docker buildx bake base-images --push
   - docker buildx bake application-images --push
