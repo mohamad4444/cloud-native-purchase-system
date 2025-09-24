@@ -6,8 +6,16 @@ rbac:
 serviceAccount:
   create: false
   name: gitlab-runner
-
 runners:
-  image: registry.kube-system.svc.cluster.local:80/dind:latest
   privileged: true
-  tags: "kubernetes,docker,helm"
+  kubernetes:
+    hostNetwork: true
+    serviceAccount: gitlab-runner
+  config: |
+    [[runners]]
+      name = "gitlab-runner-hostnet"
+      executor = "kubernetes"
+      [runners.kubernetes]
+        image = "registry.kube-system.svc.cluster.local:80/dind:latest"
+        namespace = "{{.Release.Namespace}}"
+        privileged = true
