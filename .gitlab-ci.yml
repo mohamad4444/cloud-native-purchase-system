@@ -1,43 +1,70 @@
+image: docker:28.4.0 # the main container that runs your scripts
+
+services:
+- name: docker:28.4.0-dind
+  command: [ "--registry-mirror", "" ] # optional
+  alias: docker
+
+variables:
+  DOCKER_TLS_CERTDIR: "" # important for DinD
+  DOCKER_HOST: tcp://docker:2375 # connects to the sidecar
+  DOCKER_REGISTRY: registry.kube-system.svc.cluster.local:80
+
 stages:
-- test
 - build
-- deploy
 
-# Simple test job to verify runner is working
-test-runner:
-  stage: test
-  tags:
-  - kubernetes
-  script:
-  - echo "Hello from Minikube runner"
-
-# Build Docker images using buildx
 build_image:
+  tags:
+  - kubernetes
   stage: build
-  tags:
-  - kubernetes
-  image: docker:28.4.0
-  services:
-  - name: docker:28.4.0-dind
-  variables:
-    DOCKER_TLS_CERTDIR: ""
-    DOCKER_REGISTRY: registry.kube-system.svc.cluster.local:80
   script:
-  - echo "Using cluster-local registry"
-  - docker buildx bake base-images --push --set "*.tags=$DOCKER_REGISTRY/base-image:latest"
-  - docker buildx bake application-images --push --set "*.tags=$DOCKER_REGISTRY/app-image:latest"
+  - docker buildx version
+  - docker buildx create --use --name mybuilder
+  - docker buildx inspect mybuilder
+  - docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_REGISTRY/myimage:latest --push .
 
-# Deploy with Helmfile
-deploy_helm:
-  stage: deploy
-  tags:
-  - kubernetes
-  image: lachlanevenson/k8s-helm:latest
-  script:
-  - echo "=== Helm Version ==="
-  - helm version
-  - echo "=== Helmfile Version ==="
-  - helmfile --version
-  - echo "=== Syncing Helmfile ==="
-  - helmfile --file ./environments sync
-  - echo "=== Deploy Completed ==="
+# stages:
+# - test
+# - build
+# - deploy
+# variables:
+#   DOCKER_HOST: tcp://docker:2375
+#   DOCKER_TLS_CERTDIR: ""
+# # Simple test job to verify runner is working
+# test-runner:
+#   stage: test
+#   tags:
+#   - kubernetes
+#   script:
+#   - echo "Hello from Minikube runner"
+
+# # Build Docker images using buildx
+# build_image:
+#   stage: build
+#   tags:
+#   - kubernetes
+#   image: docker:28.4.0
+#   services:
+#   - name: docker:28.4.0-dind
+#   variables:
+#     DOCKER_TLS_CERTDIR: ""
+#     DOCKER_REGISTRY: registry.kube-system.svc.cluster.local:80
+#   script:
+#   - echo "Using cluster-local registry"
+#   - docker buildx bake base-images --push --set "*.tags=$DOCKER_REGISTRY/base-image:latest"
+#   - docker buildx bake application-images --push --set "*.tags=$DOCKER_REGISTRY/app-image:latest"
+
+# # Deploy with Helmfile
+# deploy_helm:
+#   stage: deploy
+#   tags:
+#   - kubernetes
+#   image: lachlanevenson/k8s-helm:latest
+#   script:
+#   - echo "=== Helm Version ==="
+#   - helm version
+#   - echo "=== Helmfile Version ==="
+#   - helmfile --version
+#   - echo "=== Syncing Helmfile ==="
+#   - helmfile --file ./environments sync
+#   - echo "=== Deploy Completed ==="
