@@ -5,6 +5,20 @@ variable "REGISTRY" {
 variable "TAG" {
   default = "latest"
 }
+group "base-images" {
+  targets = [
+    "builder-common"
+  ]
+}
+group "application-images" {
+  targets = [
+    "nginx-frontend",
+    "artemis",
+    "inventory-service",
+    "purchase-service",
+    "keycloak"
+  ]
+}
 
 group "default" {
   targets = [
