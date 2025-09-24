@@ -14,4 +14,4 @@ verify-runner:
   - which helmfile
   - helmfile --version
   - which kubectl
-  - kubectl version --client=true --short
+  - kubectl version
