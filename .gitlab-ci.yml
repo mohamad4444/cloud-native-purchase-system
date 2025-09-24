@@ -2,8 +2,8 @@ image: docker:28.4.0 # the main container that runs your scripts
 
 services:
 - name: docker:28.4.0-dind
-  command: [ "--registry-mirror", "" ] # optional
   alias: docker
+  command: [ "--host=tcp://0.0.0.0:2375" ]
 
 variables:
   DOCKER_TLS_CERTDIR: "" # important for DinD
