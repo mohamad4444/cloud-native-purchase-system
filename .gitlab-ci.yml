@@ -1,70 +1,17 @@
-image: docker:28.4.0 # the main container that runs your scripts
-
-services:
-- name: docker:28.4.0-dind
-  alias: docker
-  command: [ "--host=tcp://0.0.0.0:2375" ]
-
-variables:
-  DOCKER_TLS_CERTDIR: "" # important for DinD
-  DOCKER_HOST: tcp://docker:2375 # connects to the sidecar
-  DOCKER_REGISTRY: registry.kube-system.svc.cluster.local:80
-
 stages:
-- build
+- test
 
-build_image:
+verify-runner:
+  stage: test
   tags:
-  - kubernetes
-  stage: build
+  - kubernetes # must match the tag you set in runner values.yaml
   script:
-  - docker buildx version
-  - docker buildx create --use --name mybuilder
-  - docker buildx inspect mybuilder
-  - docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_REGISTRY/myimage:latest --push .
-
-# stages:
-# - test
-# - build
-# - deploy
-# variables:
-#   DOCKER_HOST: tcp://docker:2375
-#   DOCKER_TLS_CERTDIR: ""
-# # Simple test job to verify runner is working
-# test-runner:
-#   stage: test
-#   tags:
-#   - kubernetes
-#   script:
-#   - echo "Hello from Minikube runner"
-
-# # Build Docker images using buildx
-# build_image:
-#   stage: build
-#   tags:
-#   - kubernetes
-#   image: docker:28.4.0
-#   services:
-#   - name: docker:28.4.0-dind
-#   variables:
-#     DOCKER_TLS_CERTDIR: ""
-#     DOCKER_REGISTRY: registry.kube-system.svc.cluster.local:80
-#   script:
-#   - echo "Using cluster-local registry"
-#   - docker buildx bake base-images --push --set "*.tags=$DOCKER_REGISTRY/base-image:latest"
-#   - docker buildx bake application-images --push --set "*.tags=$DOCKER_REGISTRY/app-image:latest"
-
-# # Deploy with Helmfile
-# deploy_helm:
-#   stage: deploy
-#   tags:
-#   - kubernetes
-#   image: lachlanevenson/k8s-helm:latest
-#   script:
-#   - echo "=== Helm Version ==="
-#   - helm version
-#   - echo "=== Helmfile Version ==="
-#   - helmfile --version
-#   - echo "=== Syncing Helmfile ==="
-#   - helmfile --file ./environments sync
-#   - echo "=== Deploy Completed ==="
+  - echo "✅ Runner is working"
+  - which docker
+  - docker --version
+  - which helm
+  - helm version
+  - which helmfile
+  - helmfile --version
+  - which kubectl
+  - kubectl version --client=true --short

@@ -16,7 +16,8 @@ group "application-images" {
     "artemis",
     "inventory-service",
     "purchase-service",
-    "keycloak"
+    "keycloak",
+    "dind"
   ]
 }
 
@@ -26,7 +27,8 @@ group "default" {
     "artemis",
     "inventory-service",
     "purchase-service",
-    "keycloak"
+    "keycloak",
+    "dind"
   ]
 }
 
@@ -77,6 +79,14 @@ target "artemis" {
 
 target "keycloak" {
   context    = "services/keycloak"
+  dockerfile = "Dockerfile"
+  tags       = ["${REGISTRY}keycloak:${TAG}"]
+  platforms  = ["linux/amd64"]
+  push       = true
+}
+
+target "dind" {
+  context    = "services/dind"
   dockerfile = "Dockerfile"
   tags       = ["${REGISTRY}keycloak:${TAG}"]
   platforms  = ["linux/amd64"]

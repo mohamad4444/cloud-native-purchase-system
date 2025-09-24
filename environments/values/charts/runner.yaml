@@ -6,16 +6,8 @@ rbac:
 serviceAccount:
   create: false
   name: gitlab-runner
+
 runners:
+  image: localhost:5000/dind:latest
   privileged: true
-  kubernetes:
-    hostNetwork: true
-    serviceAccount: gitlab-runner
-  config: |
-    [[runners]]
-      name = "gitlab-runner-hostnet"
-      executor = "kubernetes"
-      [runners.kubernetes]
-        image = "alpine:latest"
-        namespace = "{{.Release.Namespace}}"
-        privileged = true
+  tags: "kubernetes,docker,helm"
