@@ -1,17 +1,35 @@
 stages:
 - test
+- build
+- deploy
 
-verify-runner:
+test-runner:
   stage: test
   tags:
-  - kubernetes # must match the tag you set in runner values.yaml
+  - kubernetes
   script:
-  - echo "✅ Runner is working"
-  - which docker
-  - docker --version
-  - which helm
+  - echo "Hello from Minikube runner"
+
+# Build Docker images using buildx
+build_image:
+  stage: build
+  tags:
+  - kubernetes
+  script:
+  - echo "Using cluster-local registry"
+  - docker buildx bake base-images --push
+  - docker buildx bake application-images --push
+
+# Deploy with Helmfile
+deploy_helm:
+  stage: deploy
+  tags:
+  - kubernetes
+  script:
+  - echo "=== Helm Version ==="
   - helm version
-  - which helmfile
+  - echo "=== Helmfile Version ==="
   - helmfile --version
-  - which kubectl
-  - kubectl version
+  - echo "=== Syncing Helmfile ==="
+  - helmfile --file ./environments sync
+  - echo "=== Deploy Completed ==="
