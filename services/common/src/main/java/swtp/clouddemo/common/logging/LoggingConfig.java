@@ -1,9 +1,10 @@
-package swtp.clouddemo.common.config;
+package swtp.clouddemo.common.logging;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import swtp.clouddemo.common.config.MdcJwtFilter;
 
 /**
  * LoggingConfig registers filters related to logging and MDC (Mapped Diagnostic Context).

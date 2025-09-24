@@ -1,4 +1,4 @@
-package swtp.clouddemo.purchase;
+package swtp.clouddemo.common.logging;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;

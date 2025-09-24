@@ -10,6 +10,7 @@ import swtp.clouddemo.common.exception.GlobalExceptionHandler;
 import swtp.clouddemo.common.filter.EarlyLoggingValve;
 import swtp.clouddemo.common.messaging.JmsConfig;
 import swtp.clouddemo.common.messaging.MessageProducer;
+import swtp.clouddemo.common.security.JwtAuthConverter;
 
 @Configuration
 @Slf4j

@@ -1,4 +1,4 @@
-package swtp.clouddemo.common.config;
+package swtp.clouddemo.common.web;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,11 +15,11 @@ public class CorsConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowedOrigins(List.of(
-    "http://localhost:4200",
-    "http://127.0.0.1:4200",
-    "http://192.168.1.100:4200",
-    "https://frontend.local"//
-));
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "http://192.168.1.100:4200",
+        "https://frontend.local"//
+    ));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true); // only if necessary

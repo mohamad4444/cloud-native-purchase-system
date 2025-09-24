@@ -1,4 +1,4 @@
-package swtp.clouddemo.common.config;
+package swtp.clouddemo.common.web;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

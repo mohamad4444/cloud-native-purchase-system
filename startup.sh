@@ -12,6 +12,7 @@ minikube addons enable registry
 nohup kubectl port-forward -n kube-system service/registry 5000:80 > portforward.log 2>&1 &
 
 #On every service change
+docker buildx bake builder-common --push
 docker buildx bake --push
 #curl -s http://localhost:5000/v2/_catalog
 

@@ -6,8 +6,8 @@ default: release
 # Build and push Docker images using Buildx
 build-and-push:
     @echo "Building and pushing Docker images..."
+    docker buildx bake builder-common --push
     docker buildx bake --push
-
 # Deploy Helm charts using Helmfile
 deploy:
     @echo "Deploying Helm charts with Helmfile..."
