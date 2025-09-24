@@ -8,6 +8,6 @@ serviceAccount:
   name: gitlab-runner
 
 runners:
-  image: localhost:5000/dind:latest
+  image: registry.kube-system.svc.cluster.local:80/dind:latest
   privileged: true
   tags: "kubernetes,docker,helm"

@@ -88,7 +88,7 @@ target "keycloak" {
 target "dind" {
   context    = "services/dind"
   dockerfile = "Dockerfile"
-  tags       = ["${REGISTRY}keycloak:${TAG}"]
+  tags       = ["${REGISTRY}dind:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
 }
