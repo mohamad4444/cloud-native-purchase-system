@@ -1,24 +1,29 @@
 stages:
-- test
-- build
+  - test
+  - build
+  - deploy
+
 test-runner:
   stage: test
   tags:
-  - kubernetes
+    - kubernetes
   script:
-  - echo "Hello from Minikube runner"
+    - echo "Hello from Minikube runner"
+
 build_image:
   stage: build
-  image: docker:24
+  image: docker:28.4.0
   services:
-  - docker:24-dind
+    - name: docker:28.4.0-dind
+  variables:
+    DOCKER_TLS_CERTDIR: ""  # required for DinD
   script:
-  - docker buildx create --use builder-common
-  - docker buildx bake base-images --push
-  - docker buildx bake application-images --push
+    - docker buildx create --use builder-common
+    - docker buildx bake base-images --push
+    - docker buildx bake application-images --push
 
 deploy_helm:
   stage: deploy
   image: lachlanevenson/k8s-helm:latest
   script:
-  - helmfile --file ./environments sync
+    - helmfile --file ./environments sync
