@@ -23,11 +23,8 @@ build_image:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
     DOCKER_REGISTRY: registry.kube-system.svc.cluster.local:80
-    DOCKER_USERNAME: $DOCKER_USER
-    DOCKER_PASSWORD: $DOCKER_PASS
   script:
   - echo "Logging into cluster-local registry"
-  - docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - docker buildx create --name builder --use --driver docker-container
   - docker buildx inspect --bootstrap
   - docker buildx bake base-images --push --set "*.tags=$DOCKER_REGISTRY/base-image:latest"
