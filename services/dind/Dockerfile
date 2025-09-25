@@ -24,8 +24,8 @@ COPY buildkitd.toml /etc/buildkitd.toml
 # Set environment defaults for buildx
 ENV DOCKER_BUILDKIT=1 \
     DOCKER_CLI_EXPERIMENTAL=enabled \
-    REGISTRY=registry.kube-system.svc.cluster.local:80/ \
-    DOCKER_HOST=unix:///var/run/docker.sock
+    REGISTRY=registry.kube-system.svc.cluster.local:80/
+RUN unset DOCKER_HOST
 
 # Optional: pre-create a default buildx builder with our config
 # (will be reused inside the container)
@@ -35,6 +35,3 @@ RUN docker buildx create --name mybuilder \
     --use \
     --buildkitd-config /etc/buildkitd.toml || true
 
-
-ENTRYPOINT ["sh", "-c", "dockerd --host=unix:///var/run/docker.sock & sleep 3; exec bash"]
-CMD []
