@@ -19,13 +19,12 @@ build_image:
   - dockerd-entrypoint.sh & # start Docker daemon
   - sleep 5 # wait for it to be ready
 
-  # - docker buildx create --name mybuilder --use
-  # - docker buildx inspect mybuilder --bootstrap
+  - docker buildx create --name mybuilder --driver docker-container --driver-opt network=host --use --buildkitd-config /etc/buildkitd.toml
 
   # # Enable insecure registry via environment variable
-  # - export DOCKER_CLI_EXPERIMENTAL=enabled
-  # - export DOCKER_BUILDKIT=1
-
+  - export DOCKER_CLI_EXPERIMENTAL=enabled
+  - export DOCKER_BUILDKIT=1
+  - unset DOCKER_HOST
   - echo "Using cluster-local registry"
   - export REGISTRY=registry.kube-system.svc.cluster.local:80/
   - docker buildx bake base-images --push
