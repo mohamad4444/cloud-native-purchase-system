@@ -65,8 +65,7 @@ releases:
   values:
   - values/charts/runner.yaml
   needs:
-  - cert-manager/cert-manager
-
+  - gitlab-runner-sa
 - name: frontend
   chart: ../charts/frontend-chart
   namespace: purchase-app
