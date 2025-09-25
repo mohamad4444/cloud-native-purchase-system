@@ -16,15 +16,15 @@ build_image:
   tags:
   - kubernetes
   script:
-  - dockerd-entrypoint.sh & # start Docker daemon
-  - sleep 30 # wait for it to be ready
+  # - dockerd-entrypoint.sh & # start Docker daemon
+  # - sleep 30 # wait for it to be ready
 
-  - docker buildx create --name mybuilder --use
-  - docker buildx inspect mybuilder --bootstrap
+  # - docker buildx create --name mybuilder --use
+  # - docker buildx inspect mybuilder --bootstrap
 
-  # Enable insecure registry via environment variable
-  - export DOCKER_CLI_EXPERIMENTAL=enabled
-  - export DOCKER_BUILDKIT=1
+  # # Enable insecure registry via environment variable
+  # - export DOCKER_CLI_EXPERIMENTAL=enabled
+  # - export DOCKER_BUILDKIT=1
 
   - echo "Using cluster-local registry"
   - export REGISTRY=registry.kube-system.svc.cluster.local:80/

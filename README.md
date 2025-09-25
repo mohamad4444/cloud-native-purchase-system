@@ -35,7 +35,7 @@ A Docker Compose version exists under a separate tag but is no longer maintained
 - **helmfile** - [Installation guide](https://helmfile.readthedocs.io/en/latest/#installation)
 - **docker** - [Installation guide](https://docs.docker.com/engine/install/)
 - **OpenSSL** - Available on Linux by default. On Windows, use WSL: `sudo apt install openssl`
-
+- **Docker buildx**
 ### Optional Tools
 - **just** - Command runner [Installation guide](https://github.com/casey/just)
 - **Visual Studio Code** - Code editor
@@ -79,6 +79,9 @@ kubectl create secret tls my-ca-secret \
 ```
 
 **For local development** using `localhost` domains, you can skip the certificate setup as the system uses HTTP.
+
+### Step 2 create buildx container
+docker buildx create --use --name mybuilder --driver docker-container --driver-opt network=host
 
 ### Step 2: Initialize the Environment
 

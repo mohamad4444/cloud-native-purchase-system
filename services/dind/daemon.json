@@ -1,0 +1,6 @@
+{
+  "insecure-registries": [
+    "registry.kube-system.svc.cluster.local:80"
+  ],
+  "experimental": true
+}
