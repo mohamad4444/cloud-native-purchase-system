@@ -47,7 +47,9 @@ target "inventory-service" {
   tags       = ["${REGISTRY}inventory-service:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
-
+  args = {
+    REGISTRY = "${REGISTRY}"
+  }
   inherits   = ["builder-common"]
 }
 
@@ -57,7 +59,9 @@ target "purchase-service" {
   tags       = ["${REGISTRY}purchase-service:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
-
+  args = {
+    REGISTRY = "${REGISTRY}"
+  }
   inherits   = ["builder-common"]
 }
 

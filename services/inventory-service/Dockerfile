@@ -1,5 +1,6 @@
 # Use pre-built builder image with common dependencies
-FROM localhost:5000/builder-common:latest AS builder-base
+ARG REGISTRY=localhost:5000/
+FROM ${REGISTRY}builder-common:latest AS builder-base
 
 # # ---------- BUILD STAGE ----------
 # FROM maven:3.9.9-eclipse-temurin-21 AS builder
