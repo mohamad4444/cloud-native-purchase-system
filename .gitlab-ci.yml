@@ -28,6 +28,7 @@ build_image:
   - echo "Using cluster-local registry"
   - export REGISTRY=registry.kube-system.svc.cluster.local:80/
   - docker buildx bake base-images --push
+  - export REGISTRY=registry.kube-system.svc.cluster.local:80/
   - docker buildx bake application-images --push
 
 # Deploy with Helmfile
