@@ -1,0 +1,24 @@
+alloy:
+  configMap:
+    create: false
+    name: alloy-config
+    key: config.alloy
+
+  # Enable both required mounts
+  mounts:
+    varlog: true
+    dockercontainers: true
+
+  # Run as root to access log files
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+
+  # Also set pod security context
+  podSecurityContext:
+    runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+
+# Keep the rest of your existing values...

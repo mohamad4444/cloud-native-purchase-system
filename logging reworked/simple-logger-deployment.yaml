@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-logger
+  namespace: purchase-app
+  labels:
+    app: simple-logger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-logger
+  template:
+    metadata:
+      labels:
+        app: simple-logger
+    spec:
+      containers:
+      - name: python
+        image: python:3.12-slim
+        command: ["python", "/scripts/app.py"]
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+      volumes:
+      - name: script-volume
+        configMap:
+          name: simple-logger-script
+          defaultMode: 0755
