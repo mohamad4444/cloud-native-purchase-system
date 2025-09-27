@@ -1,14 +1,23 @@
-namespace: purchase-app
-
-app:
-  name: inventory-service
-  port: 8080
-  # Add the two missing values for the app key
-  securityLogLevel: INFO
-  queueName: my-queue
-  image: "localhost:5000/inventory-service:latest"
-
+namespace: dev
+appName: inventory #microservice name and deployment name
+backend:
+  #component name
+  # main deployment
+  componentName: backend
+  replicaCount: 1 #replicas for frontned deployment
+  image:
+    # image that the main microservice deployment uses to create pods
+    # registry: "localhost:5000"       # Docker registry, it's a global value across all charts
+    name: "inventory-service" # Image name
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    #Service that connects to main deployment pods
+    type: ClusterIP #Internally visible only
+    port: 8080 #port that the service exposes
+    targetPort: 8080 #Port the container receives traffic on
 database:
+  componentName: db
   name: inventorydb
   user: inventoryuser
   password: inventorypass
@@ -17,11 +26,12 @@ database:
   storage: 1Gi
 
 keycloak:
-  service: "keycloak:8080"
+  issuer: https://keycloak.local/realms/purchase-service-realm
+  service: "keycloak-service:8080" ## must match keycloak service naming in kubernetes manifests
   realm: "purchase-service-realm"
 
 artemis:
-  service: "message-broker-service:61616"
+  service: "artemis-service:61616" #must match artemis service naming
   # Add the two missing values for the artemis key
   user: artemis
   password: artemis

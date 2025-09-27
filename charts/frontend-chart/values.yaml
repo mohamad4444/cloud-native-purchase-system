@@ -1,33 +1,19 @@
-# if its just one Microservice per chart, then all these would be on top level, otherwise nested under the app name (an app name is the main microservice deployment name) and components are its database which require their own configuration. app: is always the common values and the ones used for deploying the main microservice and its components for deploying different components such as database and their replicas and settings for example, services and so on
-
-namespace: dev # in case namepace splitting in an environment and pod isolation would be done, then appending env to the namespace <env>-<namespace> is good practice to isolate different areas of responsibility within the same environment. for this project everything is put under the same name space for ease of use.
-# env: staging # Default Environment is staging (made global)
-
-# you need to diffrentiate between charts. some charts have one microservice or one deployment and its related resources. then this has one app.name and one component
-# charts that have multiple microservice need to be nested with microservice app.name being top tier. apps that have one microserivce and multiple components to them such as inventory which has a bachend and database component. and their organization within values chart differs accordingly, in this project we use the approach one helm chart per microserivce hence no need for top level approach and if a shared thing between microservice exist like ingress it gets its own chart, always assume worst case as in charts have multiple components to make things unified and also since only one container per pod is used here image is directly written on top level, as there is only one in all charts
-appName: frontend #microservice name and deployment name
-frontend:
-  #component name
-  # main deployment
-  componentName: frontend
-  replicaCount: 1 #replicas for frontned deployment
-  image:
-    # image that the main microservice deployment uses to create pods
-    # registry: "localhost:5000"       # Docker registry, it's a global value across all charts
-    name: "nginx-frontend" # Image name
-    tag: latest
-    pullPolicy: IfNotPresent
-  service:
-    #Service that connects to main deployment pods
-    type: ClusterIP #Internally visible only
-    port: 80 #port that the service exposes
-    targetPort: 80 #Port the container receives traffic on
-  config:
-    #Configuration for config.js in frontend
-    keycloak:
-      url: "https://keycloak.local"
-    api:
-      purchases: "purchase-api/purchases"
-      inventory: "inventory-api/inventory"
+replicaCount: 1
+image:
+  name: "nginx-frontend"
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  #Service that connects to main deployment pods
+  type: ClusterIP #Internally visible only
+  port: 80 #port that the service exposes
+  targetPort: 80 #Port the container receives traffic on
+config:
+  #Configuration for config.js in frontend
+  keycloak:
+    url: "https://keycloak.local"
+  api:
+    purchases: "purchase-api/purchases"
+    inventory: "inventory-api/inventory"
 ingress:
   enabled: false

@@ -3,16 +3,12 @@ kind: Deployment
 metadata:
   name: {{.Values.appName}}
   namespace: {{.Values.namespace}}
-  labels:
-    app: {{.Values.appName}}
-    component: {{.Values.frontend.componentName}}
-    env: {{.Values.env}}
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
   replicas: {{ .Values.frontend.replicaCount }}
   selector:
-    matchLabels:
+    matchLabels: # These labels must match template labels exactly
       app: {{.Values.appName}}
       component: {{.Values.frontend.componentName}}
       env: {{.Values.env}}

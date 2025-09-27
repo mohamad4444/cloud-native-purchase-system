@@ -7,11 +7,15 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: keycloak-db
+      app: {{ .Values.appName }}
+      component: {{ .Values.database.componentName }}
+      env: {{ .Values.globalConfig.env }}
   template:
     metadata:
       labels:
-        app: keycloak-db
+      app: {{ .Values.appName }}
+      component: {{ .Values.database.componentName }}
+      env: {{ .Values.globalConfig.env }}
     spec:
       containers:
         - name: keycloak-db
