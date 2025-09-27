@@ -119,3 +119,29 @@ releases:
   - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
+  # Loki
+  - name: loki
+    namespace: monitoring
+    chart: grafana/loki
+    values:
+    - ./values/charts/loki-values.yml
+
+  # Grafana
+  - name: grafana
+    namespace: monitoring
+    chart: grafana/grafana
+    values:
+    - ./values/charts/grafana-values.yml
+
+  # Alloy
+  - name: alloy-logs
+    namespace: monitoring
+    chart: grafana/alloy
+    values:
+    - ./values/charts/alloy-values.yaml
+    hooks:
+    # Apply your ConfigMap before upgrade
+    - events: [ "presync" ]
+      showlogs: true
+      command: "kubectl"
+      args: [ "apply", "-f", "./values/charts/config.alloy.yaml", "-n", "monitoring" ]

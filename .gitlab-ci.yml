@@ -17,7 +17,7 @@ build_image:
   - kubernetes
   script:
   - dockerd-entrypoint.sh & # start Docker daemon
-  - sleep 5 # wait for it to be ready
+  - sleep 30 # wait for it to be ready
 
   - docker buildx create --name mybuilder --driver docker-container --driver-opt network=host --use --buildkitd-config /etc/buildkitd.toml
 

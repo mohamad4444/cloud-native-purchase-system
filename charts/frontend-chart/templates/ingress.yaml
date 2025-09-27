@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Release.Name }}-ingress
+  name: frontend-ingress
   namespace: purchase-app
   annotations:
     cert-manager.io/cluster-issuer: my-ca-issuer
@@ -11,38 +11,18 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-  - hosts:
-      - frontend.local
-    secretName: frontend-tls
+    - hosts:
+        - frontend.local
+      secretName: frontend-tls
   rules:
     - host: frontend.local
       http:
         paths:
-          # Inventory API - all paths under /inventory-api
-          - path: /inventory-api
-            pathType: Prefix
-            backend:
-              service:
-                name: inventory-service-app
-                port:
-                  number: 8080
-          
-          # Purchase API - all paths under /purchase-api
-          - path: /purchase-api
-            pathType: Prefix
-            backend:
-              service:
-                name: purchase-service-app
-                port:
-                  number: 8080
-          # Frontend application
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "frontend-chart.fullname" . }}
+                name: {{ .Values.appName }}-service
                 port:
-                  number: {{ .Values.service.port }}
-          
-
+                  number: {{ .Values.frontend.service.port }}
 {{- end }}

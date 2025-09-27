@@ -1,15 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "frontend-chart.fullname" . }}
-  namespace: purchase-app
-  labels:
-    {{- include "frontend-chart.labels" . | nindent 4 }}
+  name: {{.Values.appName}}-service
+  namespace: {{.Values.namespace}}
+  labels: #For organizational purpusoes such as kubectl delete all -l app=frontend,env=dev . these are not as important as pod labels but helpful for easier management and normally must match pod labels
+    app: {{.Values.appName}}
+    component: {{.Values.frontend.componentName}}
+    env: {{.Values.env}}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.frontend.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: {{ .Values.frontend.service.targetPort }}
   selector:
-    app.kubernetes.io/name: {{ include "frontend-chart.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{.Values.appName}}
+    component: {{.Values.frontend.componentName}}
+    env: {{.Values.env}}

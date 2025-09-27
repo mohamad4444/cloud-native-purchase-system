@@ -1,3 +1,6 @@
+# Not really related to out architecture since its an outside helm chart
+# this gitlab runner has permissions to do anything in kubernetes as an admin
+# which is insecure but just to demonstrate how gitlab can be attached with kubernetes
 namespace: gitlab-runner
 serviceAccountName: gitlab-runner
 clusterRoleBindingName: gitlab-runner-admin

@@ -1,40 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "frontend-chart.fullname" . }}
-  namespace: purchase-app
+  name: {{.Values.appName}}
+  namespace: {{.Values.namespace}}
   labels:
-    {{- include "frontend-chart.labels" . | nindent 4 }}
+    app: {{.Values.appName}}
+    component: {{.Values.frontend.componentName}}
+    env: {{.Values.env}}
   annotations:
-    checksum/config: {{ include ("frontend-chart.configmap") . | sha256sum }}
-    debug/values: {{ .Values | toJson | sha256sum | trunc 8 }}
     reloader.stakater.com/auto: "true"
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.frontend.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "frontend-chart.name" . }}
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{.Values.appName}}
+      component: {{.Values.frontend.componentName}}
+      env: {{.Values.env}}
   template:
     metadata:
+      # annotations: (optional altenrative to reloader with helmfile trick to auto reload configs)
+        # checksum/config: {{ include ("frontend-chart.configmap") . | sha256sum }}
+        # debug/values: {{ .Values | toJson | sha256sum | trunc 8 }}
       labels:
-        {{- include "frontend-chart.labels" . | nindent 8 }}
+        app: {{.Values.appName}}
+        component: {{.Values.frontend.componentName}}
+        env: {{.Values.env}}
     spec:
-      serviceAccountName: {{ include "frontend-chart.serviceAccountName" . }}
-      containers:
-        - name: {{ include "frontend-chart.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+      containers: #a pod can have multiple containers each must have a unique name
+        - name: {{.Values.appName}} #unique name for container
+          image: "{{ .Values.globalConfig.registry}}{{.Values.frontend.image.name}}:{{ .Values.frontend.image.tag }}" #image tag
+          imagePullPolicy: {{ default .Values.frontend.image.pullPolicy .Values.globalConfig.pullPolicy }} #important for development, if globalConfig.pullPolicy exists it uses that, otherwise falls back to .Values.frontend.image.pullPolicy
           ports:
-            - containerPort: {{ .Values.service.targetPort }}
-          env:
-            - name: FOO
-              value: {{ .Values.foo | quote }}
-          volumeMounts:
+            - containerPort: {{ .Values.frontend.service.targetPort }}
+          volumeMounts: #volumeMounts map the volume to a path in the container
             - name: config
-              mountPath: /usr/share/nginx/html/js/config.js
-              subPath: config.js
-      volumes:
+              mountPath: /usr/share/nginx/html/js/config.js # the file path inside the container.
+              subPath: config.js 
+      volumes: #ConfigMap volume, ephemeral Kubernetes takes the data from the ConfigMap and exposes it inside the pod as files. If the pod is deleted, the volume disappears—but the ConfigMap remains.
         - name: config
           configMap:
-            name: {{ include "frontend-chart.fullname" . }}-config
+            name: {{.Values.appName}}-config
