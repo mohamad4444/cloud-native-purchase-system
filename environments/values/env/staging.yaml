@@ -1,0 +1,33 @@
+# values/prod.yaml
+globalConfig:
+  env: "staging"
+  registry: "localhost:5000/"
+  pullPolicy: IfNotPresent
+
+frontend:
+  image:
+    pullPolicy: IfNotPresent
+  config:
+    keycloak:
+      url: "https://keycloak.local"
+    api:
+      purchases: "purchase-api/purchases"
+      inventory: "inventory-api/inventory"
+  ingress:
+    enabled: true
+keycloak:
+  globalConfig:
+    env: staging
+
+  auth:
+    configs:
+      proxyAddressForwarding: true
+      proxyMode: edge
+      frontendUrl: https://keycloak.staging.example.com
+
+  ingress:
+    enabled: true
+    host: keycloak.local
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"

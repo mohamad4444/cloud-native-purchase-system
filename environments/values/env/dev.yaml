@@ -1,38 +1,21 @@
 globalConfig:
   env: "dev"
-  registry: "localhost:5000"
-    # globalDefaults and globalOverrides are flattened into the top level and applied to all releases.
-    # Merge order:
-    #   1. Chart defaults (values.yaml) always loaded first no matter what. this is the default behaviour
-    #   2. globalDefaults (overrides chart defaults)
-    #   3. Release-specific values (overrides both chart defaults and globalDefaults)
-    #   4. globalOverrides (overrides everything above)
-    #   5. globalConfig (nested under merged.globalConfig, not flattened)
-    # This ensures global settings are applied consistently, while allowing per-release customization.
-globalDefaults:
-  namespace: "dev"
-
-# globalOverrides:
-#   security:
-#     enabled: false
-#     scan: "none"
-#   replicaCount: 1
-
-# Release-specific values.
-# These keys (e.g. "frontend", "keycloak") match the release name.
-# At render time, the helper flattens them into the top-level chart values
-# and merges them with the chart's own defaults (values.yaml).
+  registry: "localhost:5000/"
+  pullPolicy: IfNotPresent
 frontend:
-  # release-specific. what it does is it flattens the values and merges them with whatever in that release chart/values.yaml
-  frontend:
-    config:
-      keycloak:
-        url: "http://localhost:8080"
-      api:
-        purchases: "http://localhost:8081/purchases"
-        inventory: "http://localhost:8082/inventory"
-
+  image:
+    pullPolicy: IfNotPresent
+  config:
+    keycloak:
+      url: "https://keycloak.local"
+    api:
+      purchases: "purchase-api/purchases"
+      inventory: "inventory-api/inventory"
 keycloak:
-  # release-specific
-  service:
-    type: ClusterIP
+  auth:
+    configs:
+      proxyAddressForwarding: false
+      proxyMode: standalone
+      frontendUrl: http://localhost:8080
+  ingress:
+    enabled: false

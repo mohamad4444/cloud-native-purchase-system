@@ -2,22 +2,22 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
-  namespace: {{ .Values.namespace}}
+  namespace: {{ .Values.globalConfig.env }}
 data:
   config.js: |
     // Auto-generated configuration - Do not edit manually
     export const ENVIRONMENT = "{{ .Values.globalConfig.env }}";
     
     export const KEYCLOAK_CONFIG = {
-      url: "{{ .Values.frontend.config.keycloak.url }}",
+      url: "{{ .Values.config.keycloak.url }}",
       realm: "purchase-service-realm",
       clientId: "web-frontend-client",
       scope: "openid profile email offline_access"
     };
 
     export const API_ENDPOINTS = {
-      purchases: "{{ .Values.frontend.config.api.purchases }}",
-      inventory: "{{ .Values.frontend.config.api.inventory }}"
+      purchases: "{{ .Values.config.api.purchases }}",
+      inventory: "{{ .Values.config.api.inventory }}"
     };
     
     // Debug info

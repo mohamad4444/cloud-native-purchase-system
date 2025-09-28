@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+  namespace: {{ .Values.globalConfig.env }}
+data:
+  KC_DB: "postgres"
+  KC_DB_URL: "jdbc:postgresql://keycloak-db-service:5432/{{ .Values.database.name }}"
+  PROXY_ADDRESS_FORWARDING: "{{ .Values.auth.configs.proxyAddressForwarding }}"
+  KEYCLOAK_FRONTEND_URL: "{{ .Values.auth.configs.frontendUrl }}"
+  KC_PROXY: "{{ .Values.auth.configs.proxyMode }}"
+  KC_HTTP_ENABLED: "{{ .Values.auth.configs.httpEnabled }}"

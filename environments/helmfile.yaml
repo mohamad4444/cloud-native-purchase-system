@@ -5,6 +5,7 @@ helmDefaults:
   atomic: false
   createNamespace: true
   force: false
+---
 repositories:
 - name: gitlab
   url: https://charts.gitlab.io
@@ -15,13 +16,12 @@ environments:
   dev:
     kubeContext: minikube
     values:
-    - values/env/env/dev.yaml
-  prod:
+    - values/env/dev.yaml
+  staging:
     kubeContext: minikube
     values:
-    - values/env/env/prod.yaml
+    - values/env/staging.yaml
 ---
-
 releases:
 - name: cert-manager
   namespace: cert-manager
@@ -36,7 +36,6 @@ releases:
   - crds:
       enabled: true
 
-# Your CA setup resources
 - name: ca-issuer
   namespace: cert-manager
   createNamespace: true
@@ -66,9 +65,10 @@ releases:
   - values/charts/runner.yaml
   needs:
   - gitlab-runner-sa
+
 - name: frontend
   chart: ../charts/frontend-chart
-  namespace: purchase-app
+  namespace: dev
   createNamespace: true
   labels:
     tier: ready
@@ -79,7 +79,7 @@ releases:
 
 - name: keycloak
   chart: ../charts/keycloak-chart
-  namespace: purchase-app
+  namespace: dev
   createNamespace: true
   labels:
     tier: ready
@@ -90,7 +90,7 @@ releases:
 
 - name: message-broker
   chart: ../charts/message-broker-chart
-  namespace: purchase-app
+  namespace: dev
   createNamespace: true
   labels:
     tier: ready
@@ -101,7 +101,7 @@ releases:
 
 - name: inventory-service
   chart: ../charts/inventory-service-chart
-  namespace: purchase-app
+  namespace: dev
   createNamespace: true
   labels:
     tier: dev-notready,prod-ready
@@ -110,38 +110,36 @@ releases:
   needs:
   - cert-manager/cert-manager
 
-- name: purchase-service
-  chart: ../charts/purchase-service-chart
-  namespace: purchase-app
-  labels:
-    tier: dev-notready,prod-ready
+# - name: purchase-service
+#   chart: ../charts/purchase-service-chart
+#   namespace: dev
+#   createNamespace: true
+#   labels:
+#     tier: dev-notready,prod-ready
+#   values:
+#   - values/env/env-magic.gotmpl
+#   needs:
+#   - cert-manager/cert-manager
+
+- name: loki
+  namespace: monitoring
+  chart: grafana/loki
   values:
-  - values/env/env-magic.gotmpl
-  needs:
-  - cert-manager/cert-manager
-  # Loki
-  - name: loki
-    namespace: monitoring
-    chart: grafana/loki
-    values:
-    - ./values/charts/loki-values.yml
+  - ./values/charts/loki-values.yml
 
-  # Grafana
-  - name: grafana
-    namespace: monitoring
-    chart: grafana/grafana
-    values:
-    - ./values/charts/grafana-values.yml
+- name: grafana
+  namespace: monitoring
+  chart: grafana/grafana
+  values:
+  - ./values/charts/grafana-values.yml
 
-  # Alloy
-  - name: alloy-logs
-    namespace: monitoring
-    chart: grafana/alloy
-    values:
-    - ./values/charts/alloy-values.yaml
-    hooks:
-    # Apply your ConfigMap before upgrade
-    - events: [ "presync" ]
-      showlogs: true
-      command: "kubectl"
-      args: [ "apply", "-f", "./values/charts/config.alloy.yaml", "-n", "monitoring" ]
+- name: alloy-logs
+  namespace: monitoring
+  chart: grafana/alloy
+  values:
+  - ./values/charts/alloy-values.yaml
+  hooks:
+  - events: [ "presync" ]
+    showlogs: true
+    command: "kubectl"
+    args: [ "apply", "-f", "./values/charts/config.alloy.yaml", "-n", "monitoring" ]

@@ -1,20 +1,34 @@
-namespace: purchase-app
-appName: keycloak # microservice name and deployment name
+globalConfig:
+  env: dev
+  registry: "localhost:5000/"
+  pullPolicy: IfNotPresent
 
-backend:
-  componentName: keycloak
+auth:
   replicaCount: 1
   image:
-    name: "localhost:5000/keycloak" # Image name
+    name: "keycloak"
     tag: latest
     pullPolicy: IfNotPresent
   service:
-    type: ClusterIP # Internal service (let ingress expose it)
+    type: ClusterIP
     port: 8080
     targetPort: 8080
+  configs:
+    # Non-sensitive envs
+    httpRelativePath: /
+    proxyHeaders: xforwarded
+    hostnameStrict: false
+    proxyAddressForwarding: false
+    proxyMode: standalone
+    frontendUrl: http://localhost:8080
+    httpEnabled: true
+  admin:
+    # Sensitive envs
+    username: admin
+    password: adminpassword
 
 database:
-  componentName: db
+  replicaCount: 1
   name: keycloakdb
   user: keycloak
   password: keycloakpassword
@@ -23,22 +37,9 @@ database:
   storage: 1Gi
   storageClass: ""
 
-keycloak:
-  adminUser: admin
-  adminPassword: adminpassword
-  httpRelativePath: /
-  proxyHeaders: xforwarded
-  hostnameStrict: false
-  proxyAddressForwarding: true # required for ingress
-  proxyMode: edge # edge/reencrypt recommended behind ingress
-  frontendUrl: https://keycloak.local # update from localhost
-
 ingress:
-  enabled: true
+  enabled: false
   host: keycloak.local
   paths:
   - /
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/ssl-redirect: "false" # keep HTTP for now
+  annotations: {}

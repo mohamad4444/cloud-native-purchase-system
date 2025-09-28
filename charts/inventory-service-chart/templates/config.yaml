@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.appName}}-config
-  namespace: {{ .Values.namespace }}
+  name: inventory-config
+  namespace: {{.Values.globalConfig.env }}
 data:
-  APP_NAME: "{{ .Values.appName }}"
-  SERVER_PORT: "{{ .Values.backend.service.targetPort }}"
+  APP_NAME: "inventory"
+  SERVER_PORT: "8080"
 
-  DATASOURCE_URL: "jdbc:postgresql://{{.Values.appName}}-db:{{ .Values.database.port }}/{{ .Values.database.name }}"
+  DATASOURCE_URL: "jdbc:postgresql://inventory-db-service:{{ .Values.database.port }}/{{ .Values.database.name }}"
   DATASOURCE_USERNAME: "{{ .Values.database.user }}"
 
-  ARTEMIS_BROKER_URL: "tcp://{{ .Values.artemis.service }}"
+  ARTEMIS_BROKER_URL: "tcp://{{ .Values.artemis.service }}:{{ .Values.artemis.port }}"
   ARTEMIS_USER: "{{ .Values.artemis.user }}"
 
   KEYCLOAK_ISSUER_URI: "{{.Values.keycloak.issuer}}"
@@ -19,11 +19,8 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.appName}}-secret
-  namespace: {{ .Values.namespace }}
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-5"
+  name: inventory-secret
+  namespace: {{.Values.globalConfig.env}}
 type: Opaque
 data:
   DATASOURCE_PASSWORD: {{ .Values.database.password | b64enc | quote }}

@@ -1,38 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{.Values.appName}}
-  namespace: {{.Values.namespace}}
+  name: frontend
+  namespace: {{ .Values.globalConfig.env }}
   annotations:
     reloader.stakater.com/auto: "true"
 spec:
-  replicas: {{ .Values.frontend.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
   selector:
-    matchLabels: # These labels must match template labels exactly
-      app: {{.Values.appName}}
-      component: {{.Values.frontend.componentName}}
-      env: {{.Values.env}}
+    matchLabels: # must match pod template
+      app: frontend
+      component: frontend
+      env: {{ .Values.globalConfig.env }}
   template:
     metadata:
-      # annotations: (optional altenrative to reloader with helmfile trick to auto reload configs)
-        # checksum/config: {{ include ("frontend-chart.configmap") . | sha256sum }}
-        # debug/values: {{ .Values | toJson | sha256sum | trunc 8 }}
       labels:
-        app: {{.Values.appName}}
-        component: {{.Values.frontend.componentName}}
-        env: {{.Values.env}}
+        app: frontend
+        component: frontend
+        env: {{ .Values.globalConfig.env }}
     spec:
-      containers: #a pod can have multiple containers each must have a unique name
-        - name: {{.Values.appName}} #unique name for container
-          image: "{{ .Values.globalConfig.registry}}{{.Values.frontend.image.name}}:{{ .Values.frontend.image.tag }}" #image tag
-          imagePullPolicy: {{ default .Values.frontend.image.pullPolicy .Values.globalConfig.pullPolicy }} #important for development, if globalConfig.pullPolicy exists it uses that, otherwise falls back to .Values.frontend.image.pullPolicy
+      containers:
+        - name: frontend
+          image: "{{ .Values.globalConfig.registry}}{{.Values.image.name}}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ default .Values.image.pullPolicy .Values.globalConfig.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.frontend.service.targetPort }}
-          volumeMounts: #volumeMounts map the volume to a path in the container
+            - containerPort: 80
+          volumeMounts:
             - name: config
-              mountPath: /usr/share/nginx/html/js/config.js # the file path inside the container.
+              mountPath: /usr/share/nginx/html/js/config.js
               subPath: config.js 
-      volumes: #ConfigMap volume, ephemeral Kubernetes takes the data from the ConfigMap and exposes it inside the pod as files. If the pod is deleted, the volume disappears—but the ConfigMap remains.
+      volumes:
         - name: config
           configMap:
-            name: {{.Values.appName}}-config
+            name: frontend-config

@@ -1,15 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{.Values.appName}}-service
-  namespace: {{.Values.namespace}}
-  #labels: #For organizational purpusoes such as kubectl delete all -l app=frontend,env=dev . these are not as important as pod labels but helpful for easier management and normally must match pod labels
+  name: frontend-service
+  namespace: {{ .Values.globalConfig.env }}
 spec:
-  type: {{ .Values.frontend.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.frontend.service.port }}
-      targetPort: {{ .Values.frontend.service.targetPort }}
-  selector:
-    app: {{.Values.appName}}
-    component: {{.Values.frontend.componentName}}
-    env: {{.Values.env}}
+    - port: 80
+      targetPort: 80
+  selector: # must match pod labels
+    app: frontend
+    component: frontend
+    env: {{ .Values.globalConfig.env }}

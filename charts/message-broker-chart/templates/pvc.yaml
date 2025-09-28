@@ -2,10 +2,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "artemis.pvcName" . }}
-  namespace: purchase-app
+  name: artemis-pvc
+  namespace: {{ .Values.globalConfig.env }}
   labels:
-    {{- include "artemis.labels" . | nindent 4 }}
+    app: artemis
+    component: broker
+    env: {{ .Values.globalConfig.env }}
 spec:
   accessModes:
     {{- toYaml .Values.artemis.storage.accessModes | nindent 4 }}

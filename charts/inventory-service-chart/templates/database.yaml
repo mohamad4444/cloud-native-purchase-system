@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}-{{ .Values.database.componentName }}
-  namespace: {{ .Values.namespace}}
+  name: inventory-db
+  namespace: {{.Values.globalConfig.env}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{.Values.appName}}
-      component: {{.Values.database.componentName}}
+      app: inventory
+      component: db
       env: {{.Values.globalConfig.env}}
   template:
     metadata:
       labels:
-        app: {{.Values.appName}}
-        component: {{.Values.database.componentName}}
+        app: inventory
+        component: db
         env: {{.Values.globalConfig.env}}
     spec:
       containers:
@@ -30,7 +30,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.appName}}-secret
+                  name: inventory-secret
                   key: DATASOURCE_PASSWORD
           volumeMounts:
             - name: postgres-data
@@ -38,17 +38,17 @@ spec:
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: {{.Values.appName}}-pvc
+            claimName: inventory-db-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{.Values.appName}}-db
-  namespace: {{ .Values.namespace }}
+  name: inventory-db-service
+  namespace: {{.Values.globalConfig.env}}
 spec:
   selector:
-    app: {{.Values.appName}}
-    component: {{.Values.database.componentName}}
+    app: inventory
+    component: db
     env: {{.Values.globalConfig.env}}
   ports:
     - port: {{ .Values.database.port }}
@@ -57,8 +57,8 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{.Values.appName}}-pvc
-  namespace: purchase-app
+  name: inventory-db-pvc
+  namespace: {{.Values.globalConfig.env}}
 spec:
   accessModes:
     - ReadWriteOnce

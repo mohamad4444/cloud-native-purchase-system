@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-config
+  namespace: monitoring
+data:
+  config.alloy: |
+    // --- DISCOVERY AND TARGETING ---
+    // These components discover pod log files on the node.
+
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    discovery.relabel "pod_logs" {
+      targets = discovery.kubernetes.pods.targets
+
+      // Add the pod's namespace as a label.
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+
+      // Add the pod's name as a label.
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+
+      // Add the container name as a label.
+      rule {
+        source_labels = ["__meta_kubernetes_pod_container_name"]
+        target_label  = "container"
+      }
+
+      // This rule constructs the full path to the container's log file.
+      // This is a standard pattern for Kubernetes log file locations.
+      rule {
+        source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+        separator     = "/"
+        target_label  = "__path__"
+        replacement   = "/var/log/pods/*$1/$2/*.log"
+      }
+    }
+
+    local.file_match "pod_logs" {
+      path_targets = discovery.relabel.pod_logs.output
+    }
+
+    // --- LOGGING PIPELINE ---
+    // This defines a three-stage pipeline: source -> process -> write.
+
+    // 1. SOURCE: Read logs from the discovered files.
+    loki.source.file "pod_logs" {
+      targets    = local.file_match.pod_logs.targets
+      // Forward the raw log entries to the processing component.
+      forward_to = [loki.process.pod_logs.receiver]
+    }
+
+    // 2. PROCESS: Parse, filter, and transform the logs.
+    loki.process "pod_logs" {
+      // This pipeline assumes logs are structured in JSON format, which is a
+      // common output for container runtimes like Docker or CRI-O.
+      // Example log line: {"log":"{\"level\":\"info\",\"msg\":\"User logged in\"}","stream":"stdout","time":"..."}
+
+      // Stage 1: Parse the outer JSON wrapper from the container runtime.
+      stage.json {
+        expressions = {
+          // Extract the actual log content into the 'log' key.
+          log = "log",
+          // Extract the timestamp into the 'time' key.
+          time = "time",
+        }
+      }
+
+      // Stage 2: Set the correct timestamp from the log entry itself.
+      // This is crucial for accurate log correlation.
+      stage.timestamp {
+        source = "time"
+        format = "RFC3339Nano"
+      }
+
+      // Stage 3: Parse the inner, application-level JSON string.
+      stage.json {
+        // Operate on the 'log' field extracted in the first stage.
+        source = "log"
+        expressions = {
+          // Extract the log level and message from the application's JSON.
+          level = "level",
+          msg   = "message",
+        }
+        // If the inner 'log' field isn't valid JSON, don't drop the line,
+        // just pass it through. This helps catch formatting errors.
+        drop_malformed = false
+      }
+
+      // Stage 4: Add dynamic labels from the parsed content.
+      // IMPORTANT: Only use low-cardinality fields for labels (e.g., level, app).
+      // High-cardinality fields like user IDs or trace IDs will harm Loki performance.
+      stage.labels {
+        values = {
+          // Promote the 'level' field to a Loki label for efficient querying.
+          level = "level",
+        }
+      }
+
+      // Stage 5: Filter out unwanted logs.
+      // This stage drops any log entry where the 'level' is 'debug'.
+      // This is a common way to reduce log volume and storage costs in production.
+      stage.drop {
+        source    = "level"
+        value     = "debug"
+      }
+
+      // Stage 6: Set the final output message.
+      // This makes the log in Grafana clean and human-readable, as the
+      // structured data is now in labels.
+      stage.output {
+        source = "msg"
+      }
+
+      // Forward the processed logs to the final write component.
+      forward_to = [loki.write.loki.receiver]
+    }
+
+    // 3. WRITE: Send the processed logs to Loki.
+    loki.write "loki" {
+      endpoint {
+        url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+      }
+    }

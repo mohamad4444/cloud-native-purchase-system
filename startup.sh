@@ -22,5 +22,9 @@ kubectl create secret tls my-ca-secret \
   --cert=./certificate-authority/ca7.crt \
   --key=./certificate-authority/ca7.key \
   -n cert-manager
-
-helmfile --file ./environments sync
+kubectl create namespace cert-manager
+kubectl create namespace gitlab-runner
+kubectl create namespace dev
+kubectl create namespace monitoring
+kubectl create namespace staging
+helmfile -e staging --file ./environments sync

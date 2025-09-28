@@ -2,26 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak-db
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Values.globalConfig.env }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.database.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.appName }}
-      component: {{ .Values.database.componentName }}
+      app: keycloak
+      component: database
       env: {{ .Values.globalConfig.env }}
   template:
     metadata:
       labels:
-      app: {{ .Values.appName }}
-      component: {{ .Values.database.componentName }}
-      env: {{ .Values.globalConfig.env }}
+        app: keycloak
+        component: database
+        env: {{ .Values.globalConfig.env }}
     spec:
       containers:
-        - name: keycloak-db
-          image: {{ .Values.postgres.image }}
+        - name: postgres
+          image: {{ .Values.database.image }}
           ports:
-            - containerPort: 5432
+            - containerPort: {{ .Values.database.port }}
           envFrom:
             - secretRef:
                 name: keycloak-db-secret

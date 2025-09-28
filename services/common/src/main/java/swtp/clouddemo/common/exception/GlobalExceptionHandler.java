@@ -30,15 +30,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception ex) {
         // Build limited stack trace (first 2 lines)
-        StackTraceElement[] stack = ex.getStackTrace();
-        StringBuilder limitedStacktrace = new StringBuilder(ex.toString()).append("\n");
-        int linesToShow = Math.min(stack.length, 2);
-        for (int i = 0; i < linesToShow; i++) {
-            limitedStacktrace.append("\tat ").append(stack[i].toString()).append("\n");
-        }
+        SString limitedStack = getLimitedStackTrace(ex, 2);
 
         // Log the exception with limited stacktrace
-        log.error(limitedStacktrace.toString());
+        log.error(limitedStack);
 
         // Prepare structured JSON response
         Map<String, Object> body = new HashMap<>();
@@ -49,4 +44,18 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
+
+    private String getLimitedStackTrace(Throwable ex, int maxLines) {
+        StackTraceElement[] stack = ex.getStackTrace();
+        StringBuilder sb = new StringBuilder(ex.toString()).append("\n");
+        int linesToShow = Math.min(stack.length, maxLines);
+        for (int i = 0; i < linesToShow; i++) {
+            sb.append("\tat ").append(stack[i].toString()).append("\n");
+        }
+        if (stack.length > maxLines) {
+            sb.append("\t... ").append(stack.length - maxLines).append(" more\n");
+        }
+        return sb.toString();
+    }
+
 }

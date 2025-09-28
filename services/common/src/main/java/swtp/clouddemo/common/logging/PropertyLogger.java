@@ -7,8 +7,17 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 
+/**
+ * PropertyLogger logs application properties and selected environment variables on startup
+ * for debugging purposes.
+ *
+ * <p><b>WARNING:</b> This logs sensitive information such as passwords.
+ * It is only enabled for non-production profiles (e.g., dev, staging) and
+ * is automatically skipped in production.
+ */
 @Component
 public class PropertyLogger implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -17,48 +26,47 @@ public class PropertyLogger implements ApplicationListener<ApplicationReadyEvent
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         ConfigurableEnvironment env = event.getApplicationContext().getEnvironment();
-        
+
+        // Skip logging in production
+        if (Arrays.asList(env.getActiveProfiles()).contains("prod")) {
+            logger.info("PropertyLogger skipped in production profile.");
+            return;
+        }
+
         logger.info("======= APPLICATION PROPERTIES =======");
         logger.info("Active profiles: {}", Arrays.toString(env.getActiveProfiles()));
-        
+
         for (PropertySource<?> propertySource : env.getPropertySources()) {
             logger.info("--- Property Source: {} ---", propertySource.getName());
             if (propertySource.getSource() instanceof java.util.Map) {
                 @SuppressWarnings("unchecked")
                 java.util.Map<String, Object> sourceMap = (java.util.Map<String, Object>) propertySource.getSource();
                 sourceMap.forEach((key, value) -> {
-                    if (key.toLowerCase().contains("password")) {
-                        logger.info("{} = ****** (masked)", key);
-                    } else {
-                        logger.info("{} = {}", key, value);
-                    }
+                    // intentionally logging all values for debugging (including passwords)
+                    logger.info("{} = {}", key, value);
                 });
             }
         }
         logger.info("======================================");
-        
-        // Also log the specific environment variables you're debugging
+
+        // Also log specific environment variables for clarity
         logSpecificProperties(env);
     }
 
     private void logSpecificProperties(ConfigurableEnvironment env) {
         logger.info("======= DEBUG ENV VARIABLES =======");
         String[] debugVars = {
-            "DATASOURCE_URL", "DATASOURCE_USERNAME", "DATASOURCE_PASSWORD",
-            "SERVER_PORT", "SPRING_PROFILES_ACTIVE", "APP_NAME",
-            "ARTEMIS_BROKER_URL", "ARTEMIS_USER", "ARTEMIS_PASSWORD",
-            "KEYCLOAK_ISSUER_URI", "KEYCLOAK_JWK_SET_URI",
-            "SPRING_SECURITY_LOG_LEVEL", "APP_QUEUE_NAME"
+                "DATASOURCE_URL", "DATASOURCE_USERNAME", "DATASOURCE_PASSWORD",
+                "SERVER_PORT", "SPRING_PROFILES_ACTIVE", "APP_NAME",
+                "ARTEMIS_BROKER_URL", "ARTEMIS_USER", "ARTEMIS_PASSWORD",
+                "KEYCLOAK_ISSUER_URI", "KEYCLOAK_JWK_SET_URI",
+                "SPRING_SECURITY_LOG_LEVEL", "APP_QUEUE_NAME"
         };
-        
+
         for (String var : debugVars) {
             String value = env.getProperty(var);
             if (value != null) {
-                // if (var.contains("PASSWORD")) {
-                //     logger.info("{} = ******", var);
-                // } else {
-                    logger.info("{} = {}", var, value);
-                // }
+                logger.info("{} = {}", var, value);
             } else {
                 logger.info("{} = (not set)", var);
             }

@@ -1,23 +1,16 @@
-namespace: dev
-appName: inventory #microservice name and deployment name
+# Inherit from globalConfig or define locally if not available
+globalConfig:
+  env: "dev"
+  registry: "localhost:5000"
+  imagePullPolicy: IfNotPresent
+# Application-specific configuration
 backend:
-  #component name
-  # main deployment
-  componentName: backend
-  replicaCount: 1 #replicas for frontned deployment
   image:
-    # image that the main microservice deployment uses to create pods
-    # registry: "localhost:5000"       # Docker registry, it's a global value across all charts
-    name: "inventory-service" # Image name
+    name: "inventory-service"
     tag: latest
     pullPolicy: IfNotPresent
-  service:
-    #Service that connects to main deployment pods
-    type: ClusterIP #Internally visible only
-    port: 8080 #port that the service exposes
-    targetPort: 8080 #Port the container receives traffic on
+
 database:
-  componentName: db
   name: inventorydb
   user: inventoryuser
   password: inventorypass
@@ -26,12 +19,12 @@ database:
   storage: 1Gi
 
 keycloak:
-  issuer: https://keycloak.local/realms/purchase-service-realm
-  service: "keycloak-service:8080" ## must match keycloak service naming in kubernetes manifests
+  service: keycloak-service
   realm: "purchase-service-realm"
+  issuer: https://keycloak.local/realms/purchase-service-realm
 
 artemis:
-  service: "artemis-service:61616" #must match artemis service naming
-  # Add the two missing values for the artemis key
   user: artemis
   password: artemis
+  service: artemis-service
+  port: 61616

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-db-service
+  namespace: {{.Values.globalConfig.env}}
+spec:
+  type: ClusterIP
+  selector:
+    app: keycloak
+    component: database
+    env: {{ .Values.globalConfig.env }}
+  ports:
+    - port: 5432
+      targetPort: 5432

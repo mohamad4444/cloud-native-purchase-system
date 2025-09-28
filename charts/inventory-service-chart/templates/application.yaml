@@ -1,44 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.appName }}
-  namespace: {{ .Values.namespace }}
+  name: inventory
+  namespace: {{.Values.globalConfig.env}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{.Values.appName}}
-      component: {{.Values.backend.componentName}}
+      app: inventory
+      component: backend
       env: {{.Values.globalConfig.env}}
   template:
     metadata:
       labels:
-        app: {{.Values.appName}}
-        component: {{.Values.backend.componentName}}
+        app: inventory
+        component: backend
         env: {{.Values.globalConfig.env}}
     spec:
       containers:
-        - name: {{ .Values.appName }}
-          image: "{{ .Values.globalConfig.registry}}{{.Values.frontend.image.name}}:{{ .Values.frontend.image.tag }}" 
-          imagePullPolicy: {{ default .Values.frontend.image.pullPolicy .Values.globalConfig.pullPolicy }} 
+        - name: inventory
+          image: "{{ .Values.globalConfig.registry }}{{ .Values.backend.image.name }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ default .Values.backend.image.pullPolicy .Values.globalConfig.pullPolicy }} 
           ports:
-            - containerPort: {{ .Values.backend.service.targetPort }}
+            - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: {{.Values.appName}}-config
+                name: inventory-config
             - secretRef:
-                name: {{.Values.appName}}-secret
+                name: inventory-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{.Values.appName}}-service
-  namespace: {{.Values.namespace}}
+  name: inventory-service
+  namespace: {{.Values.globalConfig.env}}
 spec:
   selector:
-    app: {{.Values.appName}}
-    component: {{.Values.backend.componentName}}
+    app: inventory
+    component: backend
     env: {{.Values.globalConfig.env}}
   ports:
-    - port: {{ .Values.backend.service.port  }}
-      targetPort: {{ .Values.backend.service.targetPort  }}
+    - port: 8080
+      targetPort: 8080

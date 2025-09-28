@@ -1,19 +1,21 @@
+#for reference actual values come from dev.yaml or staging.yaml
+globalConfig:
+  env: "dev"
+  registry: "localhost:5000"
+  pullPolicy: IfNotPresent
+
 replicaCount: 1
 image:
   name: "nginx-frontend"
   tag: latest
   pullPolicy: IfNotPresent
-service:
-  #Service that connects to main deployment pods
-  type: ClusterIP #Internally visible only
-  port: 80 #port that the service exposes
-  targetPort: 80 #Port the container receives traffic on
+
 config:
   #Configuration for config.js in frontend
   keycloak:
     url: "https://keycloak.local"
   api:
-    purchases: "purchase-api/purchases"
-    inventory: "inventory-api/inventory"
+    purchases: "https://frotnend.local/purchase-api/purchases"
+    inventory: "https://frotnend.local/inventory-api/inventory"
 ingress:
   enabled: false
