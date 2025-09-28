@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception ex) {
         // Build limited stack trace (first 2 lines)
-        SString limitedStack = getLimitedStackTrace(ex, 2);
+        String limitedStack = getLimitedStackTrace(ex, 2);
 
         // Log the exception with limited stacktrace
         log.error(limitedStack);

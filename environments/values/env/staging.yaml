@@ -1,6 +1,8 @@
 # values/prod.yaml
 globalConfig:
+  namespace: "staging"
   env: "staging"
+  profile: "staging"
   registry: "localhost:5000/"
   pullPolicy: IfNotPresent
 
@@ -23,7 +25,7 @@ keycloak:
     configs:
       proxyAddressForwarding: true
       proxyMode: edge
-      frontendUrl: https://keycloak.staging.example.com
+      frontendUrl: https://keycloak.local
 
   ingress:
     enabled: true

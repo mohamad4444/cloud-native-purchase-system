@@ -14,7 +14,7 @@ import java.util.Arrays;
  * PropertyLogger logs application properties and selected environment variables on startup
  * for debugging purposes.
  *
- * <p><b>WARNING:</b> This logs sensitive information such as passwords.
+ * WARNING: This logs sensitive information such as passwords.
  * It is only enabled for non-production profiles (e.g., dev, staging) and
  * is automatically skipped in production.
  */

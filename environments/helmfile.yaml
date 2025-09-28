@@ -68,7 +68,7 @@ releases:
 
 - name: frontend
   chart: ../charts/frontend-chart
-  namespace: dev
+  namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
   createNamespace: true
   labels:
     tier: ready
@@ -79,7 +79,7 @@ releases:
 
 - name: keycloak
   chart: ../charts/keycloak-chart
-  namespace: dev
+  namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
   createNamespace: true
   labels:
     tier: ready
@@ -90,7 +90,7 @@ releases:
 
 - name: message-broker
   chart: ../charts/message-broker-chart
-  namespace: dev
+  namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
   createNamespace: true
   labels:
     tier: ready
@@ -101,7 +101,18 @@ releases:
 
 - name: inventory-service
   chart: ../charts/inventory-service-chart
-  namespace: dev
+  namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
+  createNamespace: true
+  labels:
+    tier: dev-notready,prod-ready
+  values:
+  - values/env/env-magic.gotmpl
+  needs:
+  - cert-manager/cert-manager
+
+- name: monitoring-stack
+  chart: ../charts/monitoring-stack-chart
+  namespace: monitoring
   createNamespace: true
   labels:
     tier: dev-notready,prod-ready
@@ -138,8 +149,5 @@ releases:
   chart: grafana/alloy
   values:
   - ./values/charts/alloy-values.yaml
-  hooks:
-  - events: [ "presync" ]
-    showlogs: true
-    command: "kubectl"
-    args: [ "apply", "-f", "./values/charts/config.alloy.yaml", "-n", "monitoring" ]
+  needs:
+  - monitoring/monitoring-stack # contains 

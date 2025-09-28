@@ -59,65 +59,6 @@ data:
 
     // 2. PROCESS: Parse, filter, and transform the logs.
     loki.process "pod_logs" {
-      // This pipeline assumes logs are structured in JSON format, which is a
-      // common output for container runtimes like Docker or CRI-O.
-      // Example log line: {"log":"{\"level\":\"info\",\"msg\":\"User logged in\"}","stream":"stdout","time":"..."}
-
-      // Stage 1: Parse the outer JSON wrapper from the container runtime.
-      stage.json {
-        expressions = {
-          // Extract the actual log content into the 'log' key.
-          log = "log",
-          // Extract the timestamp into the 'time' key.
-          time = "time",
-        }
-      }
-
-      // Stage 2: Set the correct timestamp from the log entry itself.
-      // This is crucial for accurate log correlation.
-      stage.timestamp {
-        source = "time"
-        format = "RFC3339Nano"
-      }
-
-      // Stage 3: Parse the inner, application-level JSON string.
-      stage.json {
-        // Operate on the 'log' field extracted in the first stage.
-        source = "log"
-        expressions = {
-          // Extract the log level and message from the application's JSON.
-          level = "level",
-          msg   = "message",
-        }
-        // If the inner 'log' field isn't valid JSON, don't drop the line,
-        // just pass it through. This helps catch formatting errors.
-        drop_malformed = false
-      }
-
-      // Stage 4: Add dynamic labels from the parsed content.
-      // IMPORTANT: Only use low-cardinality fields for labels (e.g., level, app).
-      // High-cardinality fields like user IDs or trace IDs will harm Loki performance.
-      stage.labels {
-        values = {
-          // Promote the 'level' field to a Loki label for efficient querying.
-          level = "level",
-        }
-      }
-
-      // Stage 5: Filter out unwanted logs.
-      // This stage drops any log entry where the 'level' is 'debug'.
-      // This is a common way to reduce log volume and storage costs in production.
-      stage.drop {
-        source    = "level"
-        value     = "debug"
-      }
-
-      // Stage 6: Set the final output message.
-      // This makes the log in Grafana clean and human-readable, as the
-      // structured data is now in labels.
-      stage.output {
-        source = "msg"
-      }
 
       // Forward the processed logs to the final write component.
       forward_to = [loki.write.loki.receiver]

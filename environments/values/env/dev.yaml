@@ -1,7 +1,10 @@
 globalConfig:
-  env: "dev"
+  namespace: "dev"
+  env: "dev" #env
+  profile: "dev" # Spring profile
   registry: "localhost:5000/"
   pullPolicy: IfNotPresent
+
 frontend:
   image:
     pullPolicy: IfNotPresent
