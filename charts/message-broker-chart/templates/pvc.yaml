@@ -5,7 +5,7 @@ metadata:
   name: artemis-pvc
   namespace: {{ .Values.globalConfig.env }}
   labels:
-    app: artemis
+    microserviceName: artemis
     component: broker
     env: {{ .Values.globalConfig.env }}
 spec:

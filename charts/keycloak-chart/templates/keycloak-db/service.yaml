@@ -6,7 +6,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: keycloak
+    microserviceName: keycloak
     component: database
     env: {{ .Values.globalConfig.env }}
   ports:

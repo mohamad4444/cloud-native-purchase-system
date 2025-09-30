@@ -4,13 +4,13 @@ metadata:
   name: artemis-service
   namespace: {{ .Values.globalConfig.env }}
   labels:
-    app: artemis
+    microserviceName: artemis
     component: broker
     env: {{ .Values.globalConfig.env }}
 spec:
   type: {{ .Values.artemis.service.type }}
   selector:
-    app: artemis
+    microserviceName: artemis
     component: broker
     env: {{ .Values.globalConfig.env }}
   ports:

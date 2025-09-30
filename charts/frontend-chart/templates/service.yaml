@@ -9,6 +9,6 @@ spec:
     - port: 80
       targetPort: 80
   selector: # must match pod labels
-    app: frontend
+    microserviceName: frontend
     component: frontend
     env: {{ .Values.globalConfig.env }}

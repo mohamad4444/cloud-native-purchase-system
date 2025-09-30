@@ -7,13 +7,13 @@ spec:
   replicas: {{ .Values.auth.replicaCount }}
   selector:
     matchLabels:
-      app: keycloak
+      microserviceName: keycloak
       component: auth
       env: {{ .Values.globalConfig.env }}
   template:
     metadata:
       labels:
-        app: keycloak
+        microserviceName: keycloak
         component: auth
         env: {{ .Values.globalConfig.env }}
     spec:

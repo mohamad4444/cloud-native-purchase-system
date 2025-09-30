@@ -1,17 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-db
-  namespace: purchase-app
+  name: purchase-db
+  namespace: {{.Values.globalConfig.env}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-db
+      microserviceName: purchase
+      component: db
+      env: {{.Values.globalConfig.env}}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-db
+        microserviceName: purchase
+        component: db
+        env: {{.Values.globalConfig.env}}
     spec:
       containers:
         - name: postgres
@@ -26,7 +30,7 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-secret
+                  name: purchase-secret
                   key: DATASOURCE_PASSWORD
           volumeMounts:
             - name: postgres-data
@@ -34,16 +38,18 @@ spec:
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
+            claimName: purchase-db-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-db
-  namespace: purchase-app
+  name: purchase-db-service
+  namespace: {{.Values.globalConfig.env}}
 spec:
   selector:
-    app: {{ .Release.Name }}-db
+    microserviceName: purchase
+    component: db
+    env: {{.Values.globalConfig.env}}
   ports:
     - port: {{ .Values.database.port }}
       targetPort: {{ .Values.database.port }}
@@ -51,8 +57,8 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Release.Name }}-pvc
-  namespace: purchase-app
+  name: purchase-db-pvc
+  namespace: {{.Values.globalConfig.env}}
 spec:
   accessModes:
     - ReadWriteOnce

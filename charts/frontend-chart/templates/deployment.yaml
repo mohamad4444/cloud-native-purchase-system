@@ -9,13 +9,13 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels: # must match pod template
-      app: frontend
+      microserviceName: frontend
       component: frontend
       env: {{ .Values.globalConfig.env }}
   template:
     metadata:
       labels:
-        app: frontend
+        microserviceName: frontend
         component: frontend
         env: {{ .Values.globalConfig.env }}
     spec:

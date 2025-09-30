@@ -6,7 +6,6 @@ metadata:
   namespace: {{ .Values.globalConfig.env }}
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: my-ca-issuer
 spec:
@@ -24,7 +23,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: keycloak
+                name: keycloak-service
                 port:
                   number: {{ $.Values.auth.service.port }}
           {{- end }}

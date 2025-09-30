@@ -19,7 +19,7 @@ auth:
     proxyHeaders: xforwarded
     hostnameStrict: false
     proxyAddressForwarding: false
-    proxyMode: standalone
+    proxyMode: edge
     frontendUrl: http://localhost:8080
     httpEnabled: true
   admin:

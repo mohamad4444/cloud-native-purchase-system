@@ -5,9 +5,6 @@ metadata:
   namespace: monitoring
 data:
   config.alloy: |
-    // --- DISCOVERY AND TARGETING ---
-    // These components discover pod log files on the node.
-
     discovery.kubernetes "pods" {
       role = "pod"
     }
@@ -15,26 +12,21 @@ data:
     discovery.relabel "pod_logs" {
       targets = discovery.kubernetes.pods.targets
 
-      // Add the pod's namespace as a label.
       rule {
         source_labels = ["__meta_kubernetes_namespace"]
         target_label  = "namespace"
       }
 
-      // Add the pod's name as a label.
       rule {
         source_labels = ["__meta_kubernetes_pod_name"]
         target_label  = "pod"
       }
 
-      // Add the container name as a label.
       rule {
         source_labels = ["__meta_kubernetes_pod_container_name"]
         target_label  = "container"
       }
 
-      // This rule constructs the full path to the container's log file.
-      // This is a standard pattern for Kubernetes log file locations.
       rule {
         source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
         separator     = "/"
@@ -47,24 +39,11 @@ data:
       path_targets = discovery.relabel.pod_logs.output
     }
 
-    // --- LOGGING PIPELINE ---
-    // This defines a three-stage pipeline: source -> process -> write.
-
-    // 1. SOURCE: Read logs from the discovered files.
     loki.source.file "pod_logs" {
       targets    = local.file_match.pod_logs.targets
-      // Forward the raw log entries to the processing component.
-      forward_to = [loki.process.pod_logs.receiver]
-    }
-
-    // 2. PROCESS: Parse, filter, and transform the logs.
-    loki.process "pod_logs" {
-
-      // Forward the processed logs to the final write component.
       forward_to = [loki.write.loki.receiver]
     }
 
-    // 3. WRITE: Send the processed logs to Loki.
     loki.write "loki" {
       endpoint {
         url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"

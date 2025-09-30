@@ -1,38 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-app
-  namespace: purchase-app
+  name: purchase
+  namespace: {{.Values.globalConfig.env}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-app
+      microserviceName: purchase
+      component: backend
+      env: {{.Values.globalConfig.env}}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-app
+        microserviceName: purchase
+        component: backend
+        env: {{.Values.globalConfig.env}}
     spec:
       containers:
-        - name: purchase-app
-          image: {{ .Values.app.image }}
-          imagePullPolicy: Always
+        - name: purchase
+          image: "{{ .Values.globalConfig.registry }}{{ .Values.backend.image.name }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ default .Values.backend.image.pullPolicy .Values.globalConfig.pullPolicy }} 
           ports:
-            - containerPort: {{ .Values.app.port }}
+            - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: {{ .Release.Name }}-config
+                name: purchase-config
             - secretRef:
-                name: {{ .Release.Name }}-secret
+                name: purchase-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-app
-  namespace: purchase-app
+  name: purchase-service
+  namespace: {{.Values.globalConfig.env}}
 spec:
   selector:
-    app: {{ .Release.Name }}-app
+    microserviceName: purchase
+    component: backend
+    env: {{.Values.globalConfig.env}}
   ports:
-    - port: {{ .Values.app.port }}
-      targetPort: {{ .Values.app.port }}
+    - port: 8080
+      targetPort: 8080

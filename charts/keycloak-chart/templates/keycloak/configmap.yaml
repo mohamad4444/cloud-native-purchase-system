@@ -10,3 +10,5 @@ data:
   KEYCLOAK_FRONTEND_URL: "{{ .Values.auth.configs.frontendUrl }}"
   KC_PROXY: "{{ .Values.auth.configs.proxyMode }}"
   KC_HTTP_ENABLED: "{{ .Values.auth.configs.httpEnabled }}"
+  KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+  KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"

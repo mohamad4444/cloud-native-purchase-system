@@ -6,7 +6,7 @@ metadata:
 spec:
   type: {{ .Values.auth.service.type }}
   selector:
-    app: keycloak
+    microserviceName: keycloak
     component: auth
     env: {{ .Values.globalConfig.env }}
   ports:

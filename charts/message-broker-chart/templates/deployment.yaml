@@ -4,20 +4,20 @@ metadata:
   name: artemis-broker
   namespace: {{ .Values.globalConfig.env }}
   labels:
-    app: artemis
+    microserviceName: artemis
     component: broker
     env: {{ .Values.globalConfig.env }}
 spec:
   replicas: {{ .Values.artemis.replicas }}
   selector:
     matchLabels:
-      app: artemis
+      microserviceName: artemis
       component: broker
       env: {{ .Values.globalConfig.env }}
   template:
     metadata:
       labels:
-        app: artemis
+        microserviceName: artemis
         component: broker
         env: {{ .Values.globalConfig.env }}
     spec:

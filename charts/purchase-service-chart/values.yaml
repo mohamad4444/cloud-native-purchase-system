@@ -1,10 +1,14 @@
-app:
-  name: purchase-service
-  port: 8080
-  # Add the two missing values for the app key
-  securityLogLevel: INFO
-  queueName: my-queue
-  image: "localhost:5000/purchase-service:latest"
+# Inherit from globalConfig or define locally if not available
+globalConfig:
+  env: "dev"
+  registry: "localhost:5000"
+  imagePullPolicy: IfNotPresent
+# Application-specific configuration
+backend:
+  image:
+    name: "purchase-service"
+    tag: latest
+    pullPolicy: IfNotPresent
 
 database:
   name: purchasedb
@@ -15,11 +19,12 @@ database:
   storage: 1Gi
 
 keycloak:
-  service: "keycloak:8080"
+  service: keycloak-service
   realm: "purchase-service-realm"
+  issuer: https://keycloak.local/realms/purchase-service-realm
 
 artemis:
-  service: "message-broker-service:61616"
-  # Add the two missing values for the artemis key
   user: artemis
   password: artemis
+  service: artemis-service
+  port: 61616

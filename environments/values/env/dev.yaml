@@ -1,7 +1,8 @@
+# values/prod.yaml
 globalConfig:
   namespace: "dev"
-  env: "dev" #env
-  profile: "dev" # Spring profile
+  env: "dev"
+  profile: "dev"
   registry: "localhost:5000/"
   pullPolicy: IfNotPresent
 
@@ -10,10 +11,12 @@ frontend:
     pullPolicy: IfNotPresent
   config:
     keycloak:
-      url: "https://keycloak.local"
+      url: "http://localhost:8080"
     api:
-      purchases: "purchase-api/purchases"
-      inventory: "inventory-api/inventory"
+      purchases: "http://localhost:8001/purchases"
+      inventory: "http://localhost:8002/inventory"
+  ingress:
+    enabled: false
 keycloak:
   auth:
     configs:
