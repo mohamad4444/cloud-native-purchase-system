@@ -1,11 +1,10 @@
 # values/prod.yaml
 globalConfig:
-  namespace: "staging"
-  env: "staging"
-  profile: "staging"
-  registry: "localhost:5000/"
-  pullPolicy: IfNotPresent
-
+  namespace: "staging" #used to set namespace of all charts
+  env: "staging" #used to set labels
+  profile: "staging" #used in spring services
+  registry: "localhost:5000/" #used to set registry of all charts
+  pullPolicy: Always #used to set pullPolicy for all images in all charts, takes presedence over specific image pullPolicy
 frontend:
   image:
     pullPolicy: IfNotPresent

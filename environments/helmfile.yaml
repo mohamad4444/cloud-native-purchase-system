@@ -32,6 +32,7 @@ releases:
   keyring: ./cert-manager-keyring-2021-09-20-1020CF3C033D4F35BAE1C19E1226061C665DF13E.gpg
   labels:
     tier: ready
+    environment: staging,dev
   values:
   - crds:
       enabled: true
@@ -42,6 +43,7 @@ releases:
   chart: ../charts/ca-issuer
   labels:
     tier: ready
+    environment: staging,dev
   needs:
   - cert-manager/cert-manager
 
@@ -51,6 +53,7 @@ releases:
   chart: ../charts/gitlab-runner-sa
   labels:
     tier: ready
+    environment: staging,dev
   needs:
   - cert-manager/cert-manager
 
@@ -61,6 +64,7 @@ releases:
   createNamespace: true
   labels:
     tier: ready
+    environment: staging
   values:
   - values/charts/runner.yaml
   needs:
@@ -72,6 +76,7 @@ releases:
   createNamespace: true
   labels:
     tier: ready
+    environment: staging,dev
   values:
   - values/env/env-magic.gotmpl
   needs:
@@ -83,70 +88,75 @@ releases:
   createNamespace: true
   labels:
     tier: ready
+    environment: staging,dev
   values:
   - values/env/env-magic.gotmpl
   needs:
   - cert-manager/cert-manager
-
 - name: message-broker
   chart: ../charts/message-broker-chart
   namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
   createNamespace: true
   labels:
     tier: ready
+    environment: staging,dev
   values:
   - values/env/env-magic.gotmpl
-  needs:
-  - cert-manager/cert-manager
 
 - name: inventory-service
   chart: ../charts/inventory-service-chart
   namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
   createNamespace: true
   labels:
-    tier: dev-notready,prod-ready
+    tier: ready
+    environment: staging,dev
   values:
   - values/env/env-magic.gotmpl
-  needs:
-  - cert-manager/cert-manager
 
 - name: monitoring-stack
   chart: ../charts/monitoring-stack-chart
   namespace: monitoring
   createNamespace: true
   labels:
-    tier: dev-notready,prod-ready
+    tier: ready
+    environment: staging,dev
   values:
   - values/env/env-magic.gotmpl
-  needs:
-  - cert-manager/cert-manager
 
 - name: purchase-service
   chart: ../charts/purchase-service-chart
-  namespace: dev
+  namespace: '{{ .Environment.Values.globalConfig.namespace | default "dev" }}'
   createNamespace: true
   labels:
-    tier: dev-notready,prod-ready
+    tier: ready
+    environment: staging,dev
   values:
   - values/env/env-magic.gotmpl
-  needs:
-  - cert-manager/cert-manager
 
 - name: loki
   namespace: monitoring
   chart: grafana/loki
   values:
   - ./values/charts/loki-values.yml
+  labels:
+    tier: ready
+    environment: staging,dev
 
 - name: grafana
   namespace: monitoring
   chart: grafana/grafana
   values:
   - ./values/charts/grafana-values.yml
+  labels:
+    tier: ready
+    environment: staging,dev
 
 - name: alloy-logs
   namespace: monitoring
   chart: grafana/alloy
+  labels:
+    tier: ready
+    environment: staging,dev
   values:
   - ./values/charts/alloy-values.yaml
   needs:

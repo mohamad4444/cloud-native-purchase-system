@@ -2,7 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: inventory
-  namespace: {{.Values.globalConfig.env}}
+  namespace: {{ .Values.globalConfig.namespace }}
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: 1
   selector:
@@ -33,7 +35,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: inventory-service
-  namespace: {{.Values.globalConfig.env}}
+  namespace: {{ .Values.globalConfig.namespace }}
 spec:
   selector:
     microserviceName: inventory

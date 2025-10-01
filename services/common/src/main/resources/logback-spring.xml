@@ -35,18 +35,24 @@
             </fieldNames>
         </encoder>
     </appender>
-    
+
     <!-- Development: Human-readable logs -->
     <springProfile name="dev,local">
         <root level="DEBUG">  <!-- Changed to DEBUG for highest logging -->
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
 
     <!-- Staging: JSON logs -->
     <springProfile name="staging">
+        <logger name="org.springframework" level="INFO" additivity="false">
+            <appender-ref ref="JSON_CONSOLE" />
+        </logger>
+        <logger name="org.hibernate" level="INFO" additivity="false">
+            <appender-ref ref="JSON_CONSOLE" />
+        </logger>
         <root level="DEBUG">  <!-- Changed to DEBUG for highest logging -->
-            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="JSON_CONSOLE" />
         </root>
     </springProfile>
 </configuration>

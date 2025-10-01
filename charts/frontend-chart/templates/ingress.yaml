@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-frontend
-  namespace: {{ .Values.globalConfig.env }} # same as Certificate
+  namespace: {{ .Values.globalConfig.namespace }} # same as Certificate
   annotations:
     cert-manager.io/cluster-issuer: my-ca-issuer
     nginx.ingress.kubernetes.io/ssl-redirect: "true"

@@ -13,7 +13,7 @@ nohup kubectl port-forward -n kube-system service/registry 5000:80 > portforward
 
 #On every service change
 docker buildx bake builder-common --push
-docker buildx bake --push
+docker buildx bake application-images --push
 #curl -s http://localhost:5000/v2/_catalog
 
 #Certification authority and manager
@@ -28,3 +28,5 @@ kubectl create namespace dev
 kubectl create namespace monitoring
 kubectl create namespace staging
 helmfile -e staging --file ./environments sync
+helmfile -e dev --file ./environments sync
+

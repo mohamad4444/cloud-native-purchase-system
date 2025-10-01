@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
-  namespace: {{ .Values.globalConfig.env }}
+  namespace: {{ .Values.globalConfig.namespace }}
 data:
   config.js: |
     // Auto-generated configuration - Do not edit manually
@@ -10,9 +10,9 @@ data:
     
     export const KEYCLOAK_CONFIG = {
       url: "{{ .Values.config.keycloak.url }}",
-      realm: "purchase-service-realm",
-      clientId: "web-frontend-client",
-      scope: "openid profile email offline_access"
+      realm: "{{ .Values.config.keycloak.realm }}",
+      clientId: "{{ .Values.config.keycloak.clientId }}",
+      scope: "{{ .Values.config.keycloak.scope }}"
     };
 
     export const API_ENDPOINTS = {

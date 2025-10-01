@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,8 +34,13 @@ public class SecurityConfig {
         log.info("Setting up security filter chain");
 
         http
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {}) // link your CorsConfigurationSource bean
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/actuator/prometheus").permitAll()
+                        // Permit OPTIONS preflight for your APIs
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/inventory-api/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/purchase-api/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

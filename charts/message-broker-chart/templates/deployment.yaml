@@ -2,11 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: artemis-broker
-  namespace: {{ .Values.globalConfig.env }}
+  namespace: {{ .Values.globalConfig.namespace }}
   labels:
     microserviceName: artemis
     component: broker
     env: {{ .Values.globalConfig.env }}
+  annotations:
+    reloader.stakater.com/auto: "true"
 spec:
   replicas: {{ .Values.artemis.replicas }}
   selector:

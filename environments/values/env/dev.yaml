@@ -1,32 +1,31 @@
-# values/prod.yaml
 globalConfig:
   namespace: "dev"
-  env: "staging"
+  env: "dev"
   profile: "dev"
   registry: "localhost:5000/"
-  pullPolicy: IfNotPresent
-
+  pullPolicy: Always
 frontend:
   image:
     pullPolicy: IfNotPresent
   config:
     keycloak:
-      url: "https://keycloak.local"
+      url: "http://localhost:8080"
     api:
-      purchases: "purchase-api/purchases"
-      inventory: "inventory-api/inventory"
+      purchases: "http://localhost:8001/purchase-api/purchases"
+      inventory: "http://localhost:8002/inventory-api/inventory"
   ingress:
-    enabled: true
+    enabled: false
 keycloak:
   auth:
     configs:
-      proxyAddressForwarding: true
-      proxyMode: edge
-      frontendUrl: https://keycloak.local
-
+      proxyAddressForwarding: false
+      proxyMode: standalone
+      frontendUrl: http://localhost:8080
   ingress:
-    enabled: true
-    host: keycloak.local
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    enabled: false
+inventory-service:
+  keycloak:
+    issuer: http://localhost:8080/realms/purchase-service-realm
+purchase-service:
+  keycloak:
+    issuer: http://localhost:8080/realms/purchase-service-realm

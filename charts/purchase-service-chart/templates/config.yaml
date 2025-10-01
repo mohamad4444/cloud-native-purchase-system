@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: purchase-config
-  namespace: {{ .Values.globalConfig.env }}
+  namespace: {{ .Values.globalConfig.namespace }}
 data:
   # App / Server
   APP_NAME: "purchase"
@@ -25,7 +25,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: purchase-secret
-  namespace: {{ .Values.globalConfig.env }}
+  namespace: {{ .Values.globalConfig.namespace }}
 type: Opaque
 data:
   DATASOURCE_PASSWORD: {{ .Values.database.password | b64enc | quote }}

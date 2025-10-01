@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: keycloak-db-pvc
-  namespace: {{ .Values.globalConfig.env }}
+  namespace: {{ .Values.globalConfig.namespace }}
 spec:
   accessModes:
     - ReadWriteOnce

@@ -2,8 +2,9 @@
 globalConfig:
   env: staging
   namespace: staging
-  registry: "localhost:5000"
-  pullPolicy: IfNotPresent
+  profile: "staging" #used in spring services
+  registry: "localhost:5000/"
+  pullPolicy: IfNotPresent #takes presedence over image.pullPolicy
 
 replicaCount: 1
 image:
@@ -19,11 +20,5 @@ config:
   api:
     purchases: "https://frotnend.local/purchase-api/purchases"
     inventory: "https://frotnend.local/inventory-api/inventory"
-config:
-  #Configuration for config.js in frontend
-  keycloak:
-    
-  api:
-
 ingress:
   enabled: false
