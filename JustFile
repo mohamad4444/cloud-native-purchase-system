@@ -11,7 +11,7 @@ build-and-push:
 # Deploy Helm charts using Helmfile
 deploy:
     @echo "Deploying Helm charts with Helmfile..."
-    helmfile --file ./environments sync
+    helmfile --file ./environments -e staging sync
 
 # Build images and deploy in one go
 release: build-and-push deploy

@@ -19,7 +19,7 @@ data:
 
   # Keycloak / OAuth2
   KEYCLOAK_ISSUER_URI: "{{ .Values.keycloak.issuer }}"
-  KEYCLOAK_JWK_SET_URI: "http://{{ .Values.keycloak.service }}/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/certs"
+  KEYCLOAK_JWK_SET_URI: "http://{{ .Values.keycloak.service }}:8080/realms/{{ .Values.keycloak.realm }}/protocol/openid-connect/certs"
 ---
 apiVersion: v1
 kind: Secret

@@ -1,7 +1,7 @@
 # values/prod.yaml
 globalConfig:
   namespace: "dev"
-  env: "dev"
+  env: "staging"
   profile: "dev"
   registry: "localhost:5000/"
   pullPolicy: IfNotPresent
@@ -11,17 +11,22 @@ frontend:
     pullPolicy: IfNotPresent
   config:
     keycloak:
-      url: "http://localhost:8080"
+      url: "https://keycloak.local"
     api:
-      purchases: "http://localhost:8001/purchases"
-      inventory: "http://localhost:8002/inventory"
+      purchases: "purchase-api/purchases"
+      inventory: "inventory-api/inventory"
   ingress:
-    enabled: false
+    enabled: true
 keycloak:
   auth:
     configs:
-      proxyAddressForwarding: false
-      proxyMode: standalone
-      frontendUrl: http://localhost:8080
+      proxyAddressForwarding: true
+      proxyMode: edge
+      frontendUrl: https://keycloak.local
+
   ingress:
-    enabled: false
+    enabled: true
+    host: keycloak.local
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"

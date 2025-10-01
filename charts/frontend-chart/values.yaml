@@ -1,6 +1,7 @@
 #for reference actual values come from dev.yaml or staging.yaml
 globalConfig:
-  env: "dev"
+  env: staging
+  namespace: staging
   registry: "localhost:5000"
   pullPolicy: IfNotPresent
 
@@ -9,13 +10,20 @@ image:
   name: "nginx-frontend"
   tag: latest
   pullPolicy: IfNotPresent
-
 config:
-  #Configuration for config.js in frontend
   keycloak:
     url: "https://keycloak.local"
+    realm: "purchase-service-realm"
+    clientId: "web-frontend-client"
+    scope: "openid profile email offline_access"
   api:
     purchases: "https://frotnend.local/purchase-api/purchases"
     inventory: "https://frotnend.local/inventory-api/inventory"
+config:
+  #Configuration for config.js in frontend
+  keycloak:
+    
+  api:
+
 ingress:
   enabled: false
