@@ -11,6 +11,8 @@ repositories:
   url: https://charts.gitlab.io
 - name: grafana
   url: https://grafana.github.io/helm-charts
+- name: stakater
+  url: https://stakater.github.io/stakater-charts
 ---
 environments:
   dev:
@@ -161,3 +163,9 @@ releases:
   - ./values/charts/alloy-values.yaml
   needs:
   - monitoring/monitoring-stack # contains 
+
+- name: reloader
+  namespace: kube-system # or another namespace you prefer
+  chart: stakater/reloader
+  version: 1.0.59 # optional: pin a version
+  installed: true

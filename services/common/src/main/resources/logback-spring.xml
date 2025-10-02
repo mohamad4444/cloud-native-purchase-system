@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Human-readable console appender for development -->
+
+    <!-- ==============================
+         Human-readable console appender for development
+         ============================== -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%ex</pattern>
         </encoder>
     </appender>
 
-    <!-- JSON appender for staging -->
+    <!-- ==============================
+         JSON console appender for staging
+         ============================== -->
     <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <!-- Fixed app name -->
             <customFields>{"app":"${APP_NAME}"}</customFields>
             <flattenThrowable>true</flattenThrowable>
             <includeCallerData>true</includeCallerData>
@@ -20,9 +24,6 @@
             <includeMdcKeyName>class</includeMdcKeyName>
             <includeMdcKeyName>userId</includeMdcKeyName>
             <includeMdcKeyName>username</includeMdcKeyName>
-
-            <!-- Optional: if you want ALL MDC keys, use <includeMdc>true</includeMdc> instead -->
-            <!-- <includeMdc>true</includeMdc> -->
 
             <fieldNames>
                 <timestamp>timestamp</timestamp>
@@ -36,23 +37,43 @@
         </encoder>
     </appender>
 
-    <!-- Development: Human-readable logs -->
+    <!-- ==============================
+         Development / Local Profile
+         ============================== -->
     <springProfile name="dev,local">
-        <root level="DEBUG">  <!-- Changed to DEBUG for highest logging -->
+        <logger name="swtp.clouddemo" level="DEBUG" additivity="false">
+            <appender-ref ref="JSON_CONSOLE" />
+        </logger>
+        <root level="WARN">
             <appender-ref ref="CONSOLE" />
         </root>
     </springProfile>
 
-    <!-- Staging: JSON logs -->
+    <!-- ==============================
+         Staging Profile: JSON only
+         ============================== -->
     <springProfile name="staging">
-        <logger name="org.springframework" level="INFO" additivity="false">
+
+        <!-- Your application packages: DEBUG -->
+        <logger name="swtp.clouddemo" level="DEBUG" additivity="false">
             <appender-ref ref="JSON_CONSOLE" />
         </logger>
-        <logger name="org.hibernate" level="INFO" additivity="false">
+
+        <!-- Spring / Hibernate / other libs: WARN -->
+        <logger name="org.springframework" level="WARN" additivity="false">
             <appender-ref ref="JSON_CONSOLE" />
         </logger>
-        <root level="DEBUG">  <!-- Changed to DEBUG for highest logging -->
+        <logger name="org.hibernate" level="WARN" additivity="false">
+            <appender-ref ref="JSON_CONSOLE" />
+        </logger>
+        <logger name="org.apache" level="WARN" additivity="false">
+            <appender-ref ref="JSON_CONSOLE" />
+        </logger>
+
+        <!-- Root: WARN for everything else -->
+        <root level="WARN">
             <appender-ref ref="JSON_CONSOLE" />
         </root>
     </springProfile>
+
 </configuration>

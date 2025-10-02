@@ -33,6 +33,20 @@ data:
         target_label  = "__path__"
         replacement   = "/var/log/pods/*$1/$2/*.log"
       }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_microserviceName"]
+        target_label  = "microserviceName"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_component"]
+        target_label  = "component"
+      }
+
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_env"]
+        target_label  = "env"
+      }
     }
 
     local.file_match "pod_logs" {

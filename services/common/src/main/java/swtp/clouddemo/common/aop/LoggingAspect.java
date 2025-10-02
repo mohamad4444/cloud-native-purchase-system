@@ -36,29 +36,34 @@ public class LoggingAspect {
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getSignature().getDeclaringTypeName();
 
-        // Probably redundant as includeCallerData includes them
+        // Add method context to MDC for structured logging
         MDC.put("method", methodName);
         MDC.put("class", className);
-
-        // set earlier in filters/interceptors
-        // String userId = MDC.get("userId");      
-        // String username = MDC.get("username"); 
 
         long start = System.nanoTime();
         boolean success = false;
 
-        log.debug("Method entry");
+        // Log method entry with context
+        log.debug("Method Entered: {}.{}", className, methodName);
 
         try {
             Object result = joinPoint.proceed();
             success = true;
-
-            log.debug("Method exit");
+            
+            // Log successful method exit with duration
+            long durationMs = (System.nanoTime() - start) / 1_000_000;
+            log.debug("Method Exited Successfully: {}.{} [{}ms]", 
+                     className, methodName, durationMs);
+            
             return result;
 
         } catch (Exception ex) {
+            // Log method exception with error details
+            long durationMs = (System.nanoTime() - start) / 1_000_000;
+            log.error("Method Exited with Exception: {}.{} [{}ms] - {}", 
+                     className, methodName, durationMs, ex.getMessage(), ex);
+            
             recordFailureMetrics(className, methodName, ex.getClass().getSimpleName());
-            log.error("Method exception: {}", ex.getMessage(), ex);
             throw ex;
 
         } finally {
@@ -67,11 +72,13 @@ public class LoggingAspect {
 
             recordExecutionMetrics(className, methodName, duration, success);
 
+            // Warn about slow methods
             if (durationMs > SLOW_METHOD_THRESHOLD_MS) {
-                log.warn("Slow method detected ({} ms)", durationMs);
+                log.warn("Slow Method Detected: {}.{} took {}ms", 
+                         className, methodName, durationMs);
             }
 
-            // Clean MDC (prevent leaks across threads in pools)
+            // Clean MDC to prevent thread pool contamination
             MDC.remove("method");
             MDC.remove("class");
         }

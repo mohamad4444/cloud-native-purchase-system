@@ -42,5 +42,5 @@ deploy_helm:
   - echo "=== Helmfile Version ==="
   - helmfile --version
   - echo "=== Syncing Helmfile ==="
-  - helmfile --file ./environments sync
+  - helmfile --file ./environments -e staging sync
   - echo "=== Deploy Completed ==="
