@@ -16,11 +16,11 @@ repositories:
 ---
 environments:
   dev:
-    kubeContext: minikube
+    # kubeContext: minikube
     values:
     - values/env/dev.yaml
   staging:
-    kubeContext: minikube
+    # kubeContext: minikube
     values:
     - values/env/staging.yaml
 ---
