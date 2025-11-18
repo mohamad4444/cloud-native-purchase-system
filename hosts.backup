@@ -1,0 +1,16 @@
+127.0.0.1   localhost
+::1         localhost
+192.168.49.2 purchase-system.local
+192.168.49.2 keycloak.purchase-system.local
+192.168.49.2 api.purchase-system.local
+192.168.49.2 grafana.purchase-system.local
+192.168.49.2 prometheus.purchase-system.local
+# Added by Docker Desktop
+# To allow the same kube context to work on the host and the container:
+127.0.0.1	kubernetes.docker.internal
+# End of section
+192.168.49.2 frontend.com dashboard.com keycloak.dev
+192.168.49.2 keycloak.home
+192.168.49.2 keycloak.localhost
+192.168.58.2 frontend.localhost
+127.0.0.1 registry.test
