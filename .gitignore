@@ -292,3 +292,4 @@ yarn-error.log
 /data/devdb.mv.db
 services/dind/helm
 services/dind/helmfile
+helmfile
