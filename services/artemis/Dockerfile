@@ -1,4 +1,5 @@
-FROM apache/activemq-artemis:2.42.0-alpine
+ARG ARTEMIS_VERSION=latest
+FROM apache/activemq-artemis:${ARTEMIS_VERSION}
 
 ENV ARTEMIS_USER=artemis
 ENV ARTEMIS_PASSWORD=artemis

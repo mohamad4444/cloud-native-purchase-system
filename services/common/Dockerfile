@@ -1,4 +1,5 @@
-FROM maven:3.9.9-eclipse-temurin-21 AS builder-common
+ARG MAVEN_VERSION=latest
+FROM maven:${MAVEN_VERSION} AS builder-common
 WORKDIR /app
 
 # Copy from project root relative to build context

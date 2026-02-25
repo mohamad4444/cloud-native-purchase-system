@@ -1,5 +1,6 @@
 # Use pre-built builder image with common dependencies
 ARG REGISTRY=localhost:5000/
+ARG JRE_VERSION=latest
 FROM ${REGISTRY}builder-common:latest AS builder-base
 # # ---------- BUILD STAGE ----------
 # FROM maven:3.9.9-eclipse-temurin-21 AS builder
@@ -17,7 +18,8 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ---------- RUNTIME STAGE ----------
-FROM eclipse-temurin:21-jre
+ARG JRE_VERSION
+FROM eclipse-temurin:${JRE_VERSION}
 
 WORKDIR /app
 

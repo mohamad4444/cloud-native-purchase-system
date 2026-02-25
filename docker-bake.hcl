@@ -5,11 +5,23 @@ variable "REGISTRY" {
 variable "TAG" {
   default = "latest"
 }
+
+# Image version variables loaded from .env
+variable "ARTEMIS_VERSION" {}
+variable "KEYCLOAK_VERSION" {}
+variable "NGINX_VERSION" {}
+variable "MAVEN_VERSION" {}
+variable "JRE_VERSION" {}
+variable "DOCKER_DIND_VERSION" {}
+variable "HELM_VERSION" {}
+variable "HELMFILE_VERSION" {}
+
 group "base-images" {
   targets = [
     "builder-common"
   ]
 }
+
 group "application-images" {
   targets = [
     "nginx-frontend",
@@ -38,7 +50,9 @@ target "builder-common" {
   tags       = ["${REGISTRY}builder-common:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
-
+  args = {
+    MAVEN_VERSION = "${MAVEN_VERSION}"
+  }
 }
 
 target "inventory-service" {
@@ -48,7 +62,8 @@ target "inventory-service" {
   platforms  = ["linux/amd64"]
   push       = true
   args = {
-    REGISTRY = "${REGISTRY}"
+    REGISTRY    = "${REGISTRY}"
+    JRE_VERSION = "${JRE_VERSION}"
   }
   inherits   = ["builder-common"]
 }
@@ -60,7 +75,8 @@ target "purchase-service" {
   platforms  = ["linux/amd64"]
   push       = true
   args = {
-    REGISTRY = "${REGISTRY}"
+    REGISTRY    = "${REGISTRY}"
+    JRE_VERSION = "${JRE_VERSION}"
   }
   inherits   = ["builder-common"]
 }
@@ -71,6 +87,9 @@ target "nginx-frontend" {
   tags       = ["${REGISTRY}nginx-frontend:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
+  args = {
+    NGINX_VERSION = "${NGINX_VERSION}"
+  }
 }
 
 target "artemis" {
@@ -79,6 +98,9 @@ target "artemis" {
   tags       = ["${REGISTRY}artemis:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
+  args = {
+    ARTEMIS_VERSION = "${ARTEMIS_VERSION}"
+  }
 }
 
 target "keycloak" {
@@ -87,6 +109,9 @@ target "keycloak" {
   tags       = ["${REGISTRY}keycloak:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
+  args = {
+    KEYCLOAK_VERSION = "${KEYCLOAK_VERSION}"
+  }
 }
 
 target "dind" {
@@ -95,4 +120,9 @@ target "dind" {
   tags       = ["${REGISTRY}dind:${TAG}"]
   platforms  = ["linux/amd64"]
   push       = true
+  args = {
+    DOCKER_DIND_VERSION = "${DOCKER_DIND_VERSION}"
+    HELM_VERSION        = "${HELM_VERSION}"
+    HELMFILE_VERSION    = "${HELMFILE_VERSION}"
+  }
 }
