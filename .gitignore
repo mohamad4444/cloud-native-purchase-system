@@ -7,8 +7,12 @@
 !**/artemis-data/etc-override/
 !**/artemis-data/etc-override/**
 **/docker/volumes/*
-
-
+**/helmfile
+**/helm
+/data/devdb.mv.db
+services/dind/helm
+services/dind/helmfile
+helmfile
 
 
 
@@ -289,7 +293,4 @@ yarn-error.log
 # End of https://www.toptal.com/developers/gitignore/api/react,angular,vue,vuejs,intellij,eclipse,java
 
 
-/data/devdb.mv.db
-services/dind/helm
-services/dind/helmfile
-helmfile
+

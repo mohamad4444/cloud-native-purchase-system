@@ -15,6 +15,9 @@ default: release
 # Build & Deploy
 # ─────────────────────────────────────────────
 
+include .env
+export
+
 ## Build and push Docker images using Buildx
 build-and-push:
 	@echo "Building and pushing Docker images..."
