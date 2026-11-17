@@ -44,3 +44,25 @@ deploy_helm:
   - echo "=== Syncing Helmfile ==="
   - helmfile --file ./environments -e staging sync
   - echo "=== Deploy Completed ==="
+
+# Validate the Markdown documentation independently of application deployment.
+docs-build:
+  stage: test
+  image: python:3.13-slim
+  tags:
+  - kubernetes
+  script:
+  - python -m pip install -r requirements-docs.txt
+  - zensical build --strict
+  artifacts:
+    paths:
+    - site/
+    expire_in: 1 week
+  rules:
+  - changes:
+    - docs/**/*
+    - zensical.toml
+    - requirements-docs.txt
+    - README.md
+    - CONTRIBUTING.md
+    - .gitlab-ci.yml
