@@ -1,0 +1,31 @@
+# Cloud Native Purchase System
+
+This project explores how a small purchase application fits together across application code, authentication, messaging, Kubernetes, and observability. It is built around two Java services and a static browser client, with infrastructure kept beside the code.
+
+## Choose a starting point
+
+| Your goal | Read next |
+| --- | --- |
+| Run the project for the first time | [Prerequisites](getting-started/prerequisites.md), then [local Kubernetes](tutorials/local-kubernetes.md) |
+| See the complete business flow | [Make your first purchase](tutorials/first-purchase.md) |
+| Understand the design | [Architecture](concepts/architecture.md), [authentication](concepts/authentication.md), and [messaging](concepts/messaging.md) |
+| Understand the deployment files | [Kubernetes and Helm](concepts/kubernetes-and-helm.md) |
+| Follow a log from Java to Grafana | [Grafana Alloy and logging](monitoring-and-logging.md) |
+| Change or repair something | [Development](guides/development.md) and [troubleshooting](guides/troubleshooting.md) |
+| Look up a value or endpoint | [Configuration](reference/configuration.md) and [HTTP API](reference/api.md) |
+
+Tutorials lead to an observable result. Concept pages explain why the pieces exist. Guides cover a specific task, and reference pages describe the checked-in interfaces and configuration.
+
+## What runs
+
+The Nginx frontend calls the Purchase and Inventory services. Each service owns a PostgreSQL database. Keycloak issues access tokens; ActiveMQ Artemis carries purchase requests and results. Kubernetes runs the workloads, Helm renders their manifests, and Helmfile coordinates releases. Alloy reads container logs, Loki stores them, and Grafana lets you search them.
+
+The Spring services expose Prometheus metrics, but Helmfile currently deploys no Prometheus server. Promtail belongs to earlier project context; the maintained Kubernetes logging configuration uses Alloy.
+
+## Scope and history
+
+The initial implementation developed over **three months**, with the move from Docker Compose to Kubernetes happening **only in the final month**. The [project history](project-history.md) explains the learning process, documentation study, use of ChatGPT, and the later use of Codex for these docs.
+
+Kubernetes is the maintained deployment. The Compose version remains available at `Docker-Compsoe-Version` (the tag's original spelling). These guides describe a local learning system, including its [known setup limitations](guides/troubleshooting.md), rather than a verified production deployment.
+
+To edit, preview, or publish this site, see [contributing to the docs](contributing.md).

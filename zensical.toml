@@ -1,0 +1,67 @@
+[project]
+site_name = "Cloud Native Purchase System"
+site_description = "Learn the purchase flow, Kubernetes deployment, and Grafana Alloy log pipeline."
+site_author = "Mohammad Mahamid"
+repo_url = "https://github.com/mohamad4444/cloud-native-purchase-system"
+repo_name = "cloud-native-purchase-system"
+edit_uri = "edit/develop/docs/"
+docs_dir = "docs"
+site_dir = "site"
+nav = [
+  { "Start here" = [
+    { "Overview" = "index.md" },
+    { "Prerequisites" = "getting-started/prerequisites.md" },
+    { "Project history" = "project-history.md" },
+  ] },
+  { "Tutorials" = [
+    { "Run on local Kubernetes" = "tutorials/local-kubernetes.md" },
+    { "Make your first purchase" = "tutorials/first-purchase.md" },
+  ] },
+  { "Concepts" = [
+    { "System architecture" = "concepts/architecture.md" },
+    { "Kubernetes, Helm, and Helmfile" = "concepts/kubernetes-and-helm.md" },
+    { "Authentication and roles" = "concepts/authentication.md" },
+    { "Asynchronous purchases" = "concepts/messaging.md" },
+  ] },
+  { "Guides" = [
+    { "Development workflow" = "guides/development.md" },
+    { "Certificate management" = "certificate-management.md" },
+    { "Grafana Alloy and logging" = "monitoring-and-logging.md" },
+    { "Troubleshooting" = "guides/troubleshooting.md" },
+  ] },
+  { "Reference" = [
+    { "Configuration" = "reference/configuration.md" },
+    { "HTTP API" = "reference/api.md" },
+    { "Repository map" = "reference/repository.md" },
+  ] },
+  { "Contributing" = "contributing.md" },
+]
+
+[project.theme]
+language = "en"
+features = ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy"]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+[[project.theme.palette]]
+scheme = "default"
+primary = "teal"
+accent = "amber"
+toggle.icon = "material/brightness-7"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "slate"
+primary = "teal"
+accent = "amber"
+toggle.icon = "material/brightness-4"
+toggle.name = "Switch to light mode"
+
+[project.markdown_extensions]
+tables = {}
+toc = { permalink = true }
+attr_list = {}
+admonition = {}
+"pymdownx.highlight" = { anchor_linenums = true, line_spans = "__span", pygments_lang_class = true }
+"pymdownx.superfences" = { custom_fences = [{ name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }] }
