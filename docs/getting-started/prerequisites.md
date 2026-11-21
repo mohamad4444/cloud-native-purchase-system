@@ -18,6 +18,15 @@ A single script installs every required tool and verifies the result:
 
 It supports Arch/EndeavourOS, Debian/Ubuntu and Fedora, reads pinned versions from `.env`, skips anything already installed, and never deletes a cluster. After it finishes you may need to log out and back in for Docker group membership to take effect.
 
+Two optional sets of tools are available:
+
+```bash
+./scripts/install-tools.sh --optional    # k9s, stern, lazydocker, Lens, Freelens, Headlamp
+./scripts/install-tools.sh --dashboards  # Portainer (:9000), Yacht (:8000), Dockge (:2201)
+```
+
+The first adds terminal and desktop inspectors for Kubernetes and Docker. The second starts browser-based dashboards as Docker containers. See [runtime notes](../guides/runtime-notes.md#where-to-read-next) for related environment notes.
+
 | Tool | Purpose | Upstream instructions |
 | --- | --- | --- |
 | Docker Engine and Buildx | Run Minikube and build images | [Docker installation](https://docs.docker.com/engine/install/) and [Buildx](https://docs.docker.com/build/concepts/overview/) |

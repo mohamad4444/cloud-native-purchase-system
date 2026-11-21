@@ -2,9 +2,10 @@
 # Install and verify every tool needed to build and run the Cloud Native Purchase System.
 #
 # Usage:
-#   ./scripts/install-tools.sh --check     # only verify what is installed
-#   ./scripts/install-tools.sh             # install missing tools
-#   ./scripts/install-tools.sh --optional  # also install k9s and stern
+#   ./scripts/install-tools.sh --check       # only verify what is installed
+#   ./scripts/install-tools.sh               # install missing required tools
+#   ./scripts/install-tools.sh --optional    # also install CLI/GUI monitoring tools
+#   ./scripts/install-tools.sh --dashboards  # also install container dashboards (Portainer, etc.)
 #   ./scripts/install-tools.sh --help
 #
 # Safe to re-run: existing tools are detected and skipped, and it never deletes a cluster.
@@ -14,6 +15,7 @@ set -euo pipefail
 
 CHECK_ONLY=0
 INSTALL_OPTIONAL=0
+INSTALL_DASHBOARDS=0
 LOCAL_BIN="${HOME}/.local/bin"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -31,9 +33,15 @@ usage() {
 Usage: ./scripts/install-tools.sh [options]
 
 Options:
-  --check      Only verify installed tools; do not install anything
-  --optional   Also install optional tools (k9s, stern)
-  --help       Show this help
+  --check        Only verify installed tools; do not install anything
+  --optional     Also install: k9s, stern, lazydocker, Lens, Freelens, Headlamp
+  --dashboards   Also install container dashboards: Portainer, Yacht, Dockge
+  --help         Show this help
+
+Container dashboards run as Docker containers on ports 9000 (Portainer),
+8000 (Yacht) and 2201 (Dockge). They need Docker running and are skipped if
+their ports are already in use. Aptakube (paid) and the archived Kubernetes
+Dashboard are not installed; use Freelens or Headlamp instead.
 
 By default the script installs missing required tools and prints a summary.
 It reads pinned tool versions from the repository .env file when available.
@@ -43,7 +51,8 @@ EOF
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --check)    CHECK_ONLY=1; shift ;;
-        --optional) INSTALL_OPTIONAL=1; shift ;;
+        --optional)   INSTALL_OPTIONAL=1; shift ;;
+        --dashboards) INSTALL_DASHBOARDS=1; shift ;;
         -h|--help)  usage; exit 0 ;;
         *)          fail "Unknown option: $1 (try --help)" ;;
     esac
@@ -74,6 +83,9 @@ HELM_VERSION="${HELM_VERSION:-v4.1.1}"
 HELMFILE_VERSION="${HELMFILE_VERSION:-v1.3.1}"
 MINIKUBE_VERSION="${MINIKUBE_VERSION:-v1.36.0}"
 STERN_VERSION="${STERN_VERSION:-v1.35.0}"
+LAZYDOCKER_VERSION="${LAZYDOCKER_VERSION:-v0.25.2}"
+FREELENS_VERSION="${FREELENS_VERSION:-v2.1.0}"
+HEADLAMP_VERSION="${HEADLAMP_VERSION:-v0.46.0}"
 KUBECTL_VERSION="${KUBECTL_VERSION:-}"
 ARCH="$(uname -m)"
 case "$ARCH" in
@@ -90,7 +102,7 @@ info "Architecture: ${ARCH_SUFFIX}"
 # Verification helpers
 # ---------------------------------------------------------------------------
 REQUIRED_TOOLS=(docker minikube kubectl helm helmfile make openssl curl java)
-OPTIONAL_TOOLS=(jq stern k9s)
+OPTIONAL_TOOLS=(jq stern k9s lazydocker lens freelens headlamp)
 MISSING=()
 
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -110,6 +122,8 @@ version_of() {
         jq)       jq --version 2>/dev/null | head -1 ;;
         stern)    stern --version 2>/dev/null | head -1 || echo "installed" ;;
         k9s)      k9s version --short 2>/dev/null | head -1 || echo "installed" ;;
+        lazydocker) lazydocker --version 2>/dev/null | head -1 || echo "installed" ;;
+        lens|freelens|headlamp) echo "installed (AppImage)" ;;
         *)        echo "unknown" ;;
     esac
 }
@@ -215,6 +229,21 @@ install_binary() {
     ok "${name} installed to ${LOCAL_BIN}/${name}"
 }
 
+install_appimage() {
+    local name="$1" url="$2"
+    if have "$name"; then
+        ok "${name} already installed"
+        return 0
+    fi
+    info "Downloading ${name} AppImage..."
+    local tmp
+    tmp="$(mktemp)"
+    curl -fsSL "$url" -o "$tmp" || { rm -f "$tmp"; warn "Could not download ${name}"; return 1; }
+    install -m 0755 "$tmp" "${LOCAL_BIN}/${name}"
+    rm -f "$tmp"
+    ok "${name} AppImage installed to ${LOCAL_BIN}/${name}"
+}
+
 install_tarball() {
     local name="$1" url="$2" path_in_tar="$3"
     if have "$name"; then
@@ -271,7 +300,7 @@ install_tarball helmfile \
     "https://github.com/helmfile/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION#v}_linux_${ARCH_SUFFIX}.tar.gz" \
     "helmfile"
 
-# 3. Optional tools ---------------------------------------------------------
+# 3. Optional CLI/GUI tools -------------------------------------------------
 if [[ "$INSTALL_OPTIONAL" -eq 1 ]]; then
     if ! have stern; then
         install_tarball stern \
@@ -283,6 +312,56 @@ if [[ "$INSTALL_OPTIONAL" -eq 1 ]]; then
             "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_${ARCH_SUFFIX}.tar.gz" \
             "k9s"
     fi
+    case "$ARCH_SUFFIX" in
+        amd64) LAZYDOCKER_ARCH="x86_64" ;;
+        arm64) LAZYDOCKER_ARCH="arm64" ;;
+    esac
+    if ! have lazydocker; then
+        install_tarball lazydocker \
+            "https://github.com/jesseduffield/lazydocker/releases/download/${LAZYDOCKER_VERSION}/lazydocker_${LAZYDOCKER_VERSION#v}_Linux_${LAZYDOCKER_ARCH}.tar.gz" \
+            "lazydocker"
+    fi
+
+    # GUI tools are AppImages (single files). Lens uses a rolling URL; the
+    # others are pinned to versions above.
+    install_appimage lens \
+        "https://api.k8slens.dev/binaries/latest.x86_64.AppImage"
+
+    case "$ARCH_SUFFIX" in
+        amd64)
+            FREELENS_ARCH="amd64"; HEADLAMP_ARCH="x64" ;;
+        arm64)
+            FREELENS_ARCH="arm64"; HEADLAMP_ARCH="arm64" ;;
+    esac
+    install_appimage freelens \
+        "https://github.com/freelensapp/freelens/releases/download/${FREELENS_VERSION}/Freelens-${FREELENS_VERSION#v}-linux-${FREELENS_ARCH}.AppImage"
+    install_appimage headlamp \
+        "https://github.com/kubernetes-sigs/headlamp/releases/download/${HEADLAMP_VERSION}/Headlamp-${HEADLAMP_VERSION#v}-linux-${HEADLAMP_ARCH}.AppImage"
+fi
+
+# 3b. Container-based dashboards -------------------------------------------
+if [[ "$INSTALL_DASHBOARDS" -eq 1 ]] && have docker; then
+    run_dashboard() {
+        local name="$1" port="$2" container_port="${3:-$2}"; shift 3
+        if curl -s -o /dev/null -m 2 "http://localhost:${port}/"; then
+            ok "${name} already responding on port ${port}"
+            return 0
+        fi
+        info "Starting ${name} container on port ${port}..."
+        docker run -d --name "$name" --restart unless-stopped \
+            -p "${port}:${container_port}" "$@" >/dev/null 2>&1 \
+            && ok "${name} started" \
+            || warn "Could not start ${name} (port ${port} busy or Docker unavailable)"
+    }
+    run_dashboard portainer 9000 9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+    run_dashboard yacht 8000 8000 -v /var/run/docker.sock:/var/run/docker.sock -v yacht:/config ghcr.io/selfhostedpro/yacht:latest
+    mkdir -p "${HOME}/dockge" "${HOME}/dockge/stacks"
+    run_dashboard dockge 2201 5001 \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v "${HOME}/dockge/data:/app/data" \
+        -v "${HOME}/dockge/stacks:/opt/stacks" \
+        -e DOCKGE_STACKS_DIR=/opt/stacks \
+        louislam/dockge:1
 fi
 
 # 4. Docker service and group ----------------------------------------------
@@ -315,6 +394,12 @@ if [[ ${#CORE_MISSING[@]} -eq 0 ]]; then
     echo "  1. Log out/in if you were just added to the docker group"
     echo "  2. Follow docs/tutorials/local-kubernetes.md to start Minikube"
     echo "  3. Run 'zensical serve' in the docs venv to preview documentation"
+    if [[ "$INSTALL_OPTIONAL" -eq 1 ]]; then
+        echo "  4. Start k9s, lazydocker, Lens, Freelens or Headlamp to inspect the cluster and containers"
+    fi
+    if [[ "$INSTALL_DASHBOARDS" -eq 1 ]]; then
+        echo "  5. Open Portainer on http://localhost:9000 and Yacht on http://localhost:8000"
+    fi
 else
     warn "Still missing: ${CORE_MISSING[*]}"
     warn "Install them manually, then re-run this script with --check"
