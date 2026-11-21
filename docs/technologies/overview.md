@@ -65,38 +65,38 @@ Source code and shared Maven modules become images. Charts and environment value
 
 ```mermaid
 flowchart TB
-  subgraph BUILD["Build time"]
-    direction LR
-    POM["poms + common<br/>Maven hierarchy"]
-    SRC["service sources<br/>Java · web · Keycloak · Artemis · dind"]
-    BAKE["docker-bake.hcl + .env<br/>image targets"]
-    REG_LOCAL["host registry<br/>localhost:5000<br/>(make build-and-push)"]
-    REG_CI["cluster registry<br/>registry.kube-system.svc.cluster.local:80<br/>(CI rewrites REGISTRY)"]
-    POM --> SRC --> BAKE
-    BAKE --> REG_LOCAL
-    BAKE --> REG_CI
-  end
+ subgraph BUILD["Build time"]
+ direction LR
+ POM["poms + common<br/>Maven hierarchy"]
+ SRC["service sources<br/>Java · web · Keycloak · Artemis · dind"]
+ BAKE["docker-bake.hcl + .env<br/>image targets"]
+ REG_LOCAL["host registry<br/>localhost:5000<br/>(make build-and-push)"]
+ REG_CI["cluster registry<br/>registry.kube-system.svc.cluster.local:80<br/>(CI rewrites REGISTRY)"]
+ POM --> SRC --> BAKE
+ BAKE --> REG_LOCAL
+ BAKE --> REG_CI
+ end
 
-  subgraph DEPLOY["Deploy time"]
-    direction LR
-    CH["charts/<br/>templates"]
-    HF["environments/<br/>helmfile + values"]
-    K8S["Kubernetes<br/>dev · staging"]
-    CH --> HF --> K8S
-  end
+ subgraph DEPLOY["Deploy time"]
+ direction LR
+ CH["charts/<br/>templates"]
+ HF["environments/<br/>helmfile + values"]
+ K8S["Kubernetes<br/>dev · staging"]
+ CH --> HF --> K8S
+ end
 
-  MAKE["Makefile<br/>local builds"] --> BAKE
-  CI[".gitlab-ci.yml<br/>Runner build pods"] --> BAKE
-  CI --> HF
-  REG_LOCAL -->|"images pulled by Pods"| K8S
-  REG_CI -->|"images pulled by Pods"| K8S
+ MAKE["Makefile<br/>local builds"] --> BAKE
+ CI[".gitlab-ci.yml<br/>Runner build pods"] --> BAKE
+ CI --> HF
+ REG_LOCAL -->|"images pulled by Pods"| K8S
+ REG_CI -->|"images pulled by Pods"| K8S
 
-  classDef build fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
-  classDef deploy fill:#e0f2f1,stroke:#00695c,color:#004d40;
-  classDef ci fill:#fff3e0,stroke:#ef6c00,color:#e65100;
-  class POM,SRC,BAKE,REG_LOCAL,REG_CI build;
-  class CH,HF,K8S deploy;
-  class CI,MAKE ci;
+ classDef build fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+ classDef deploy fill:#e0f2f1,stroke:#00695c,color:#004d40;
+ classDef ci fill:#fff3e0,stroke:#ef6c00,color:#e65100;
+ class POM,SRC,BAKE,REG_LOCAL,REG_CI build;
+ class CH,HF,K8S deploy;
+ class CI,MAKE ci;
 ```
 
 The two registry addresses serve different build contexts: local `make` builds push to `localhost:5000`, while CI jobs rewrite `docker-bake.hcl` to push to the cluster-internal `registry.kube-system.svc.cluster.local:80`. Pods pull from whichever registry the image was pushed to. The `poms + common` node applies only to the two Java services; the web, Keycloak, Artemis and dind images build independently. See [image pulls](../guides/troubleshooting.md#image-builds-and-image-pulls).

@@ -1,6 +1,6 @@
 # Design decisions and rationale
 
-The [architecture page](architecture.md) describes what the system does. This page explains **why it is put together this way**, what alternatives were considered, and which trade-offs were accepted. It follows the design chapter of the project's accompanying bachelor thesis (§3.2–3.5) and is included here because the reasoning behind a choice matters as much as the choice itself. The [repository map](../reference/repository.md) points to the files behind each claim.
+The [architecture page](architecture.md) describes what the system does. This page explains **why it is put together this way**, what alternatives were considered, and which trade-offs were accepted. It is included here because the reasoning behind a choice matters as much as the choice itself. The [repository map](../reference/repository.md) points to the files behind each claim.
 
 ## Design methodology
 
@@ -18,7 +18,7 @@ This is a learning system, so "best practice" means *demonstrating the pattern i
 
 ## The nine layers at a glance
 
-The thesis describes the system as nine layers. The table maps each one to the checked-in implementation.
+The design describes the system as nine layers. The table maps each one to the checked-in implementation.
 
 | Layer | Role | Where to look |
 | --- | --- | --- |
@@ -36,33 +36,33 @@ The layers stack from the platform up to the business workflow. Observability an
 
 ```mermaid
 flowchart TB
-  L1["1 · Orchestration<br/>Kubernetes"]
-  L2["2 · CI/CD<br/>GitLab CI/CD"]
-  L3["3 · Containerization<br/>Docker + Bake"]
-  L4["4 · Security<br/>Keycloak + PKCE"]
-  L5["5 · Frontend<br/>Nginx + JavaScript"]
-  L6["6 · Backend<br/>Spring Boot"]
-  L7["7 · Messaging<br/>Apache Artemis"]
-  L8["8 · Observability<br/>Alloy · Loki · Grafana"]
-  L9["9 · PKI<br/>cert-manager"]
+ L1["1 · Orchestration<br/>Kubernetes"]
+ L2["2 · CI/CD<br/>GitLab CI/CD"]
+ L3["3 · Containerization<br/>Docker + Bake"]
+ L4["4 · Security<br/>Keycloak + PKCE"]
+ L5["5 · Frontend<br/>Nginx + JavaScript"]
+ L6["6 · Backend<br/>Spring Boot"]
+ L7["7 · Messaging<br/>Apache Artemis"]
+ L8["8 · Observability<br/>Alloy · Loki · Grafana"]
+ L9["9 · PKI<br/>cert-manager"]
 
-  L2 -->|"deploys"| L1
-  L2 -->|"builds"| L3
-  L3 -->|"pulled by Pods"| L1
-  L4 --> L5 --> L6 --> L7
-  L8 -.-> L4
-  L8 -.-> L5
-  L8 -.-> L6
-  L8 -.-> L7
-  L9 -.->|"secures ingress"| L1
-  L9 -.->|"TLS for Keycloak"| L4
+ L2 -->|"deploys"| L1
+ L2 -->|"builds"| L3
+ L3 -->|"pulled by Pods"| L1
+ L4 --> L5 --> L6 --> L7
+ L8 -.-> L4
+ L8 -.-> L5
+ L8 -.-> L6
+ L8 -.-> L7
+ L9 -.->|"secures ingress"| L1
+ L9 -.->|"TLS for Keycloak"| L4
 
-  classDef platform fill:#e8eaf6,stroke:#3949ab,color:#1a237e;
-  classDef app fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
-  classDef cross fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
-  class L1,L2,L3 platform;
-  class L4,L5,L6,L7 app;
-  class L8,L9 cross;
+ classDef platform fill:#e8eaf6,stroke:#3949ab,color:#1a237e;
+ classDef app fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+ classDef cross fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+ class L1,L2,L3 platform;
+ class L4,L5,L6,L7 app;
+ class L8,L9 cross;
 ```
 
 The dashed lines from L8 show that observability reads the logs of **all** application Pods (L4–L7). Layer 8 is only partially realized: logs have a working Alloy → Loki → Grafana pipeline, but no Prometheus server is deployed even though the applications expose metrics. [Grafana Alloy, explained](../technologies/grafana-alloy.md) goes deep on the collector, and [Grafana Alloy and logging](../monitoring-and-logging.md#metrics-are-exposed-but-collection-is-unfinished) covers the operational side.
@@ -71,7 +71,7 @@ Two supporting namespaces are shared by both application environments: `monitori
 
 ## Decisions and alternatives
 
-Each decision below is recorded the way the thesis does: the option considered, the option chosen, and the reason.
+Each decision below is recorded the way the design does: the option considered, the option chosen, and the reason.
 
 ### Maven dependency management: custom hierarchy instead of a BOM
 
@@ -99,7 +99,7 @@ Each decision below is recorded the way the thesis does: the option considered, 
 
 ### CI/CD: external GitLab with an in-cluster runner
 
-**Alternative:** host a full GitLab instance inside the cluster for complete data control and no usage limits. The thesis estimates roughly 8 GB RAM, 4 CPU cores, and 50 GB storage for that control plane, plus ongoing patching and backup work.
+**Alternative:** host a full GitLab instance inside the cluster for complete data control and no usage limits. The design estimates roughly 8 GB RAM, 4 CPU cores, and 50 GB storage for that control plane, plus ongoing patching and backup work.
 
 **Chosen:** an external GitLab instance with a lightweight GitLab Runner deployed in the `gitlab-runner` namespace. Each job creates a temporary build Pod from the custom `dind` image, which carries Docker Buildx, Helm, Helmfile, and kubectl. See [the CI/CD workflow](../guides/development.md) and the runner values under `environments/values/charts/`.
 
@@ -109,7 +109,7 @@ Each decision below is recorded the way the thesis does: the option considered, 
 
 **Alternative:** separate `helm install/upgrade` commands per environment and chart, with duplicated values files.
 
-**Chosen:** a single `environments/helmfile.yaml` selecting `dev` or `staging` values, plus `env-magic.gotmpl` to compose values per release. The thesis presents this unified values strategy as one of its main contributions.
+**Chosen:** a single `environments/helmfile.yaml` selecting `dev` or `staging` values, plus `env-magic.gotmpl` to compose values per release. The design presents this unified values strategy as one of its main contributions.
 
 **Why:** one source of truth for environment settings, explicit release ordering through `needs`, and no per-chart deployment scripts. **Trade-off accepted:** the template merges at the top level rather than recursively, and `needs` does not wait for applications to become ready. Both behaviors are explained in [Kubernetes, Helm, and Helmfile](kubernetes-and-helm.md#environment-values-and-merge-behavior).
 

@@ -1,8 +1,8 @@
 # Business services in detail
 
-The code behind the two business services, following thesis §§4.1–4.4. The [shared Java library](../concepts/common-library.md) covers the common module they both depend on; this page focuses on what is specific to Inventory and Purchase.
+The code behind the two business services. The [shared Java library](../concepts/common-library.md) covers the common module they both depend on; this page focuses on what is specific to Inventory and Purchase.
 
-## Technology inventory (§4.1)
+## Technology inventory
 
 | Category | Technologies |
 | --- | --- |
@@ -15,33 +15,33 @@ The code behind the two business services, following thesis §§4.1–4.4. The [
 | CI/CD | GitLab Runner with Kubernetes executor, custom dind image |
 | Data | PostgreSQL, Flyway |
 
-The thesis lists an **implementation roadmap** (§4.1.3): project structure and common library first, then service implementation, then containerisation and orchestration, then infrastructure and security, then CI/CD and automation. The git history follows that order — see [learning process](../learning-process.md).
+The design lists an **implementation roadmap**: project structure and common library first, then service implementation, then containerisation and orchestration, then infrastructure and security, then CI/CD and automation. The git history follows that order — see [learning process](../learning-process.md).
 
-## Repository structure (§4.2)
+## Repository structure
 
 The repository keeps code and deployment definitions side by side:
 
 ```mermaid
 flowchart TB
-  subgraph CODE["services/"]
-    COMMON["common/<br/>shared JAR"]
-    INV["inventory-service/"]
-    PUR["purchase-service/"]
-    WEB["web-client/"]
-    KC["keycloak/"]
-    ART["artemis/"]
-    DIND["dind/"]
-    POMS["poms/"]
-  end
-  subgraph OPS["Deployment"]
-    CHARTS["charts/"]
-    ENV["environments/"]
-    BAKE["docker-bake.hcl + .env + Makefile"]
-  end
-  COMMON --> INV
-  COMMON --> PUR
-  POMS --> COMMON
-  CODE --> BAKE --> CHARTS --> ENV
+ subgraph CODE["services/"]
+ COMMON["common/<br/>shared JAR"]
+ INV["inventory-service/"]
+ PUR["purchase-service/"]
+ WEB["web-client/"]
+ KC["keycloak/"]
+ ART["artemis/"]
+ DIND["dind/"]
+ POMS["poms/"]
+ end
+ subgraph OPS["Deployment"]
+ CHARTS["charts/"]
+ ENV["environments/"]
+ BAKE["docker-bake.hcl + .env + Makefile"]
+ end
+ COMMON --> INV
+ COMMON --> PUR
+ POMS --> COMMON
+ CODE --> BAKE --> CHARTS --> ENV
 ```
 
 Each business service has the same internal layout under `src/main/java/swtp/clouddemo/`:
@@ -57,7 +57,7 @@ Each business service has the same internal layout under `src/main/java/swtp/clo
 
 Migrations live under `src/main/resources/db/migration/`. The full map is in the [repository map](../reference/repository.md).
 
-## Inventory Service (§4.4.1)
+## Inventory Service
 
 **Responsibility:** stock management and product inventory operations.
 
@@ -70,9 +70,9 @@ Migrations live under `src/main/resources/db/migration/`. The full map is in the
 ```sql
 DROP TABLE IF EXISTS lager_item;
 CREATE TABLE lager_item (
-    id SERIAL PRIMARY KEY,
-    product VARCHAR(255),
-    quantity INTEGER
+ id SERIAL PRIMARY KEY,
+ product VARCHAR(255),
+ quantity INTEGER
 );
 ```
 
@@ -98,13 +98,13 @@ public class InventoryServiceApplication { ... }
 @RequestMapping("inventory-api")
 @RequiredArgsConstructor
 public class ProductController {
-    private final LagerService productService;
+ private final LagerService productService;
 
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/inventory")
-    public List<ProductDto> getAllProducts() {
-        return productService.getAllProducts();
-    }
+ @PreAuthorize("hasRole('USER')")
+ @GetMapping("/inventory")
+ public List<ProductDto> getAllProducts {
+ return productService.getAllProducts;
+ }
 }
 ```
 
@@ -115,17 +115,17 @@ The repository filters out products with quantity zero or negative, so sold-out 
 ```java
 @JmsListener(destination = QueueNames.PURCHASE_REQUESTED)
 public void handlePurchaseRequested(PurchaseRequestedEvent event) {
-    boolean available = lagerService.consumeProductIfAvailable(
-        event.getLagerItemId(), event.getQuantity());
-    String message = available ? "Inventory reserved successfully" : "Inventory out of stock";
-    messageProducer.sendMessage(QueueNames.PURCHASE_RESULT,
-        new PurchaseResultEvent(event.getPurchaseId(), available, message));
+ boolean available = lagerService.consumeProductIfAvailable(
+ event.getLagerItemId, event.getQuantity);
+ String message = available ? "Inventory reserved successfully" : "Inventory out of stock";
+ messageProducer.sendMessage(QueueNames.PURCHASE_RESULT,
+ new PurchaseResultEvent(event.getPurchaseId, available, message));
 }
 ```
 
 The check and the stock reduction happen inside `LagerService`. Note that there is no explicit idempotency check or concurrency control around that two-step operation — see [current limits](../concepts/messaging.md#current-limits).
 
-## Purchase Service (§4.4.2)
+## Purchase Service
 
 **Responsibility:** transaction processing for client purchase requests.
 
@@ -148,12 +148,12 @@ The schema grew across three migrations, which is a nice illustration of Flyway'
 ```java
 @Override
 public PurchaseDtoOut createPurchase(PurchaseDtoIn dtoIn) throws JsonProcessingException {
-    String userId = jwtService.getUserId();                 // JWT sub claim
-    Purchase saved = purchaseRepository.save(PurchaseMapper.toEntity(dtoIn, userId));
-    PurchaseRequestedEvent event = new PurchaseRequestedEvent(
-        saved.getProductName(), saved.getQuantity(), saved.getId(), saved.getLagerItemId());
-    messageProducer.sendMessage(QueueNames.PURCHASE_REQUESTED, event);
-    return PurchaseMapper.toDto(saved);
+ String userId = jwtService.getUserId; // JWT sub claim
+ Purchase saved = purchaseRepository.save(PurchaseMapper.toEntity(dtoIn, userId));
+ PurchaseRequestedEvent event = new PurchaseRequestedEvent(
+ saved.getProductName, saved.getQuantity, saved.getId, saved.getLagerItemId);
+ messageProducer.sendMessage(QueueNames.PURCHASE_REQUESTED, event);
+ return PurchaseMapper.toDto(saved);
 }
 ```
 

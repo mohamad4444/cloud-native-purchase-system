@@ -4,18 +4,18 @@ The application separates purchase records from stock management. The browser co
 
 ```mermaid
 flowchart TB
-  Browser[Browser] --> Frontend[Nginx frontend]
-  Browser --> Keycloak[Keycloak]
-  Browser --> Routing[Ingress or dev port forwards]
-  Routing --> Purchase[Purchase service]
-  Routing --> Inventory[Inventory service]
-  Purchase --> PurchaseDB[(Purchase PostgreSQL)]
-  Inventory --> InventoryDB[(Inventory PostgreSQL)]
-  Keycloak --> AuthDB[(Keycloak PostgreSQL)]
-  Purchase -->|purchase.requested| Artemis[ActiveMQ Artemis]
-  Artemis -->|purchase.requested| Inventory
-  Inventory -->|purchase.result| Artemis
-  Artemis -->|purchase.result| Purchase
+ Browser[Browser] --> Frontend[Nginx frontend]
+ Browser --> Keycloak[Keycloak]
+ Browser --> Routing[Ingress or dev port forwards]
+ Routing --> Purchase[Purchase service]
+ Routing --> Inventory[Inventory service]
+ Purchase --> PurchaseDB[(Purchase PostgreSQL)]
+ Inventory --> InventoryDB[(Inventory PostgreSQL)]
+ Keycloak --> AuthDB[(Keycloak PostgreSQL)]
+ Purchase -->|purchase.requested| Artemis[ActiveMQ Artemis]
+ Artemis -->|purchase.requested| Inventory
+ Inventory -->|purchase.result| Artemis
+ Artemis -->|purchase.result| Purchase
 ```
 
 In staging, ingress-nginx routes `frontend.local` paths to the frontend and API Services and exposes Keycloak at `keycloak.local`. In development, ingress is disabled and the browser reaches the forwarded ports directly.
@@ -24,43 +24,43 @@ Namespaces provide the isolation between the two environment instances. Platform
 
 ```mermaid
 flowchart TB
-  ING["ingress-nginx<br/>frontend.local · keycloak.local<br/>staging only"]
+ ING["ingress-nginx<br/>frontend.local · keycloak.local<br/>staging only"]
 
-  subgraph DEV["namespace: dev — HTTP + port forward"]
-    direction LR
-    DF["frontend"]
-    DP["purchase + DB"]
-    DI["inventory + DB"]
-    DK["keycloak + DB"]
-    DA["artemis"]
-  end
+ subgraph DEV["namespace: dev — HTTP + port forward"]
+ direction LR
+ DF["frontend"]
+ DP["purchase + DB"]
+ DI["inventory + DB"]
+ DK["keycloak + DB"]
+ DA["artemis"]
+ end
 
-  subgraph STAGING["namespace: staging — HTTPS + ingress"]
-    direction LR
-    SF["frontend"]
-    SP["purchase + DB"]
-    SI["inventory + DB"]
-    SK["keycloak + DB"]
-    SA["artemis"]
-  end
+ subgraph STAGING["namespace: staging — HTTPS + ingress"]
+ direction LR
+ SF["frontend"]
+ SP["purchase + DB"]
+ SI["inventory + DB"]
+ SK["keycloak + DB"]
+ SA["artemis"]
+ end
 
-  subgraph SHARED["shared platform namespaces"]
-    direction LR
-    MON["monitoring<br/>Alloy · Loki · Grafana"]
-    CA["cert-manager<br/>local CA issuer"]
-    RUN["gitlab-runner<br/>temporary build pods"]
-  end
+ subgraph SHARED["shared platform namespaces"]
+ direction LR
+ MON["monitoring<br/>Alloy · Loki · Grafana"]
+ CA["cert-manager<br/>local CA issuer"]
+ RUN["gitlab-runner<br/>temporary build pods"]
+ end
 
-  ING --> STAGING
-  SHARED -.->|"logs · TLS · CI"| DEV
-  SHARED -.->|"logs · TLS · CI"| STAGING
+ ING --> STAGING
+ SHARED -.->|"logs · TLS · CI"| DEV
+ SHARED -.->|"logs · TLS · CI"| STAGING
 
-  classDef env fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
-  classDef platform fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
-  classDef ingress fill:#fff3e0,stroke:#ef6c00,color:#e65100;
-  class DF,DP,DI,DK,DA,SF,SP,SI,SK,SA env;
-  class MON,CA,RUN platform;
-  class ING ingress;
+ classDef env fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+ classDef platform fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+ classDef ingress fill:#fff3e0,stroke:#ef6c00,color:#e65100;
+ class DF,DP,DI,DK,DA,SF,SP,SI,SK,SA env;
+ class MON,CA,RUN platform;
+ class ING ingress;
 ```
 
 ## Responsibilities

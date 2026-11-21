@@ -62,14 +62,14 @@ For hosting, copy the **contents of `site/`** to a static web server's document 
 
 ```nginx
 server {
-    listen 80;
-    server_name docs.example.com;
-    root /srv/www/purchase-system-docs;
-    index index.html;
+ listen 80;
+ server_name docs.example.com;
+ root /srv/www/purchase-system-docs;
+ index index.html;
 
-    location / {
-        try_files $uri $uri/ =404;
-    }
+ location / {
+ try_files $uri $uri/ =404;
+ }
 }
 ```
 

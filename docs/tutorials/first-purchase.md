@@ -18,16 +18,16 @@ For an equivalent API experiment, obtain a current application access token from
 read -rsp 'Application access token: ' ACCESS_TOKEN
 echo
 curl --fail-with-body http://localhost:8002/inventory-api/inventory \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
+ -H "Authorization: Bearer $ACCESS_TOKEN"
 ```
 
 Use the returned `id` as `lagerItemId` and the returned `product` as `productName`. The following JSON is illustrative; replace its ID and name with an actual inventory entry:
 
 ```bash
 curl --fail-with-body http://localhost:8001/purchase-api/purchases \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"lagerItemId":1,"productName":"Example product","quantity":1}'
+ -H "Authorization: Bearer $ACCESS_TOKEN" \
+ -H 'Content-Type: application/json' \
+ -d '{"lagerItemId":1,"productName":"Example product","quantity":1}'
 ```
 
 The current controller responds with HTTP **200** and a purchase containing `id`, `productName`, `quantity`, and `timestamp`. The response DTO does **not** contain status. Receiving this response means the HTTP operation returned; the asynchronous inventory decision can still be in flight.
@@ -38,9 +38,9 @@ Refresh purchase history in the UI or query confirmed purchases after allowing t
 
 ```bash
 curl --fail-with-body 'http://localhost:8001/purchase-api/purchases?status=CONFIRMED' \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
+ -H "Authorization: Bearer $ACCESS_TOKEN"
 curl --fail-with-body http://localhost:8002/inventory-api/inventory \
-  -H "Authorization: Bearer $ACCESS_TOKEN"
+ -H "Authorization: Bearer $ACCESS_TOKEN"
 unset ACCESS_TOKEN
 ```
 

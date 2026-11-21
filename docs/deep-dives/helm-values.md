@@ -1,6 +1,6 @@
 # Helm values in depth
 
-This is the area the thesis treats as its main technical contribution (§2.10): a unified way to manage values across environments without duplicating configuration. The [Kubernetes and Helmfile concept page](../concepts/kubernetes-and-helm.md) walks one value through to a manifest; this page explains the mechanism and why it exists.
+This is one of the project's main technical contributions: a unified way to manage values across environments without duplicating configuration. The [Kubernetes and Helmfile concept page](../concepts/kubernetes-and-helm.md) walks one value through to a manifest; this page explains the mechanism and why it exists.
 
 ## The problem: YAML hell and umbrella charts
 
@@ -8,17 +8,17 @@ Before Helm, each environment needed its own near-identical set of manifests. Ch
 
 ```mermaid
 flowchart LR
-  C["Chart.yaml + values.yaml<br/>+ templates/"] --> H["helm install my-release ./chart"]
-  O["-f overrides.yaml<br/>--set key=value"] --> H
-  H --> R["rendered Kubernetes manifests"]
-  R --> API["Kubernetes API server"]
+ C["Chart.yaml + values.yaml<br/>+ templates/"] --> H["helm install my-release ./chart"]
+ O["-f overrides.yaml<br/>--set key=value"] --> H
+ H --> R["rendered Kubernetes manifests"]
+ R --> API["Kubernetes API server"]
 ```
 
-Templates contain placeholders like `{{ .Values.replicaCount }}`; the actual numbers live in `values.yaml` or an override file. The thesis (§2.9) lists three steps: combine structure with values, render templates, submit to the API server.
+Templates contain placeholders like `{{ .Values.replicaCount }}`; the actual numbers live in `values.yaml` or an override file. Helm lists three steps: combine structure with values, render templates, submit to the API server.
 
 ## Native Helm precedence
 
-When Helm renders a chart, values are merged in this order — lowest to highest priority (§2.10.1):
+When Helm renders a chart, values are merged in this order — lowest to highest priority:
 
 1. The chart's own `values.yaml`
 2. Parent chart values in an **umbrella chart**
@@ -30,20 +30,20 @@ An umbrella chart is a parent containing subcharts under `charts/`. It overrides
 ```yaml
 # parent values.yaml
 frontend:
-  replicaCount: 2
+ replicaCount: 2
 ```
 
 Helm flattens that structure automatically when rendering the `frontend` subchart, so the subchart sees `.Values.replicaCount = 2`. **Globals** declared under `Values.global` are visible from every subchart as `.Values.global.domain`.
 
 ## Helmfile's mismatch
 
-Helmfile processes values through Go templates *before* Helm sees them (§2.10.2). It cannot emulate umbrella-chart flattening: if you place `frontend:` blocks in a Helmfile values file, Helm receives them as-is and the chart ignores them because it expects top-level `replicaCount`, not `frontend.replicaCount`.
+Helmfile processes values through Go templates *before* Helm sees them. It cannot emulate umbrella-chart flattening: if you place `frontend:` blocks in a Helmfile values file, Helm receives them as-is and the chart ignores them because it expects top-level `replicaCount`, not `frontend.replicaCount`.
 
-The thesis frames this as "a fundamental mismatch between Helm's native umbrella chart pattern and Helmfile's value processing architecture", and the project's answer is a release-name-based values template that flattens values itself.
+The design frames this as "a fundamental mismatch between Helm's native umbrella chart pattern and Helmfile's value processing architecture", and the project's answer is a release-name-based values template that flattens values itself.
 
 ## The unified values strategy
 
-The checked-in implementation is `environments/values/env/env-magic.gotmpl`, which follows the thesis listing nearly verbatim:
+The checked-in implementation is `environments/values/env/env-magic.gotmpl`, which follows the design listing nearly verbatim:
 
 ```gotmpl
 {{- $releaseValues := .Values | get .Release.Name dict | default dict -}}
@@ -53,16 +53,16 @@ The checked-in implementation is `environments/values/env/env-magic.gotmpl`, whi
 
 {{- $merged := dict -}}
 {{- range $k, $v := $globalDefaults -}}
-  {{- $_ := set $merged $k $v -}}
+ {{- $_ := set $merged $k $v -}}
 {{- end -}}
 {{- range $k, $v := $releaseValues -}}
-  {{- $_ := set $merged $k $v -}}
+ {{- $_ := set $merged $k $v -}}
 {{- end -}}
 {{- range $k, $v := $globalOverrides -}}
-  {{- $_ := set $merged $k $v -}}
+ {{- $_ := set $merged $k $v -}}
 {{- end -}}
 {{- if $globalConfig -}}
-  {{- $_ := set $merged "globalConfig" $globalConfig -}}
+ {{- $_ := set $merged "globalConfig" $globalConfig -}}
 {{- end }}
 {{- $merged | toYaml -}}
 ```
@@ -71,10 +71,10 @@ Four composition stages, from lowest to highest priority:
 
 ```mermaid
 flowchart TB
-  A["1 · globalDefaults<br/>shared defaults"] --> B["2 · release values<br/>.Values[Release.Name]"]
-  B --> C["3 · globalOverrides<br/>forced values"]
-  C --> D["4 · globalConfig<br/>preserved as its own map"]
-  D --> E["flattened values → Helm"]
+ A["1 · globalDefaults<br/>shared defaults"] --> B["2 · release values<br/>.Values[Release.Name]"]
+ B --> C["3 · globalOverrides<br/>forced values"]
+ C --> D["4 · globalConfig<br/>preserved as its own map"]
+ D --> E["flattened values → Helm"]
 ```
 
 Important properties:
@@ -89,9 +89,9 @@ Important properties:
 
 ```yaml
 globalConfig:
-  namespace: "dev"
-  registry: "localhost:5000/"
-  pullPolicy: Always
+ namespace: "dev"
+ registry: "localhost:5000/"
+ pullPolicy: Always
 ```
 
 Helmfile selects that file with `-e dev`. The `inventory-service` release uses `env-magic.gotmpl`, which flattens the release block and preserves `globalConfig`. The chart template then builds the image name:
@@ -104,7 +104,7 @@ Result: `localhost:5000/inventory-service:latest`. The same path is described st
 
 ## What the environment files actually populate
 
-The thesis's example environment file defines `globalConfig`, `globalDefaults`, `globalOverrides` and per-release blocks. The checked-in `dev.yaml` and `staging.yaml` contain only `globalConfig` plus release-name blocks — `globalDefaults` and `globalOverrides` are empty by default and simply resolve to `{}`.
+The design's example environment file defines `globalConfig`, `globalDefaults`, `globalOverrides` and per-release blocks. The checked-in `dev.yaml` and `staging.yaml` contain only `globalConfig` plus release-name blocks — `globalDefaults` and `globalOverrides` are empty by default and simply resolve to `{}`.
 
 | Key | dev | staging |
 | --- | --- | --- |
@@ -131,11 +131,11 @@ A single `environments/helmfile.yaml` defines all releases:
 
 ```mermaid
 flowchart LR
-  ENV["-e dev / -e staging"] --> HF["helmfile.yaml"]
-  HF --> VALUES["environment values file"]
-  VALUES --> MAGIC["env-magic.gotmpl<br/>flatten per release"]
-  MAGIC --> CH["chart templates"]
-  CH --> K8S["Kubernetes objects"]
+ ENV["-e dev / -e staging"] --> HF["helmfile.yaml"]
+ HF --> VALUES["environment values file"]
+ VALUES --> MAGIC["env-magic.gotmpl<br/>flatten per release"]
+ MAGIC --> CH["chart templates"]
+ CH --> K8S["Kubernetes objects"]
 ```
 
 A subtlety worth remembering: `labels.environment` on a release is metadata for selection, not an install condition. Passing `-e dev` selects *values*; it does not prevent other releases from being processed. The tutorial therefore uses `--selector` for a first run — see [namespaces and shared infrastructure](../concepts/kubernetes-and-helm.md#namespaces-and-shared-infrastructure).
@@ -144,10 +144,10 @@ A subtlety worth remembering: `labels.environment` on a release is metadata for 
 
 ```bash
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=inventory-service template --skip-needs
+ --selector name=inventory-service template --skip-needs
 ```
 
-The thesis also lists `helmfile -e <env> write-values` and `template --args="--debug"` as ways to inspect the resolved values. Rendering does not change the cluster; `sync` does. Both are described in [Kubernetes, Helm, and Helmfile](../concepts/kubernetes-and-helm.md#inspect-before-applying).
+The design also lists `helmfile -e <env> write-values` and `template --args="--debug"` as ways to inspect the resolved values. Rendering does not change the cluster; `sync` does. Both are described in [Kubernetes, Helm, and Helmfile](../concepts/kubernetes-and-helm.md#inspect-before-applying).
 
 ## Where to read next
 

@@ -1,6 +1,6 @@
 # The shared Java library
 
-Both business services depend on the same `services/common` module. It is packaged as a JAR and carries the concerns that should behave identically everywhere: security, JWT handling, message contracts, logging, and exception handling. This keeps the services small and is the concrete implementation of the DRY principle described in the implementation chapter of the project's thesis (§4.2–4.3).
+Both business services depend on the same `services/common` module. It is packaged as a JAR and carries the concerns that should behave identically everywhere: security, JWT handling, message contracts, logging, and exception handling. This keeps the services small and is the concrete implementation of the DRY principle across the codebase.
 
 You do not need to read this page to [run the application](../tutorials/local-kubernetes.md). Read it when you change a cross-cutting concern and need to know where that change will land.
 
@@ -10,10 +10,10 @@ There is no root reactor POM; the inheritance is explicit and must be installed 
 
 ```mermaid
 flowchart TB
-  base["swtp-base-pom<br/>versions and plugins"] --> common["common<br/>shared JAR"]
-  base --> parent["swtp-parent-pom<br/>declares dependency on common"]
-  parent --> inventory["inventory-service"]
-  parent --> purchase["purchase-service"]
+ base["swtp-base-pom<br/>versions and plugins"] --> common["common<br/>shared JAR"]
+ base --> parent["swtp-parent-pom<br/>declares dependency on common"]
+ parent --> inventory["inventory-service"]
+ parent --> purchase["purchase-service"]
 ```
 
 | POM | Version | Responsibility |
@@ -35,8 +35,8 @@ The straightforward hierarchy keeps dependency versions in one place and gives e
 | --- | --- | --- |
 | CSRF | Disabled | Tokens are stateless; there is no browser session cookie to protect |
 | CORS | Enabled, with `OPTIONS` permitted for both API paths | Browsers send preflight requests before cross-origin calls |
-| `/actuator/prometheus` | `permitAll()` | Allows metric scraping without a user token |
-| Every other request | `authenticated()` | The API is not anonymously readable |
+| `/actuator/prometheus` | `permitAll` | Allows metric scraping without a user token |
+| Every other request | `authenticated` | The API is not anonymously readable |
 | OAuth2 resource server | JWT with the custom converter | Validates tokens issued by Keycloak |
 
 The issuer and JWK URLs come from `KEYCLOAK_ISSUER_URI` and `KEYCLOAK_JWK_SET_URI`. They deliberately differ: the browser validates against the public Keycloak address, while Pods fetch signing keys through cluster DNS. See [authentication and roles](authentication.md#issuer-and-signing-keys-are-different-concerns).
@@ -48,25 +48,25 @@ The issuer and JWK URLs come from `KEYCLOAK_ISSUER_URI` and `KEYCLOAK_JWK_SET_UR
 - It also keeps the standard OAuth2 scope-derived authorities.
 - The authentication principal name is `preferred_username`, falling back to `sub`.
 
-`JwtService` is the small helper business code uses to read claims from the security context. Purchase creation uses `getUserId()` — the token's `sub` — as the stored user ID. The [API reference](../reference/api.md) notes that this ID is stored but not used to filter history.
+`JwtService` is the small helper business code uses to read claims from the security context. Purchase creation uses `getUserId` — the token's `sub` — as the stored user ID. The [API reference](../reference/api.md) notes that this ID is stored but not used to filter history.
 
 !!! warning "Verbose token logging"
-    The checked-in converter logs JWT claims, metadata, and a token fragment on each request. That is useful while learning and dangerous in a shared environment. Do not copy those log statements into a public deployment.
+ The checked-in converter logs JWT claims, metadata, and a token fragment on each request. That is useful while learning and dangerous in a shared environment. Do not copy those log statements into a public deployment.
 
 `CorsConfig` allows the development origins (`localhost:4200`, `127.0.0.1:4200`, a LAN test address) plus `https://frontend.local`, permits common REST methods, allows credentials, and exposes `Authorization`, `Content-Type`, and `X-Requested-With`. The realm's actual redirect URIs and web origins are in `services/keycloak/realms/purchase-service-realm-realm.json`.
 
 ## How a request is observed
 
-The common module layers four mechanisms around a request. The thesis presents them as a single "observability foundation"; the checked-in code implements them as follows.
+The common module layers four mechanisms around a request. The design presents them as a single "observability foundation"; the checked-in code implements them as follows.
 
 ```text
-Tomcat valve          raw request in / final status out
-  Spring Security       authenticate, authorize
-    MdcJwtFilter          userId + username into the MDC
-      Controllers         ... AOP around service and repository methods
-    MdcJwtFilter          MDC cleared
-  Spring Security       response headers
-Tomcat valve          response status logged
+Tomcat valve raw request in / final status out
+ Spring Security authenticate, authorize
+ MdcJwtFilter userId + username into the MDC
+ Controllers ... AOP around service and repository methods
+ MdcJwtFilter MDC cleared
+ Spring Security response headers
+Tomcat valve response status logged
 ```
 
 | Component | Where it acts | What it adds |
@@ -87,24 +87,24 @@ Messaging types live in `common` so both services compile against the same contr
 
 ```mermaid
 classDiagram
-  class BaseEvent {
-    +String eventId
-    +Instant eventTimestamp
-    +String eventType
-  }
-  class PurchaseRequestedEvent {
-    +String product
-    +int quantity
-    +Integer purchaseId
-    +Long lagerItemId
-  }
-  class PurchaseResultEvent {
-    +Integer purchaseId
-    +boolean success
-    +String message
-  }
-  BaseEvent <|-- PurchaseRequestedEvent
-  BaseEvent <|-- PurchaseResultEvent
+ class BaseEvent {
+ +String eventId
+ +Instant eventTimestamp
+ +String eventType
+ }
+ class PurchaseRequestedEvent {
+ +String product
+ +int quantity
+ +Integer purchaseId
+ +Long lagerItemId
+ }
+ class PurchaseResultEvent {
+ +Integer purchaseId
+ +boolean success
+ +String message
+ }
+ BaseEvent <|-- PurchaseRequestedEvent
+ BaseEvent <|-- PurchaseResultEvent
 ```
 
 `BaseEvent` uses Jackson's `@JsonTypeInfo` to write a `_type` property and `@JsonSubTypes` to resolve `PurchaseRequested` and `PurchaseResult` back to Java classes. `JmsConfig` registers a `MappingJackson2MessageConverter` with `MessageType.TEXT`, the `JavaTimeModule` for `Instant` fields, and `_type` as the type-id property — the two `_type` settings must agree.

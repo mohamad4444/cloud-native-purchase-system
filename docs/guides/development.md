@@ -14,11 +14,11 @@ Run commands from the repository root and confirm your Kubernetes context before
 ## Existing Make targets
 
 ```bash
-make build-and-push              # Build common image, then all application images
-make deploy                      # Sync the entire staging Helmfile
-make release                     # Build/push, then staging sync
-make rollout-restart-inventory   # Restart inventory in staging
-make rollout-restart-purchase    # Restart purchase in staging
+make build-and-push # Build common image, then all application images
+make deploy # Sync the entire staging Helmfile
+make release # Build/push, then staging sync
+make rollout-restart-inventory # Restart inventory in staging
+make rollout-restart-purchase # Restart purchase in staging
 ```
 
 `make rollout-restart` restarts all deployments in staging. `stern-inventory` and related targets tail staging inventory logs, with optional JSON filtering and formatting through jq. These targets do not select `dev` automatically.
@@ -47,9 +47,9 @@ The charts use `Always` in the environment values, but pushing another image wit
 
 ```bash
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=inventory-service template --skip-needs
+ --selector name=inventory-service template --skip-needs
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=inventory-service sync --skip-needs
+ --selector name=inventory-service sync --skip-needs
 ```
 
 Check images, namespaces, selectors, and environment variables in the rendered resources. ConfigMap changes to the backends and Keycloak can be handled by Stakater Reloader when it is installed; without it, restart those workloads after updating environment-based configuration.

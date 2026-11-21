@@ -16,7 +16,7 @@ The response has this shape:
 
 ```json
 [
-  {"id": 1, "product": "Example product", "quantity": 10}
+ {"id": 1, "product": "Example product", "quantity": 10}
 ]
 ```
 
@@ -40,10 +40,10 @@ Request fields come from `PurchaseDtoIn`:
 
 ```json
 {
-  "id": 42,
-  "productName": "Example product",
-  "quantity": 1,
-  "timestamp": "2026-02-01T12:34:56"
+ "id": 42,
+ "productName": "Example product",
+ "quantity": 1,
+ "timestamp": "2026-02-01T12:34:56"
 }
 ```
 

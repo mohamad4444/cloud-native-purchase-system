@@ -24,17 +24,17 @@ An Alloy configuration is a graph of typed **components**. A component has a typ
 
 ```mermaid
 flowchart LR
-  A["discovery.kubernetes 'pods'<br/>find Pods via the API"] --> B["discovery.relabel 'pod_logs'<br/>create labels + __path__"]
-  B --> C["local.file_match 'pod_logs'<br/>expand path into files"]
-  C --> D["loki.source.file 'pod_logs'<br/>tail the files"]
-  D --> E["loki.write 'loki'<br/>push to Loki gateway"]
+ A["discovery.kubernetes 'pods'<br/>find Pods via the API"] --> B["discovery.relabel 'pod_logs'<br/>create labels + __path__"]
+ B --> C["local.file_match 'pod_logs'<br/>expand path into files"]
+ C --> D["loki.source.file 'pod_logs'<br/>tail the files"]
+ D --> E["loki.write 'loki'<br/>push to Loki gateway"]
 ```
 
 ### discovery.kubernetes
 
 ```alloy
 discovery.kubernetes "pods" {
-  role = "pod"
+ role = "pod"
 }
 ```
 
@@ -48,8 +48,8 @@ Discovery answers which Pods exist. It does not make their log files readable.
 
 ```alloy
 rule {
-  source_labels = ["__meta_kubernetes_namespace"]
-  target_label  = "namespace"
+ source_labels = ["__meta_kubernetes_namespace"]
+ target_label = "namespace"
 }
 ```
 
@@ -59,42 +59,42 @@ One rule builds `__path__`, which tells the next component which files to read:
 
 ```alloy
 rule {
-  source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-  separator     = "/"
-  target_label  = "__path__"
-  replacement   = "/var/log/pods/*$1/$2/*.log"
+ source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+ separator = "/"
+ target_label = "__path__"
+ replacement = "/var/log/pods/*$1/$2/*.log"
 }
 ```
 
 !!! warning "The replacement has no second capture group"
-    The `replacement` refers to `$1` and `$2`, but the rule has no `regex` with two capture groups, so `$2` is not filled from a second group. If Alloy finds no files, inspect this rule first. A two-capture form to compare with your node's paths is:
+ The `replacement` refers to `$1` and `$2`, but the rule has no `regex` with two capture groups, so `$2` is not filled from a second group. If Alloy finds no files, inspect this rule first. A two-capture form to compare with your node's paths is:
 
-    ```alloy
-    regex       = "(.*)/(.*)"
-    replacement = "/var/log/pods/*$1/$2/*.log"
-    ```
+ ```alloy
+ regex = "(.*)/(.*)"
+ replacement = "/var/log/pods/*$1/$2/*.log"
+ ```
 
-    This is a proposed correction, not a change already applied to the chart. See the [relabel reference](https://grafana.com/docs/alloy/latest/reference/components/discovery/discovery.relabel/).
+ This is a proposed correction, not a change already applied to the chart. See the [relabel reference](https://grafana.com/docs/alloy/latest/reference/components/discovery/discovery.relabel/).
 
 ### local.file_match
 
 ```alloy
 local.file_match "pod_logs" {
-  path_targets = discovery.relabel.pod_logs.output
+ path_targets = discovery.relabel.pod_logs.output
 }
 ```
 
 `local.file_match` expands the `__path__` pattern into files present on the node's filesystem.
 
 !!! note "Discovery is not access"
-    Alloy can discover every Pod in a cluster, but it can only read files mounted into its own Pod. The chart mounts `/var/log` and `/var/lib/docker/containers` and runs as root, which is how logs of other Pods on the same node become visible.
+ Alloy can discover every Pod in a cluster, but it can only read files mounted into its own Pod. The chart mounts `/var/log` and `/var/lib/docker/containers` and runs as root, which is how logs of other Pods on the same node become visible.
 
 ### loki.source.file
 
 ```alloy
 loki.source.file "pod_logs" {
-  targets    = local.file_match.pod_logs.targets
-  forward_to = [loki.write.loki.receiver]
+ targets = local.file_match.pod_logs.targets
+ forward_to = [loki.write.loki.receiver]
 }
 ```
 
@@ -104,9 +104,9 @@ loki.source.file "pod_logs" {
 
 ```alloy
 loki.write "loki" {
-  endpoint {
-    url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
-  }
+ endpoint {
+ url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+ }
 }
 ```
 
@@ -146,7 +146,7 @@ More queries are listed in [Grafana Alloy and logging](../monitoring-and-logging
 Logback in the [shared Java library](../concepts/common-library.md#how-a-request-is-observed) writes JSON lines to stdout with `app`, `userId`, `username`, `method`, and `class` fields. That happens inside the Java process. Alloy's work starts later, at the container log file:
 
 ```text
-Spring Boot  →  stdout (JSON)  →  node log file  →  Alloy  →  Loki  →  Grafana
+Spring Boot → stdout (JSON) → node log file → Alloy → Loki → Grafana
 ```
 
 ## Verify the collector
@@ -155,7 +155,7 @@ Spring Boot  →  stdout (JSON)  →  node log file  →  Alloy  →  Loki  → 
 kubectl get configmap alloy-config -n monitoring -o yaml
 kubectl get pods -n monitoring
 kubectl logs -n monitoring -l app.kubernetes.io/instance=alloy-logs \
-  --all-containers=true --tail=100
+ --all-containers=true --tail=100
 kubectl port-forward -n monitoring service/grafana 3000:80
 ```
 

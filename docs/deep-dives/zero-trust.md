@@ -1,12 +1,12 @@
 # Zero Trust explained
 
-Why "network location equals trust" no longer works, what replaces it, and how much of that this project implements. Thesis §2.11 is the source; [limitations](limitations.md#security-posture) states the gaps plainly.
+Why "network location equals trust" no longer works, what replaces it, and how much of that this project implements. The [limitations](limitations.md#security-posture) states the gaps plainly.
 
 ## The failure of the perimeter model
 
 Traditional security used a **castle-and-moat** model: a strong firewall at the edge, and implicit trust for anything inside. Firewalls, VPNs and network segmentation enforced the boundary.
 
-The thesis (§2.11.1) lists four shifts that dissolved that perimeter:
+The design lists four shifts that dissolved that perimeter:
 
 1. **No single perimeter** — resources span public clouds, private clouds and edge locations.
 2. **East-west traffic dominates** — in microservices most traffic is service-to-service *inside* the cluster; a perimeter filter cannot see lateral movement.
@@ -19,7 +19,7 @@ The flawed assumption is that **network location equates to trust**. In a dynami
 
 Formalised by NIST in **SP 800-207**, Zero Trust follows "**never trust, always verify**": every request — from a user, service or device — is authenticated, authorized and encrypted regardless of origin.
 
-| Principle | Meaning in the thesis |
+| Principle | Meaning in the design |
 | --- | --- |
 | Assume breach | Minimise blast radius through segmentation |
 | Verify explicitly | Use identity, device health, behaviour — not source IP |
@@ -29,31 +29,31 @@ Formalised by NIST in **SP 800-207**, Zero Trust follows "**never trust, always 
 
 ```mermaid
 flowchart TB
-  subgraph OLD["Castle-and-moat (obsolete)"]
-    direction LR
-    U["Untrusted outside"] --> F["Firewall / VPN"]
-    F --> T["Trusted inside<br/>(implicit trust)"]
-  end
-  subgraph NEW["Zero Trust"]
-    direction LR
-    R["Every request"] --> A["Authenticate + authorize"]
-    A --> E["Encrypt in transit"]
-    E --> P["Continuous policy check"]
-    P --> G["Grant / deny"]
-  end
-  OLD -.->|"perimeter dissolved"| NEW
+ subgraph OLD["Castle-and-moat (obsolete)"]
+ direction LR
+ U["Untrusted outside"] --> F["Firewall / VPN"]
+ F --> T["Trusted inside<br/>(implicit trust)"]
+ end
+ subgraph NEW["Zero Trust"]
+ direction LR
+ R["Every request"] --> A["Authenticate + authorize"]
+ A --> E["Encrypt in transit"]
+ E --> P["Continuous policy check"]
+ P --> G["Grant / deny"]
+ end
+ OLD -.->|"perimeter dissolved"| NEW
 ```
 
 ## Implementation patterns
 
-The thesis (§2.11.2) maps the principles to concrete technologies:
+The design maps the principles to concrete technologies:
 
 - **IAM as the central pillar** — users authenticate with OIDC; services may use client credentials; tokens carry claims and roles that resource servers enforce.
 - **Service mesh** — Istio or Linkerd provide mutual TLS for east-west traffic and fine-grained network policies such as "purchase-service may talk to inventory-service only on port 8080".
 - **Secrets management** — Vault or cloud key stores replace hard-coded credentials, with leasing and rotation.
 - **API gateway** — handles north-south traffic: TLS termination, token validation, rate limiting.
 
-The thesis is explicit that a service mesh is **not implemented** here; the project focuses on the foundational identity-centric layer as "the first and most critical step".
+The design is explicit that a service mesh is **not implemented** here; the project focuses on the foundational identity-centric layer as "the first and most critical step".
 
 ## What this project implements
 
@@ -87,11 +87,11 @@ There is no mTLS between Pods, no service mesh, and no network policy restrictin
 
 ## Verbose logging as a security risk
 
-The checked-in `JwtAuthConverter` logs token metadata, claims and a token fragment; `SecurityConfig` logs JWT header/payload prefixes; `PropertyLogger` logs configuration values including passwords. The thesis describes rich diagnostic logging, but these statements should not be copied into a real deployment. See [authentication and roles](../concepts/authentication.md#diagnose-access-failures) and [troubleshooting](../guides/troubleshooting.md#unpinned-infrastructure-and-local-credentials).
+The checked-in `JwtAuthConverter` logs token metadata, claims and a token fragment; `SecurityConfig` logs JWT header/payload prefixes; `PropertyLogger` logs configuration values including passwords. The design describes rich diagnostic logging, but these statements should not be copied into a real deployment. See [authentication and roles](../concepts/authentication.md#diagnose-access-failures) and [troubleshooting](../guides/troubleshooting.md#unpinned-infrastructure-and-local-credentials).
 
 ## Moving toward Zero Trust
 
-The thesis's future work (Chapter 7) proposes:
+The design's future work (Chapter 7) proposes:
 
 1. **mTLS between services**, ideally managed by Istio or Linkerd.
 2. **Proper RBAC** — least-privilege ServiceAccounts instead of `cluster-admin`.

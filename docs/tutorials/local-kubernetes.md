@@ -43,13 +43,13 @@ The local registry uses HTTP. Create a local BuildKit configuration and a builde
 mkdir -p .local
 cat > .local/buildkitd.toml <<'EOF'
 [registry."localhost:5000"]
-  http = true
-  insecure = true
+ http = true
+ insecure = true
 EOF
 
 docker buildx create --name purchase-docs-builder --use \
-  --driver docker-container --driver-opt network=host \
-  --buildkitd-config .local/buildkitd.toml
+ --driver docker-container --driver-opt network=host \
+ --buildkitd-config .local/buildkitd.toml
 docker buildx inspect --bootstrap
 ```
 
@@ -72,10 +72,10 @@ The release selector below limits the first deployment to frontend, Keycloak, th
 
 ```bash
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=frontend --selector name=keycloak \
-  --selector name=message-broker --selector name=inventory-service \
-  --selector name=purchase-service \
-  template --skip-needs > .local/dev-rendered.yaml
+ --selector name=frontend --selector name=keycloak \
+ --selector name=message-broker --selector name=inventory-service \
+ --selector name=purchase-service \
+ template --skip-needs > .local/dev-rendered.yaml
 ```
 
 Inspect `.local/dev-rendered.yaml`: image names should use `localhost:5000/`, resources should use `dev`, and the frontend and Keycloak ingress objects should be absent. Rendered manifests contain development secrets; keep them local.
@@ -84,10 +84,10 @@ Then apply that same selection:
 
 ```bash
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=frontend --selector name=keycloak \
-  --selector name=message-broker --selector name=inventory-service \
-  --selector name=purchase-service \
-  sync --skip-needs
+ --selector name=frontend --selector name=keycloak \
+ --selector name=message-broker --selector name=inventory-service \
+ --selector name=purchase-service \
+ sync --skip-needs
 kubectl get pods,svc,pvc -n dev
 kubectl rollout status deployment/inventory -n dev --timeout=300s
 kubectl rollout status deployment/purchase -n dev --timeout=300s

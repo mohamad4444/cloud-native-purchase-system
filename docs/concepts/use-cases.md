@@ -1,6 +1,6 @@
 # End-to-end use cases
 
-The demonstration chapter of the bachelor thesis walks through the running system from a user's point of view. This page keeps those scenarios and connects each one to the code and configuration behind it. To reproduce them yourself, follow [local Kubernetes](../tutorials/local-kubernetes.md) and [make your first purchase](../tutorials/first-purchase.md).
+This page walks through the running system from a user's point of view. This page keeps those scenarios and connects each one to the code and configuration behind it. To reproduce them yourself, follow [local Kubernetes](../tutorials/local-kubernetes.md) and [make your first purchase](../tutorials/first-purchase.md).
 
 ## 1. Sign in and load the frontend
 
@@ -25,23 +25,23 @@ The authenticated user loads the inventory and clicks *Finalize Purchase*. What 
 
 ```mermaid
 sequenceDiagram
-  participant UI as Frontend
-  participant Purchase
-  participant Artemis
-  participant Inventory
-  UI->>Purchase: POST /purchase-api/purchases
-  Purchase->>Purchase: save PENDING + publish request
-  Purchase-->>UI: HTTP 200 with purchase DTO
-  Artemis->>Inventory: purchase.requested
-  Inventory->>Inventory: check and reduce stock
-  Inventory->>Artemis: purchase.result
-  Artemis->>Purchase: PurchaseResultEvent
-  Purchase->>Purchase: result listener updates to CONFIRMED or REJECTED
+ participant UI as Frontend
+ participant Purchase
+ participant Artemis
+ participant Inventory
+ UI->>Purchase: POST /purchase-api/purchases
+ Purchase->>Purchase: save PENDING + publish request
+ Purchase-->>UI: HTTP 200 with purchase DTO
+ Artemis->>Inventory: purchase.requested
+ Inventory->>Inventory: check and reduce stock
+ Inventory->>Artemis: purchase.result
+ Artemis->>Purchase: PurchaseResultEvent
+ Purchase->>Purchase: result listener updates to CONFIRMED or REJECTED
 ```
 
-The thesis describes the outcome the user sees: if stock is sufficient the purchase becomes **Completed**, otherwise **Rejected**. In the checked-in code those states are named `CONFIRMED` and `REJECTED`, with `PENDING` while the broker work is in flight; the [messaging page](messaging.md) explains the names and the timing.
+The design describes the outcome the user sees: if stock is sufficient the purchase becomes **Completed**, otherwise **Rejected**. In the checked-in code those states are named `CONFIRMED` and `REJECTED`, with `PENDING` while the broker work is in flight; the [messaging page](messaging.md) explains the names and the timing.
 
-Under heavy use, Inventory can become the bottleneck and purchases accumulate in `PENDING`. The thesis points to horizontal scaling — more Inventory replicas — as the response. The charts expose replica counts as values, though no Horizontal Pod Autoscaler is configured.
+Under heavy use, Inventory can become the bottleneck and purchases accumulate in `PENDING`. The design points to horizontal scaling — more Inventory replicas — as the response. The charts expose replica counts as values, though no Horizontal Pod Autoscaler is configured.
 
 ## 3. Run the CI/CD pipeline
 

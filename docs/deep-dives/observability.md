@@ -1,20 +1,20 @@
 # Observability explained
 
-The three pillars, how the application produces usable signals, and what the deployed stack actually does with them. Thesis §§2.16–2.17 give the theory; §4.8 and the [logging guide](../monitoring-and-logging.md) cover operations.
+The three pillars, how the application produces usable signals, and what the deployed stack actually does with them. The [logging guide](../monitoring-and-logging.md) covers operations.
 
 ## Monitoring vs observability
 
-The thesis (§2.16) puts it neatly: **monitoring tells you *if*; observability tells you *why***. Observability means being able to infer a system's internal state from its external outputs — essential when a request crosses several processes and a failure can happen between them.
+A useful summary: **monitoring tells you *if*; observability tells you *why***. Observability means being able to infer a system's internal state from its external outputs — essential when a request crosses several processes and a failure can happen between them.
 
 ### The three pillars
 
-| Pillar | What it is | Tool in the thesis |
+| Pillar | What it is | Tool in the design |
 | --- | --- | --- |
 | **Logs** | Timestamped discrete events | Loki (log aggregation) |
 | **Metrics** | Numerical measurements over time | Prometheus (scraping + PromQL) |
 | **Traces** | End-to-end journey of a request | — (proposed, not implemented) |
 
-The thesis describes Prometheus as a pull-based metrics system, Loki as indexing only metadata labels (cheaper than full-text indexing), Promtail as the collection agent, and Grafana as the visualisation layer. In the Kubernetes deployment, **Grafana Alloy replaced Promtail** — see [Grafana Alloy](../technologies/grafana-alloy.md).
+The design describes Prometheus as a pull-based metrics system, Loki as indexing only metadata labels (cheaper than full-text indexing), Promtail as the collection agent, and Grafana as the visualisation layer. In the Kubernetes deployment, **Grafana Alloy replaced Promtail** — see [Grafana Alloy](../technologies/grafana-alloy.md).
 
 ## How the application produces logs
 
@@ -28,16 +28,16 @@ Five components in the `common` module shape a request's logs; see [the shared J
 
 ```mermaid
 flowchart TB
-  V["EarlyLoggingValve<br/>raw request + final status"]
-  S["Spring Security<br/>authenticate / authorize"]
-  M["MdcJwtFilter<br/>userId + username → MDC"]
-  C["Controllers"]
-  A["LoggingAspect<br/>duration + metrics"]
-  B["Business logic"]
-  V --> S --> M --> C --> A --> B
-  A -.-> L["logback JSON<br/>app · method · class · userId · username"]
-  M -.-> L
-  V -.-> L
+ V["EarlyLoggingValve<br/>raw request + final status"]
+ S["Spring Security<br/>authenticate / authorize"]
+ M["MdcJwtFilter<br/>userId + username → MDC"]
+ C["Controllers"]
+ A["LoggingAspect<br/>duration + metrics"]
+ B["Business logic"]
+ V --> S --> M --> C --> A --> B
+ A -.-> L["logback JSON<br/>app · method · class · userId · username"]
+ M -.-> L
+ V -.-> L
 ```
 
 The nesting matters: if a request is rejected by a filter, the valve still records it, while the MDC filter only runs when authentication has already populated the principal.
@@ -48,29 +48,29 @@ Unstructured text needs regex parsing, breaks easily when formats change, and sc
 
 ```json
 {
-  "timestamp": "...",
-  "level": "INFO",
-  "app": "inventory",
-  "method": "getAllProducts",
-  "class": "...ProductService",
-  "userId": "...",
-  "username": "demo001",
-  "message": "Method Exited Successfully ... [47ms]"
+ "timestamp": "...",
+ "level": "INFO",
+ "app": "inventory",
+ "method": "getAllProducts",
+ "class": "...ProductService",
+ "userId": "...",
+ "username": "demo001",
+ "message": "Method Exited Successfully ... [47ms]"
 }
 ```
 
-The thesis shows richer examples with `event`, `args` and `traceId`; the checked-in Logback config includes only `method`, `class`, `userId` and `username` as MDC keys.
+The design shows richer examples with `event`, `args` and `traceId`; the checked-in Logback config includes only `method`, `class`, `userId` and `username` as MDC keys.
 
 ## The deployed log pipeline
 
 ```mermaid
 flowchart LR
-  J["Spring JSON to stdout"] --> F["Node container log files"]
-  F --> AL["Alloy: discovery → relabel → file_match → source.file"]
-  AL --> GW1["loki-gateway (write)"]
-  GW1 --> LS["Loki storage"]
-  G["Grafana Explore"] --> GW2["loki-gateway (query)"]
-  LS --> GW2
+ J["Spring JSON to stdout"] --> F["Node container log files"]
+ F --> AL["Alloy: discovery → relabel → file_match → source.file"]
+ AL --> GW1["loki-gateway (write)"]
+ GW1 --> LS["Loki storage"]
+ G["Grafana Explore"] --> GW2["loki-gateway (query)"]
+ LS --> GW2
 ```
 
 Alloy discovers Pods through the Kubernetes API, copies selected labels (`namespace`, `pod`, `container`, `microserviceName`, `component`, `env`) and builds a file path from the Pod UID and container name. It tails the file and pushes lines to the Loki gateway. Grafana queries the same gateway through its provisioned Loki data source.
@@ -99,11 +99,11 @@ There is **no Prometheus server, scrape configuration, or Grafana metrics data s
 
 ## Traces: not implemented
 
-The thesis describes correlation IDs propagated across calls and messages, and later proposes OpenTelemetry. The code has **no** trace or correlation ID: `BaseEvent.eventId` is a UUID for each event but is not written into logs or passed between services. `LoggingAspect` is proxy-based method interception, not distributed tracing. See [limitations](limitations.md#observability-gaps).
+The design describes correlation IDs propagated across calls and messages, and later proposes OpenTelemetry. The code has **no** trace or correlation ID: `BaseEvent.eventId` is a UUID for each event but is not written into logs or passed between services. `LoggingAspect` is proxy-based method interception, not distributed tracing. See [limitations](limitations.md#observability-gaps).
 
 ## Theory vs implementation summary
 
-| Thesis description | Repository reality |
+| description | Repository reality |
 | --- | --- |
 | Promtail as collector | Alloy in Kubernetes, Promtail only in the earlier Compose prototype |
 | Prometheus + Grafana dashboards | Only Loki + Grafana logs; no Prometheus server |

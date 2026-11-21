@@ -69,11 +69,11 @@ For this project most inspection can also be done with plain `kubectl` — see [
 ## Installation and verification
 
 ```bash
-./scripts/install-tools.sh --check        # verify what is installed
-./scripts/install-tools.sh                # install required tools
-./scripts/install-tools.sh --optional     # add inspectors
-./scripts/install-tools.sh --dashboards   # add browser dashboards
-./scripts/install-tools.sh --help         # full options
+./scripts/install-tools.sh --check # verify what is installed
+./scripts/install-tools.sh # install required tools
+./scripts/install-tools.sh --optional # add inspectors
+./scripts/install-tools.sh --dashboards # add browser dashboards
+./scripts/install-tools.sh --help # full options
 ```
 
 The script is idempotent: it skips existing tools, reads pinned versions from `.env`, supports Arch/EndeavourOS, Debian/Ubuntu and Fedora, and never deletes a cluster. The AppImage tools (Lens, Freelens, Headlamp) require FUSE.

@@ -1,16 +1,16 @@
 # Limitations and evaluation
 
-An honest assessment of what the project does and does not do. The thesis (Chapter 6) evaluates the system against its goals; this page keeps those findings and connects them to the checked-in configuration. The [problems and fixes](../problems-and-fixes.md) page records how the working parts were debugged.
+An honest assessment of what the project does and does not do. This evaluates the system against its goals and connects the findings to the checked-in configuration. The [problems and fixes](../problems-and-fixes.md) page records how the working parts were debugged.
 
 ## What the project achieves
 
-The thesis concludes that the main objective was met: a modular, containerised purchase system running on Kubernetes. Its stated strengths are:
+The design concludes that the main objective was met: a modular, containerised purchase system running on Kubernetes. Its stated strengths are:
 
 - **Decoupled architecture.** REST for immediate queries, Artemis for the workflow that spans services.
 - **Consistency through shared code.** Parent POMs and the `common` library give every service the same security, logging, and event behaviour.
 - **Repeatable deployment.** Helm charts and one Helmfile select an environment and render all resources.
 - **Centralised application security.** Keycloak issues tokens; Spring Security enforces roles through shared configuration.
-- **Small footprint.** The thesis reports roughly **3.1 GB of memory and 8 Pods** for the full staging stack — suitable for a laptop with Minikube.
+- **Small footprint.** The design reports roughly **3.1 GB of memory and 8 Pods** for the full staging stack — suitable for a laptop with Minikube.
 
 ## Operational limitations
 
@@ -25,7 +25,7 @@ The thesis concludes that the main objective was met: a modular, containerised p
 
 - **No metrics pipeline.** Spring Actuator exposes `/actuator/prometheus` and `LoggingAspect` records Micrometer meters, but no Prometheus server or dashboards are deployed. See [monitoring](../monitoring-and-logging.md#metrics-are-exposed-but-collection-is-unfinished).
 - **Logging is partial.** Alloy ships raw lines; there is no `loki.process` stage to parse CRI envelopes or JSON, and the checked-in `__path__` relabel rule has a suspect replacement. See [Grafana Alloy](../technologies/grafana-alloy.md#discoveryrelabel).
-- **No tracing.** The thesis describes correlation IDs, but the code adds only user, method and class context to logs — no trace or correlation ID is propagated across services. See [the shared library](../concepts/common-library.md#how-a-request-is-observed).
+- **No tracing.** The design describes correlation IDs, but the code adds only user, method and class context to logs — no trace or correlation ID is propagated across services. See [the shared library](../concepts/common-library.md#how-a-request-is-observed).
 
 ## Security posture
 
@@ -52,31 +52,31 @@ The thesis concludes that the main objective was met: a modular, containerised p
 
 ```mermaid
 flowchart TB
-  subgraph S["Strengths"]
-    direction LR
-    S1["Event-driven design"]
-    S2["Shared code + POMs"]
-    S3["Helm/Helmfile automation"]
-    S4["Keycloak security"]
-    S5["Small footprint (~3.1 GB, 8 pods)"]
-  end
-  subgraph W["Weaknesses"]
-    direction LR
-    W1["Operational friction"]
-    W2["No automated tests"]
-    W3["No metrics / tracing"]
-    W4["Broad RBAC / no mTLS"]
-    W5["Single-instance stateful services"]
-  end
-  S --> V["Well suited as a local learning<br/>and demonstration platform"]
-  W --> V
+ subgraph S["Strengths"]
+ direction LR
+ S1["Event-driven design"]
+ S2["Shared code + POMs"]
+ S3["Helm/Helmfile automation"]
+ S4["Keycloak security"]
+ S5["Small footprint (~3.1 GB, 8 pods)"]
+ end
+ subgraph W["Weaknesses"]
+ direction LR
+ W1["Operational friction"]
+ W2["No automated tests"]
+ W3["No metrics / tracing"]
+ W4["Broad RBAC / no mTLS"]
+ W5["Single-instance stateful services"]
+ end
+ S --> V["Well suited as a local learning<br/>and demonstration platform"]
+ W --> V
 ```
 
-The thesis treats this as a successful learning outcome rather than a production deployment: the architecture is sound, but reliability, security, and observability need significant work before the same design could be used for real users.
+The design treats this as a successful learning outcome rather than a production deployment: the architecture is sound, but reliability, security, and observability need significant work before the same design could be used for real users.
 
 ## Future work
 
-The thesis proposes these next steps, grouped by goal:
+The design proposes these next steps, grouped by goal:
 
 | Goal | Proposed work |
 | --- | --- |

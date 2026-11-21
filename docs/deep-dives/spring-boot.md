@@ -13,7 +13,7 @@ A plain Spring application needs a lot of setup: which beans exist, which web se
 | **Starters** | Curated dependency bundles | `web`, `security`, `oauth2-resource-server`, `data-jpa`, `actuator`, `artemis`, `aop` in the base POM |
 | **Externalised configuration** | Values come from properties, environment variables and profiles | `application-common.properties` uses `${DATASOURCE_URL:...}` placeholders injected by Kubernetes ConfigMaps/Secrets |
 
-The application is a **fat JAR** with a `main()` method and an **embedded Tomcat** — there is no separate web server process. `server.port=${SERVER_PORT:8080}` is why every backend container listens on 8080.
+The application is a **fat JAR** with a `main` method and an **embedded Tomcat** — there is no separate web server process. `server.port=${SERVER_PORT:8080}` is why every backend container listens on 8080.
 
 ### The IoC container
 
@@ -24,7 +24,7 @@ Spring's Inversion-of-Control container creates and wires beans. When a class ne
 @RestController
 @RequestMapping("inventory-api")
 public class ProductController {
-    private final LagerService productService;
+ private final LagerService productService;
 }
 ```
 
@@ -46,53 +46,53 @@ This is the part that shows how the pieces really fit. A `GET /inventory-api/inv
 
 ```mermaid
 sequenceDiagram
-  autonumber
-  participant C as Browser
-  participant T as Tomcat connector
-  participant V as EarlyLoggingValve
-  participant SF as Spring Security filter chain
-  participant LOG as Inline logging filter
-  participant JWT as Bearer-token filter + JwtAuthConverter
-  participant MDC as MdcJwtFilter
-  participant DS as DispatcherServlet
-  participant PX as AOP proxy (LoggingAspect)
-  participant CTRL as Controller
-  participant SVC as Service
-  participant REPO as Repository
-  participant DB as PostgreSQL
+ autonumber
+ participant C as Browser
+ participant T as Tomcat connector
+ participant V as EarlyLoggingValve
+ participant SF as Spring Security filter chain
+ participant LOG as Inline logging filter
+ participant JWT as Bearer-token filter + JwtAuthConverter
+ participant MDC as MdcJwtFilter
+ participant DS as DispatcherServlet
+ participant PX as AOP proxy (LoggingAspect)
+ participant CTRL as Controller
+ participant SVC as Service
+ participant REPO as Repository
+ participant DB as PostgreSQL
 
-  C->>T: HTTP request
-  T->>V: Tomcat context valve
-  V->>V: log "EARLY TOMCAT Incoming Request: method, uri"
-  V->>SF: getNext().invoke(...)
-  Note over SF: Spring sees the request only NOW
-  SF->>LOG: filter added before pre-auth filter
-  LOG->>LOG: method, URI, IP, User-Agent,<br/>Authorization length, JWT head, auth state
-  LOG->>JWT: continue chain
-  JWT->>JWT: validate signature, issuer, expiry;<br/>map roles → ROLE_USER
-  JWT->>MDC: SecurityContext now populated
-  MDC->>MDC: MDC.put(userId=sub, username=preferred_username)
-  MDC->>DS: continue chain
-  DS->>DS: HandlerMapping selects controller method
-  DS->>PX: invoke proxied controller
-  PX->>PX: MDC.put(method, class); start timer
-  PX->>CTRL: proceed()
-  CTRL->>SVC: call proxied service
-  SVC->>SVC: aspect logs again (nested)
-  SVC->>REPO: call proxied repository
-  REPO->>DB: SQL query
-  DB-->>REPO: rows
-  REPO-->>SVC: entities
-  SVC-->>CTRL: result
-  CTRL-->>PX: return
-  PX->>PX: log exit + duration; record Micrometer meters;<br/>MDC.remove(method, class)
-  PX-->>DS: response
-  DS-->>MDC: unwind filters
-  MDC->>MDC: finally → MDC.clear()
-  MDC-->>SF: continue
-  SF-->>V: response
-  V->>V: log "EARLY TOMCAT Outgoing Response: status"
-  V-->>C: HTTP response
+ C->>T: HTTP request
+ T->>V: Tomcat context valve
+ V->>V: log "EARLY TOMCAT Incoming Request: method, uri"
+ V->>SF: getNext.invoke(...)
+ Note over SF: Spring sees the request only NOW
+ SF->>LOG: filter added before pre-auth filter
+ LOG->>LOG: method, URI, IP, User-Agent,<br/>Authorization length, JWT head, auth state
+ LOG->>JWT: continue chain
+ JWT->>JWT: validate signature, issuer, expiry;<br/>map roles → ROLE_USER
+ JWT->>MDC: SecurityContext now populated
+ MDC->>MDC: MDC.put(userId=sub, username=preferred_username)
+ MDC->>DS: continue chain
+ DS->>DS: HandlerMapping selects controller method
+ DS->>PX: invoke proxied controller
+ PX->>PX: MDC.put(method, class); start timer
+ PX->>CTRL: proceed
+ CTRL->>SVC: call proxied service
+ SVC->>SVC: aspect logs again (nested)
+ SVC->>REPO: call proxied repository
+ REPO->>DB: SQL query
+ DB-->>REPO: rows
+ REPO-->>SVC: entities
+ SVC-->>CTRL: result
+ CTRL-->>PX: return
+ PX->>PX: log exit + duration; record Micrometer meters;<br/>MDC.remove(method, class)
+ PX-->>DS: response
+ DS-->>MDC: unwind filters
+ MDC->>MDC: finally → MDC.clear
+ MDC-->>SF: continue
+ SF-->>V: response
+ V->>V: log "EARLY TOMCAT Outgoing Response: status"
+ V-->>C: HTTP response
 ```
 
 ### 1. Tomcat and the valve — logging before Spring exists
@@ -101,8 +101,8 @@ The request first hits the embedded Tomcat connector. A context **valve** (`Earl
 
 ```java
 log.info("EARLY TOMCAT Incoming Request: method={}, uri={}", ...);
-getNext().invoke(request, response);   // continue into Spring
-log.info("EARLY TOMCAT Outgoing Response: status={}", response.getStatus());
+getNext.invoke(request, response); // continue into Spring
+log.info("EARLY TOMCAT Outgoing Response: status={}", response.getStatus);
 ```
 
 This is the "smart logging even before the request arrives" idea: because the valve wraps the entire chain, it records the raw request even if authentication rejects it later, and it always records the final status on the way out. Nothing in Spring can suppress those two lines. See [the shared library](../concepts/common-library.md#how-a-request-is-observed).
@@ -124,7 +124,7 @@ MDC.put("userId", jwt.getClaimAsString("sub"));
 MDC.put("username", jwt.getClaimAsString("preferred_username"));
 ```
 
-Its `finally` block calls `MDC.clear()` so values cannot leak into the next request on a pooled thread.
+Its `finally` block calls `MDC.clear` so values cannot leak into the next request on a pooled thread.
 
 A subtlety worth understanding: `LoggingConfig` registers this filter with `Ordered.LOWEST_PRECEDENCE - 10`. The source comment claims this makes it "run early", but in Spring a *lower* order value means *higher* precedence — `LOWEST_PRECEDENCE - 10` actually places it very **late** in the chain. That is precisely what the filter needs: it must run after Spring Security so the principal exists. The [observability page](observability.md) notes the same point.
 
@@ -138,14 +138,14 @@ Because `LoggingAspect` has a pointcut over `service..*`, `controller..*` and `r
 
 ```text
 Method Entered: InventoryController.getAllProducts
-  Method Entered: InventoryService.getAllProducts
-    Method Entered: ProductRepository.findAll
-    Method Exited:  ProductRepository.findAll [45ms]
-  Method Exited:  InventoryService.getAllProducts [47ms]
-Method Exited:  InventoryController.getAllProducts [48ms]
+ Method Entered: InventoryService.getAllProducts
+ Method Entered: ProductRepository.findAll
+ Method Exited: ProductRepository.findAll [45ms]
+ Method Exited: InventoryService.getAllProducts [47ms]
+Method Exited: InventoryController.getAllProducts [48ms]
 ```
 
-Each proxy puts `method` and `class` into the MDC, starts a timer, calls `proceed()` (the real method), then records duration and Micrometer meters, warns if the call took more than one second, and removes its MDC keys. See [AOP explained](aop.md#the-projects-loggingaspect).
+Each proxy puts `method` and `class` into the MDC, starts a timer, calls `proceed` (the real method), then records duration and Micrometer meters, warns if the call took more than one second, and removes its MDC keys. See [AOP explained](aop.md#the-projects-loggingaspect).
 
 ### 6. The unwind
 

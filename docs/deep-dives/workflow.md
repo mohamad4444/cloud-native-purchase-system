@@ -1,8 +1,8 @@
 # The complete development workflow
 
-Everything from thesis §4.7 in one place: cluster setup, registry access, image builds, environment values, dual environments, host routing, certificates and the full loop. The [tutorials](../tutorials/local-kubernetes.md) do the same steps interactively; this page explains why each one exists.
+Everything about the development workflow in one place: cluster setup, registry access, image builds, environment values, dual environments, host routing, certificates and the full loop. The [tutorials](../tutorials/local-kubernetes.md) do the same steps interactively; this page explains why each one exists.
 
-## 1. Minikube cluster configuration (§4.7.2)
+## 1. Minikube cluster configuration
 
 The one-time bootstrap from `scripts/startup.sh`:
 
@@ -15,7 +15,7 @@ minikube addons enable metrics-server
 minikube addons enable registry
 ```
 
-| Choice | Reason from the thesis |
+| Choice | Reason from the design |
 | --- | --- |
 | Docker driver | Native Docker integration and consistent runtime behaviour |
 | 8 GB memory | Enough for Keycloak, the monitoring stack and several services |
@@ -26,7 +26,7 @@ minikube addons enable registry
 
 Ongoing cluster commands: `minikube stop` to pause, `minikube start` to resume, `minikube delete` to tear down. The tutorial avoids `scripts/startup.sh` for everyday use because it starts with `minikube delete` — see [troubleshooting](../guides/troubleshooting.md#existing-helper-script-limitations).
 
-## 2. Registry port forwarding (§4.7.2)
+## 2. Registry port forwarding
 
 After every restart, the local registry must be reachable from the host:
 
@@ -36,7 +36,7 @@ nohup kubectl port-forward -n kube-system service/registry 5000:80 > portforward
 
 This creates a tunnel from host port 5000 to the in-cluster registry Service, so `docker push localhost:5000/...` works from the host while Pods pull from the same registry internally. `nohup` keeps the tunnel alive across terminal sessions. The host/node address confusion this creates is one of the project's recurring debugging problems — see [problems and fixes](../problems-and-fixes.md#pods-could-not-pull-images-from-the-in-cluster-registry).
 
-## 3. Build and push (§4.7.3)
+## 3. Build and push
 
 ```bash
 docker buildx bake builder-common --push
@@ -45,7 +45,7 @@ docker buildx bake application-images --push
 
 The first command builds the shared Maven-cache image; the second builds the six application images. CI does the same but first rewrites `REGISTRY` to the cluster-internal address. See [containers and builds](containers.md).
 
-## 4. Deploy with Helmfile (§4.7.4)
+## 4. Deploy with Helmfile
 
 ```bash
 helmfile -e staging --file ./environments sync
@@ -56,14 +56,14 @@ One Helmfile defines all releases. Environment selection (`-e`) chooses the valu
 
 ```mermaid
 flowchart LR
-  A["1 · minikube start<br/>+ addons"] --> B["2 · port-forward registry"]
-  B --> C["3 · buildx bake --push"]
-  C --> D["4 · helmfile sync<br/>(dev or staging)"]
-  D --> E["5 · verify via hosts/<br/>port forwards"]
-  E --> F["6 · observe logs"]
+ A["1 · minikube start<br/>+ addons"] --> B["2 · port-forward registry"]
+ B --> C["3 · buildx bake --push"]
+ C --> D["4 · helmfile sync<br/>(dev or staging)"]
+ D --> E["5 · verify via hosts/<br/>port forwards"]
+ E --> F["6 · observe logs"]
 ```
 
-## 5. Dual environment strategy (§4.7.6)
+## 5. Dual environment strategy
 
 | | `dev` | `staging` |
 | --- | --- | --- |
@@ -76,7 +76,7 @@ flowchart LR
 
 Both environments run the same images and charts; only the values differ. This is dev/prod parity in practice. See [Kubernetes, Helm and Helmfile](../concepts/kubernetes-and-helm.md#namespaces-and-shared-infrastructure).
 
-## 6. Hosts file configuration (§4.7.7)
+## 6. Hosts file configuration
 
 Staging hostnames are local names, not public DNS:
 
@@ -89,13 +89,13 @@ minikube ip
 
 The Minikube IP can change after a restart, so the hosts file may need updating. `scripts/update-hosts.sh` automates it. The Ingress controller routes by the `Host` header, so without these entries the browser never reaches the right Service. See [certificate management](../certificate-management.md#4-verify-https).
 
-## 7. Certificates and security (§4.7.8)
+## 7. Certificates and security
 
 Namespaces isolate security-sensitive components: `cert-manager` for the CA and issuer, `gitlab-runner` for CI, `monitoring` for logs, and `dev`/`staging` for applications. The CA secret, ClusterIssuer and TLS Secrets are described in [HTTPS and PKI](pki.md#how-the-project-uses-it).
 
-## 8. Complete loop (§4.7.9)
+## 8. Complete loop
 
-The thesis's "iterative development process" is:
+The design's "iterative development process" is:
 
 1. **Cluster initialisation** — one-time Minikube setup with addons.
 2. **Registry configuration** — port forward for local image pushes.

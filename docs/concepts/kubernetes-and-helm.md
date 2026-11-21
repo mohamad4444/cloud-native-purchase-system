@@ -8,10 +8,10 @@ The development environment contains this configuration in `environments/values/
 
 ```yaml
 globalConfig:
-  namespace: "dev"
-  profile: "dev"
-  registry: "localhost:5000/"
-  pullPolicy: Always
+ namespace: "dev"
+ profile: "dev"
+ registry: "localhost:5000/"
+ pullPolicy: Always
 ```
 
 The inventory release in `environments/helmfile.yaml` uses `charts/inventory-service-chart` and the values template `environments/values/env/env-magic.gotmpl`. That template takes values for the release name, adds `globalConfig`, and passes the result to Helm.
@@ -56,7 +56,7 @@ Helmfile `needs` expresses release ordering, but it does not replace application
 
 ```bash
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=inventory-service template --skip-needs
+ --selector name=inventory-service template --skip-needs
 kubectl get pods -n dev --show-labels
 kubectl get endpoints -n dev inventory-service
 ```

@@ -1,6 +1,6 @@
 # CI/CD pipeline in depth
 
-How a push becomes a deployment. Thesis §§2.20–2.21 introduce GitLab CI and the Runner; §3.4.2 describes the infrastructure; §4 documents the build Pod. The [development workflow](../guides/development.md) shows the local equivalent.
+How a push becomes a deployment. GitLab CI and a Kubernetes-based Runner automate builds and deployments. The [development workflow](../guides/development.md) shows the local equivalent.
 
 ## Continuous integration and delivery
 
@@ -15,32 +15,32 @@ The project's pipeline has three stages — `test`, `build`, `deploy` — plus a
 | `deploy_helm` | deploy | Runs `helmfile --file ./environments -e staging sync` |
 | `docs-build` | test | Installs `requirements-docs.txt` in `python:3.13-slim`, runs `zensical build --strict`, uploads `site/` as an artifact; only runs when docs-related files change |
 
-All jobs are tagged `kubernetes`, so the in-cluster runner picks them up. The thesis describes a simpler two-stage pipeline (build + deploy); the extra test and docs jobs are additions.
+All jobs are tagged `kubernetes`, so the in-cluster runner picks them up. The design describes a simpler two-stage pipeline (build + deploy); the extra test and docs jobs are additions.
 
 ```mermaid
 sequenceDiagram
-  autonumber
-  actor Dev
-  participant GL as GitLab
-  participant R as GitLab Runner
-  participant K as Kubernetes API
-  participant Pod as Ephemeral Build Pod (dind)
-  Dev->>GL: git push
-  GL->>R: pipeline jobs (test, build, deploy)
-  loop one ephemeral Pod per job
-    R->>K: create Build Pod
-    K-->>Pod: schedule
-    Pod->>Pod: clone repo
-    Pod->>Pod: job script (test / build+push / helmfile sync)
-    Pod-->>R: job status
-    R->>K: delete Build Pod
-  end
-  R-->>GL: report pipeline status
+ autonumber
+ actor Dev
+ participant GL as GitLab
+ participant R as GitLab Runner
+ participant K as Kubernetes API
+ participant Pod as Ephemeral Build Pod (dind)
+ Dev->>GL: git push
+ GL->>R: pipeline jobs (test, build, deploy)
+ loop one ephemeral Pod per job
+ R->>K: create Build Pod
+ K-->>Pod: schedule
+ Pod->>Pod: clone repo
+ Pod->>Pod: job script (test / build+push / helmfile sync)
+ Pod-->>R: job status
+ R->>K: delete Build Pod
+ end
+ R-->>GL: report pipeline status
 ```
 
 ## The GitLab Runner
 
-A **Runner** is an agent separate from GitLab that executes jobs. It "phones home" to the GitLab instance using a registration token, then polls for work. The thesis (§2.21) shows the registration flow; this project registers a runner deployed inside Kubernetes.
+A **Runner** is an agent separate from GitLab that executes jobs. It "phones home" to the GitLab instance using a registration token, then polls for work. The design shows the registration flow; this project registers a runner deployed inside Kubernetes.
 
 The **Kubernetes executor** creates a temporary Pod for each job rather than running jobs on a fixed machine. Benefits: isolation, automatic cleanup, and scaling with the cluster. The relevant settings in `environments/values/charts/runner.yaml` are:
 
@@ -91,9 +91,9 @@ helmfile --file ./environments -e staging sync
 
 Helmfile reads `environments/helmfile.yaml`, selects `staging.yaml` values, composes per-release values through `env-magic.gotmpl`, and applies all releases in dependency order. The details of that mechanism are in [Helm values in depth](helm-values.md).
 
-## Runner command examples (§2.21)
+## Runner command examples
 
-The thesis gives concrete examples of what job scripts can do. These are the categories worth knowing.
+The design gives concrete examples of what job scripts can do. These are the categories worth knowing.
 
 ### Runner lifecycle commands
 
@@ -107,13 +107,13 @@ The thesis gives concrete examples of what job scripts can do. These are the cat
 
 In this project the runner is installed by a Helm chart, so lifecycle management happens through Helmfile rather than direct `gitlab-runner` commands.
 
-### Basic and filesystem commands (§2.21.1–2.21.2)
+### Basic and filesystem commands
 
 A job runs arbitrary shell commands in the build image. Common groups:
 
 ```bash
-mkdir -p build && cp target/app.jar build/       # prepare artefacts
-find . -name '*.log' -delete                     # clean up
+mkdir -p build && cp target/app.jar build/ # prepare artefacts
+find . -name '*.log' -delete # clean up
 ```
 
 ### Build and dependency commands
@@ -141,15 +141,15 @@ minikube service list
 
 These appear throughout the tutorials and Make targets; see [development workflow](../guides/development.md).
 
-### A simple three-stage pipeline (§2.21.3)
+### A simple three-stage pipeline
 
-The thesis illustrates a pipeline with `build`, `test`, `deploy` stages — compile, run tests, then apply manifests and restart a rollout. This project's real pipeline is in `.gitlab-ci.yml` and adds a `docs-build` validation job; see [the pipeline definition](#continuous-integration-and-delivery).
+The design illustrates a pipeline with `build`, `test`, `deploy` stages — compile, run tests, then apply manifests and restart a rollout. This project's real pipeline is in `.gitlab-ci.yml` and adds a `docs-build` validation job; see [the pipeline definition](#continuous-integration-and-delivery).
 
-### Multi-environment deployment (§2.21.3)
+### Multi-environment deployment
 
-The thesis shows separate deploy jobs selecting different kubectl contexts and Helm values files for Minikube and production. This project instead uses **one** Helmfile with `-e dev` or `-e staging`, and CI always deploys `staging`. That keeps a single source of deployment truth; see [Helm values in depth](helm-values.md#helmfile-orchestration).
+The design shows separate deploy jobs selecting different kubectl contexts and Helm values files for Minikube and production. This project instead uses **one** Helmfile with `-e dev` or `-e staging`, and CI always deploys `staging`. That keeps a single source of deployment truth; see [Helm values in depth](helm-values.md#helmfile-orchestration).
 
-### Local-machine execution (§2.21.4)
+### Local-machine execution
 
 Runners can also execute on the host with a shell executor. Diagnostic commands such as `uname -a`, `df -h`, `free -m`, `curl -I` and `ping` help verify the environment. The `prerequisites` page gives the equivalent checks for a local setup — see [prerequisites](../getting-started/prerequisites.md#for-the-application).
 
@@ -163,9 +163,9 @@ Runners can also execute on the host with a shell executor. Diagnostic commands 
 4. optionally sets CI/CD variables and triggers a pipeline.
 
 ```bash
-GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh --dry-run   # preview
-GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh             # attach runner
-GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh --trigger  # also run a pipeline
+GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh --dry-run # preview
+GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh # attach runner
+GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh --trigger # also run a pipeline
 ```
 
 The runner is registered with tag `kubernetes`, matching the `tags: [kubernetes]` in `.gitlab-ci.yml`. The generated values override the build image with `registry.kube-system.svc.cluster.local:80/dind:latest`, which is the address Pods can actually reach (the checked-in `runner.yaml` still uses the host-only `localhost:5000` default).

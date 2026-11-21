@@ -4,11 +4,11 @@ This page follows a log from a Spring service to Grafana. The Kubernetes logging
 
 ```mermaid
 flowchart TB
-  Java[Spring logs to stdout] --> Runtime[Node container log files]
-  Runtime --> Alloy[Alloy collection pipeline]
-  Alloy --> Gateway[Loki gateway]
-  Gateway --> Loki[Loki storage]
-  Grafana[Grafana Explore] --> Gateway
+ Java[Spring logs to stdout] --> Runtime[Node container log files]
+ Runtime --> Alloy[Alloy collection pipeline]
+ Alloy --> Gateway[Loki gateway]
+ Gateway --> Loki[Loki storage]
+ Grafana[Grafana Explore] --> Gateway
 ```
 
 ## The application produces structured logs
@@ -33,8 +33,8 @@ For example, this rule preserves the namespace as a queryable label:
 
 ```alloy
 rule {
-  source_labels = ["__meta_kubernetes_namespace"]
-  target_label  = "namespace"
+ source_labels = ["__meta_kubernetes_namespace"]
+ target_label = "namespace"
 }
 ```
 
@@ -52,11 +52,11 @@ The checked-in path rule combines Pod UID and container name using `/`, then use
 
 ```alloy
 rule {
-  source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-  separator     = "/"
-  regex         = "(.*)/(.*)"
-  target_label  = "__path__"
-  replacement   = "/var/log/pods/*$1/$2/*.log"
+ source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+ separator = "/"
+ regex = "(.*)/(.*)"
+ target_label = "__path__"
+ replacement = "/var/log/pods/*$1/$2/*.log"
 }
 ```
 
@@ -70,12 +70,12 @@ This adds shared `monitoring` resources to the cluster. Review `loki-values.yml`
 
 ```bash
 helmfile --file environments/helmfile.yaml -e dev \
-  --selector name=monitoring-stack --selector name=loki \
-  --selector name=grafana --selector name=alloy-logs sync
+ --selector name=monitoring-stack --selector name=loki \
+ --selector name=grafana --selector name=alloy-logs sync
 kubectl get pods,svc,pvc -n monitoring
 kubectl get configmap alloy-config -n monitoring -o yaml
 kubectl logs -n monitoring -l app.kubernetes.io/instance=alloy-logs \
-  --all-containers=true --tail=100
+ --all-containers=true --tail=100
 kubectl port-forward -n monitoring service/grafana 3000:80
 ```
 

@@ -1,6 +1,6 @@
 # Keycloak and OIDC explained
 
-How browser sign-in produces a token that the Spring services trust. Thesis §2.12 covers the theory, §§2.11.3/4.9 the flows and setup. The short [authentication concept page](../concepts/authentication.md) is the practical summary.
+How browser sign-in produces a token that the Spring services trust. The short [authentication concept page](../concepts/authentication.md) is the practical summary.
 
 ## OAuth 2.0 and OpenID Connect
 
@@ -32,34 +32,34 @@ The custom Keycloak image copies the realm JSON into `/opt/keycloak/data/import`
 
 ## The authorization code flow with PKCE
 
-The browser is a **public client**: it cannot keep a secret, so it uses PKCE. The thesis's illustrative client `my-spa-app` is not the deployed one; the real client is `web-frontend-client` on port 4200.
+The browser is a **public client**: it cannot keep a secret, so it uses PKCE. The design's illustrative client `my-spa-app` is not the deployed one; the real client is `web-frontend-client` on port 4200.
 
 ```mermaid
 sequenceDiagram
-  autonumber
-  actor User
-  participant SPA as Browser (web-frontend-client)
-  participant KC as Keycloak
-  User->>SPA: Open frontend
-  SPA->>SPA: Generate code_verifier + SHA-256 challenge
-  SPA->>KC: /auth?client_id...&code_challenge=S256&state&nonce
-  KC-->>User: Login form
-  User->>KC: Credentials (demo001)
-  KC-->>SPA: 302 with code + state
-  SPA->>SPA: Validate state
-  SPA->>KC: /token with code + code_verifier (no secret)
-  KC->>KC: Hash verifier, compare with stored challenge
-  KC-->>SPA: access_token + id_token + refresh_token
-  SPA->>SPA: Store tokens; send Bearer on API calls
+ autonumber
+ actor User
+ participant SPA as Browser (web-frontend-client)
+ participant KC as Keycloak
+ User->>SPA: Open frontend
+ SPA->>SPA: Generate code_verifier + SHA-256 challenge
+ SPA->>KC: /auth?client_id...&code_challenge=S256&state&nonce
+ KC-->>User: Login form
+ User->>KC: Credentials (demo001)
+ KC-->>SPA: 302 with code + state
+ SPA->>SPA: Validate state
+ SPA->>KC: /token with code + code_verifier (no secret)
+ KC->>KC: Hash verifier, compare with stored challenge
+ KC-->>SPA: access_token + id_token + refresh_token
+ SPA->>SPA: Store tokens; send Bearer on API calls
 ```
 
-Why PKCE matters: if an attacker intercepts the authorization `code`, they still cannot exchange it without the original `code_verifier`, which never leaves the legitimate client. The thesis stresses `state` (CSRF protection) and `nonce` (replay protection) as additional required parameters.
+Why PKCE matters: if an attacker intercepts the authorization `code`, they still cannot exchange it without the original `code_verifier`, which never leaves the legitimate client. The design stresses `state` (CSRF protection) and `nonce` (replay protection) as additional required parameters.
 
-The actual authorization request recorded in the thesis demonstration (§5.1) uses `response_type=code`, `response_mode=fragment`, `scope=openid profile email offline_access`, random `state` and `nonce`, `code_challenge_method=S256`, realm `purchase-service-realm` and client `web-frontend-client`.
+The actual authorization request recorded in the design demonstration uses `response_type=code`, `response_mode=fragment`, `scope=openid profile email offline_access`, random `state` and `nonce`, `code_challenge_method=S256`, realm `purchase-service-realm` and client `web-frontend-client`.
 
 ## The token: structure and validation
 
-A JWT has three Base64Url parts: `HEADER.PAYLOAD.SIGNATURE` (§2.12.2). The header names the algorithm (RS256 here); the payload holds registered claims (`iss`, `sub`, `aud`, `exp`, `iat`) plus Keycloak roles; the signature proves the token was signed by Keycloak and not altered.
+A JWT has three Base64Url parts: `HEADER.PAYLOAD.SIGNATURE`. The header names the algorithm (RS256 here); the payload holds registered claims (`iss`, `sub`, `aud`, `exp`, `iat`) plus Keycloak roles; the signature proves the token was signed by Keycloak and not altered.
 
 JWTs are **self-contained** — the service does not query a session database — but that makes validation essential. The services are configured as OAuth2 **resource servers**:
 
@@ -82,25 +82,25 @@ See [issuer vs. JWK URL](../concepts/authentication.md#issuer-and-signing-keys-a
 3. Keep standard scope-derived authorities too.
 4. Use `preferred_username` (falling back to `sub`) as the principal name.
 
-Controllers then enforce `@PreAuthorize("hasRole('USER')")`. `JwtService.getUserId()` reads the `sub` claim so a new purchase can store the user's ID. The listing methods do **not** filter by that ID — see the [API reference](../reference/api.md#list-and-filter-purchases).
+Controllers then enforce `@PreAuthorize("hasRole('USER')")`. `JwtService.getUserId` reads the `sub` claim so a new purchase can store the user's ID. The listing methods do **not** filter by that ID — see the [API reference](../reference/api.md#list-and-filter-purchases).
 
 ## Where the user comes from
 
 The realm has one user in the default group:
 
 ```text
-realm:        purchase-service-realm
-user:         demo001 (password demo001)
-group:        /normal-user (default)
-client role:  User on web-frontend-client
-result:       ROLE_USER in the JWT → @PreAuthorize passes
+realm: purchase-service-realm
+user: demo001 (password demo001)
+group: /normal-user (default)
+client role: User on web-frontend-client
+result: ROLE_USER in the JWT → @PreAuthorize passes
 ```
 
-Registration is disabled, which the thesis lists as a functional limitation; there is no profile management either. See [limitations](limitations.md#functional-scope).
+Registration is disabled, which the design lists as a functional limitation; there is no profile management either. See [limitations](limitations.md#functional-scope).
 
 ## Service-to-service: theory vs. reality
 
-The thesis (§2.12.5) compares **token relay** (forward the user's token downstream) with the **client credentials** grant (a service acts as itself) and says token relay was chosen to preserve user context for auditing.
+The design compares **token relay** (forward the user's token downstream) with the **client credentials** grant (a service acts as itself) and says token relay was chosen to preserve user context for auditing.
 
 The checked-in code does **not** implement either pattern for downstream calls. The only user identity that flows onward is the `userId` stamped onto the purchase and included as `lagerItemId`/`purchaseId` metadata in the event — messages carry no token or user claims. Services validate tokens from the browser; they do not authenticate to each other. This is one of the clearest gaps between the design discussion and the implementation, and it is why [Zero Trust](zero-trust.md#east-west-traffic) is only partially addressed.
 

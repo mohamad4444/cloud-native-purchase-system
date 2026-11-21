@@ -1,10 +1,10 @@
 # Containers and builds
 
-How source code becomes an image that Kubernetes can run. Chapter 2 §2.5 of the thesis covers the theory; this page keeps it and maps every claim to the checked-in build files.
+How source code becomes an image that Kubernetes can run. This page explains the theory and maps every claim to the checked-in build files.
 
 ## Containers vs virtual machines
 
-A virtual machine virtualises hardware and runs a full guest operating system. A container virtualises at the **operating-system level**: it shares the host kernel but isolates processes, filesystems and networks. The thesis (§2.5) lists the reasons containers suit microservices:
+A virtual machine virtualises hardware and runs a full guest operating system. A container virtualises at the **operating-system level**: it shares the host kernel but isolates processes, filesystems and networks. The following reasons explain why containers suit microservices: the reasons containers suit microservices:
 
 - **Environment consistency** — the image carries the runtime and libraries, so "works on my machine" disappears.
 - **Isolation** — each service has its own filesystem and process space.
@@ -16,7 +16,7 @@ A virtual machine virtualises hardware and runs a full guest operating system. A
 
 Each Dockerfile instruction adds a cached **layer**. The Java services use a multi-stage build to keep the final image small: one stage compiles with Maven, a second stage copies only the JAR into a JRE image.
 
-The thesis's illustrative example:
+The design's illustrative example:
 
 ```dockerfile
 FROM maven:3.8.6-eclipse-temurin-17 AS build
@@ -49,7 +49,7 @@ Both Java service Dockerfiles follow this pattern. Because they inherit from the
 
 ## Buildx and BuildKit
 
-**Buildx** is a Docker CLI plugin backed by BuildKit. The thesis emphasises multi-platform images and manifest lists: a single tag can point to amd64 and arm64 variants, chosen automatically by the pulling client.
+**Buildx** is a Docker CLI plugin backed by BuildKit. The design emphasises multi-platform images and manifest lists: a single tag can point to amd64 and arm64 variants, chosen automatically by the pulling client.
 
 The project uses Buildx mainly for its **builder configuration** rather than multi-arch output:
 
@@ -63,7 +63,7 @@ The project uses Buildx mainly for its **builder configuration** rather than mul
 
 The local registry uses plain HTTP, so BuildKit must be told it is insecure — this is the `http = true, insecure = true` setting shown in the [Kubernetes tutorial](../tutorials/local-kubernetes.md#3-configure-buildx-for-the-local-http-registry).
 
-All Bake targets pin `platforms = ["linux/amd64"]`. The multi-platform manifest-list scenario is theory in the thesis, not something this project builds. See [limitations](limitations.md#reliability-and-performance).
+All Bake targets pin `platforms = ["linux/amd64"]`. The multi-platform manifest-list scenario is theory in the design, not something this project builds. See [limitations](limitations.md#reliability-and-performance).
 
 ## Bake targets and groups
 
@@ -79,18 +79,18 @@ Variables come from `.env`: `ARTEMIS_VERSION`, `KEYCLOAK_VERSION`, `NGINX_VERSIO
 
 ```mermaid
 flowchart TB
-  ENV[".env<br/>version pins"] --> BAKE["docker-bake.hcl"]
-  BAKE --> BASE["base-images<br/>builder-common"]
-  BAKE --> IND["independent images<br/>frontend · artemis · keycloak · dind"]
-  BASE --> JAVA["Java services<br/>(inherit cached Maven layer)"]
-  JAVA --> PUSH["push image"]
-  IND --> PUSH
-  PUSH --> K8S["Kubernetes pulls image"]
+ ENV[".env<br/>version pins"] --> BAKE["docker-bake.hcl"]
+ BAKE --> BASE["base-images<br/>builder-common"]
+ BAKE --> IND["independent images<br/>frontend · artemis · keycloak · dind"]
+ BASE --> JAVA["Java services<br/>(inherit cached Maven layer)"]
+ JAVA --> PUSH["push image"]
+ IND --> PUSH
+ PUSH --> K8S["Kubernetes pulls image"]
 ```
 
 ## Registries
 
-The thesis compares enterprise registries (Nexus, Artifactory, Harbor) with a local `registry:2`. This project uses the **Minikube registry addon** because it is light and needs almost no configuration; the reasoning is in [design decisions](../concepts/design-decisions.md#container-registry-minikube-addon-instead-of-nexus-or-harbor).
+The design compares enterprise registries (Nexus, Artifactory, Harbor) with a local `registry:2`. This project uses the **Minikube registry addon** because it is light and needs almost no configuration; the reasoning is in [design decisions](../concepts/design-decisions.md#container-registry-minikube-addon-instead-of-nexus-or-harbor).
 
 Two addresses are in play:
 

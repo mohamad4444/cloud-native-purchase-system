@@ -6,12 +6,12 @@ The staging environment exposes `frontend.local` and `keycloak.local` through in
 
 ```mermaid
 flowchart TB
-  CA[Local CA certificate and key] --> Secret[my-ca-secret in cert-manager]
-  Secret --> Issuer[ClusterIssuer my-ca-issuer]
-  Ingress[Annotated Ingress] --> Certificate[Certificate request]
-  Issuer --> Certificate
-  Certificate --> TLS[TLS Secret in application namespace]
-  TLS --> Nginx[ingress-nginx serves HTTPS]
+ CA[Local CA certificate and key] --> Secret[my-ca-secret in cert-manager]
+ Secret --> Issuer[ClusterIssuer my-ca-issuer]
+ Ingress[Annotated Ingress] --> Certificate[Certificate request]
+ Issuer --> Certificate
+ Certificate --> TLS[TLS Secret in application namespace]
+ TLS --> Nginx[ingress-nginx serves HTTPS]
 ```
 
 The CA secret is in cert-manager's cluster resource namespace (`cert-manager` in this setup). The ClusterIssuer references `secretName: my-ca-secret`; it does not use a `secretNamespace` field. Leaf TLS Secrets such as `frontend-tls` and `keycloak-tls` live with their respective Ingress resources, normally in `staging`.
@@ -25,11 +25,11 @@ mkdir -p .local/certificate-authority
 openssl genrsa -out .local/certificate-authority/ca.key 4096
 chmod 600 .local/certificate-authority/ca.key
 openssl req -x509 -new -nodes \
-  -key .local/certificate-authority/ca.key -sha256 -days 3650 \
-  -out .local/certificate-authority/ca.crt \
-  -subj '/CN=Purchase System Local Root CA'
+ -key .local/certificate-authority/ca.key -sha256 -days 3650 \
+ -out .local/certificate-authority/ca.crt \
+ -subj '/CN=Purchase System Local Root CA'
 openssl x509 -in .local/certificate-authority/ca.crt \
-  -noout -subject -issuer -dates
+ -noout -subject -issuer -dates
 ```
 
 Import the **certificate**, not the private key, into the trust store used by your operating system and browser. Trust-store commands differ between Arch/RHEL, Debian/Ubuntu, and browsers with separate stores. The [cert-manager CA issuer documentation](https://cert-manager.io/docs/configuration/ca/) explains the issuer's trust and renewal responsibilities.
@@ -42,14 +42,14 @@ With the cluster from the [Kubernetes tutorial](tutorials/local-kubernetes.md) a
 
 ```bash
 helmfile --file environments/helmfile.yaml -e staging \
-  --selector name=cert-manager sync
+ --selector name=cert-manager sync
 kubectl get pods -n cert-manager
 kubectl create secret tls my-ca-secret -n cert-manager \
-  --cert=.local/certificate-authority/ca.crt \
-  --key=.local/certificate-authority/ca.key \
-  --dry-run=client -o yaml | kubectl apply -f -
+ --cert=.local/certificate-authority/ca.crt \
+ --key=.local/certificate-authority/ca.key \
+ --dry-run=client -o yaml | kubectl apply -f -
 helmfile --file environments/helmfile.yaml -e staging \
-  --selector name=ca-issuer sync --skip-needs
+ --selector name=ca-issuer sync --skip-needs
 kubectl get clusterissuer my-ca-issuer
 ```
 
@@ -62,9 +62,9 @@ Start the registry port forward and build the images as described in the tutoria
 ```bash
 minikube addons enable ingress
 helmfile --file environments/helmfile.yaml -e staging \
-  --selector name=frontend --selector name=keycloak \
-  --selector name=message-broker --selector name=inventory-service \
-  --selector name=purchase-service sync --skip-needs
+ --selector name=frontend --selector name=keycloak \
+ --selector name=message-broker --selector name=inventory-service \
+ --selector name=purchase-service sync --skip-needs
 bash scripts/update-hosts.sh
 ```
 
@@ -74,14 +74,14 @@ The frontend template includes this relationship:
 
 ```yaml
 metadata:
-  annotations:
-    cert-manager.io/cluster-issuer: my-ca-issuer
+ annotations:
+ cert-manager.io/cluster-issuer: my-ca-issuer
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - frontend.local
-      secretName: frontend-tls
+ ingressClassName: nginx
+ tls:
+ - hosts:
+ - frontend.local
+ secretName: frontend-tls
 ```
 
 cert-manager's ingress integration creates the Certificate resource from this annotated Ingress. You do not need to create an unrelated `hello.local` Certificate manually.

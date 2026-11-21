@@ -1,10 +1,10 @@
 # What is a cloud project?
 
-Before the architecture makes sense, it helps to define what "cloud" and "cloud-native" mean — and why this project, which runs entirely on a laptop, still belongs to that category. Thesis §2.4 is the source.
+Before the architecture makes sense, it helps to define what "cloud" and "cloud-native" mean — and why this project, which runs entirely on a laptop, still belongs to that category. This page explains both.
 
 ## Cloud computing in one paragraph
 
-The thesis cites the NIST definition of cloud computing (SP 800-145 [22]): a model for enabling convenient, on-demand network access to a shared pool of configurable computing resources — networks, servers, storage, applications and services — that can be rapidly provisioned and released with minimal management effort. The essential characteristics are on-demand self-service, broad network access, resource pooling, rapid elasticity and measured service.
+The design cites the NIST definition of cloud computing (SP 800-145 [22]): a model for enabling convenient, on-demand network access to a shared pool of configurable computing resources — networks, servers, storage, applications and services — that can be rapidly provisioned and released with minimal management effort. The essential characteristics are on-demand self-service, broad network access, resource pooling, rapid elasticity and measured service.
 
 Cloud services are usually described by **service models**:
 
@@ -18,9 +18,9 @@ And by **deployment models**: public cloud, private cloud, hybrid cloud, and com
 
 ## Cloud-native is defined by attributes, not location
 
-The key distinction in §2.4.1: **cloud-native is not about where the application runs, but how it is built**. A cloud-native system can run on AWS, on a private data centre, or on a developer's laptop — what matters is that it uses the techniques that make software agile, scalable and resilient.
+The key distinction in: **cloud-native is not about where the application runs, but how it is built**. A cloud-native system can run on AWS, on a private data centre, or on a developer's laptop — what matters is that it uses the techniques that make software agile, scalable and resilient.
 
-The CNCF definition quoted in the thesis:
+The CNCF definition quoted in the design:
 
 > "Cloud-native technologies empower organizations to build and run scalable applications in modern, dynamic environments such as public, private, and hybrid clouds. Techniques like containers, service meshes, microservices, immutable infrastructure, and declarative APIs exemplify this approach."
 
@@ -28,7 +28,7 @@ The result is a system that is loosely coupled, resilient, manageable and observ
 
 ## The foundational principles
 
-The thesis (§2.4.2) breaks cloud-native down into concrete practices. Here is each principle paired with where it appears in this repository:
+The design breaks cloud-native down into concrete practices. Here is each principle paired with where it appears in this repository:
 
 | Principle | What it means | Here |
 | --- | --- | --- |
@@ -44,25 +44,25 @@ The thesis (§2.4.2) breaks cloud-native down into concrete practices. Here is e
 
 ```mermaid
 flowchart TB
-  CN["Cloud-native project"] --> P1["Containers"]
-  CN --> P2["Microservices"]
-  CN --> P3["Orchestration"]
-  CN --> P4["Declarative config"]
-  CN --> P5["Immutable images"]
-  CN --> P6["Observability"]
-  CN --> P7["Automation"]
-  P1 --> R["Result: loosely coupled,<br/>resilient, manageable, observable"]
-  P2 --> R
-  P3 --> R
-  P4 --> R
-  P5 --> R
-  P6 --> R
-  P7 --> R
+ CN["Cloud-native project"] --> P1["Containers"]
+ CN --> P2["Microservices"]
+ CN --> P3["Orchestration"]
+ CN --> P4["Declarative config"]
+ CN --> P5["Immutable images"]
+ CN --> P6["Observability"]
+ CN --> P7["Automation"]
+ P1 --> R["Result: loosely coupled,<br/>resilient, manageable, observable"]
+ P2 --> R
+ P3 --> R
+ P4 --> R
+ P5 --> R
+ P6 --> R
+ P7 --> R
 ```
 
 ## Why a local Minikube project is still cloud-native
 
-The thesis (§2.4.4) makes this explicit: the "cloud" in cloud-native refers to the **architectural model and operational practices**, not the physical hosting location. This project runs on a self-hosted Minikube cluster with its own local registry, yet it uses Kubernetes, Docker, Helm and microservices — so it exhibits the core characteristics.
+The design makes this explicit: the "cloud" in cloud-native refers to the **architectural model and operational practices**, not the physical hosting location. This project runs on a self-hosted Minikube cluster with its own local registry, yet it uses Kubernetes, Docker, Helm and microservices — so it exhibits the core characteristics.
 
 That brings three practical benefits:
 

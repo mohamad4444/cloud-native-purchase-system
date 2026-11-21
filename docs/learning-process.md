@@ -10,11 +10,11 @@ This page records how this project was built, which sources were used, and what 
 
 ```mermaid
 flowchart LR
-  A["Docker + Compose<br/>first working system"]
-  B["Add observability<br/>to Compose"]
-  C["Migrate to Kubernetes only<br/>final month"]
-  D["Write the docs<br/>for the project"]
-  A --> B --> C --> D
+ A["Docker + Compose<br/>first working system"]
+ B["Add observability<br/>to Compose"]
+ C["Migrate to Kubernetes only<br/>final month"]
+ D["Write the docs<br/>for the project"]
+ A --> B --> C --> D
 ```
 
 ## Sources
@@ -30,7 +30,7 @@ flowchart LR
 | Other people's GitHub code | Small libraries, focused examples and full implementations; comparing patterns before using them |
 | OIDC and PKI references | Authorization code + PKCE flow, certificate handling |
 
-The accompanying bachelor thesis lists the full bibliography. The technologies used here are summarized in [Technology stack, explained](technologies/overview.md).
+The technologies used here are summarized in [Technology stack, explained](technologies/overview.md).
 
 ## Migration to Kubernetes
 

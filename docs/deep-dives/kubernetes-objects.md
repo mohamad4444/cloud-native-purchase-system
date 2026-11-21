@@ -1,6 +1,6 @@
 # Kubernetes objects
 
-The building blocks the charts render. Thesis §§2.6–2.8 explains what each object is; this page pairs each one with its concrete use in the repository. The [Kubernetes and Helmfile concept page](../concepts/kubernetes-and-helm.md) shows how a value reaches a manifest.
+The building blocks the charts render. Kubernetes defines what each object is; this page pairs each one with its concrete use in the repository. The [Kubernetes and Helmfile concept page](../concepts/kubernetes-and-helm.md) shows how a value reaches a manifest.
 
 ## Clusters, control plane and nodes
 
@@ -11,7 +11,7 @@ Kubernetes groups machines into a **cluster** that behaves as one resource. Two 
 | Control plane ("brain") | `kube-apiserver`, `etcd`, `kube-scheduler`, `kube-controller-manager` | Cluster administrator |
 | Worker nodes ("muscle") | `kubelet`, `kube-proxy`, container runtime | Cluster administrator |
 
-The developer's job is to submit desired state to the **API server**; control loops reconcile observed state with that desired state. The thesis (§2.6) uses the example of declaring five replicas when only four are running — a controller creates the missing one. That reconciliation is the basis of self-healing.
+The developer's job is to submit desired state to the **API server**; control loops reconcile observed state with that desired state. The design uses the example of declaring five replicas when only four are running — a controller creates the missing one. That reconciliation is the basis of self-healing.
 
 In this project the cluster is created by `scripts/startup.sh`:
 
@@ -20,7 +20,7 @@ minikube start --driver=docker --memory=8g --cpus=4
 minikube addons enable ingress dashboard metrics-server registry
 ```
 
-The developer never writes manifests for the control plane — only application-layer objects, which is exactly the boundary the thesis draws (§2.6).
+The developer never writes manifests for the control plane — only application-layer objects, which is exactly the boundary the design draws.
 
 ## Objects as records of intent
 
@@ -30,9 +30,9 @@ Every manifest has four top-level fields:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: inventory
+ name: inventory
 spec:
-  replicas: 1
+ replicas: 1
 ```
 
 - **apiVersion** — the API group and version (`v1`, `apps/v1`).
@@ -48,10 +48,10 @@ You almost never create a Pod by hand. A **Deployment** wraps a ReplicaSet, whic
 
 ```mermaid
 flowchart TB
-  D["Deployment<br/>declarative updates"] --> RS["ReplicaSet<br/>keeps N replicas running"]
-  RS --> P1["Pod"]
-  RS --> P2["Pod"]
-  RS --> P3["Pod"]
+ D["Deployment<br/>declarative updates"] --> RS["ReplicaSet<br/>keeps N replicas running"]
+ RS --> P1["Pod"]
+ RS --> P2["Pod"]
+ RS --> P3["Pod"]
 ```
 
 The hierarchy is why deleting a Pod causes a replacement to appear. Deployments also provide rolling updates and rollback.
@@ -60,13 +60,13 @@ In the repo, every workload is a Deployment: `charts/frontend-chart/templates/de
 
 ```yaml
 livenessProbe:
-  tcpSocket:
-    port: {{ .Values.artemis.livenessProbe.port }}
-  initialDelaySeconds: {{ .Values.artemis.livenessProbe.initialDelaySeconds }}
-  periodSeconds: {{ .Values.artemis.livenessProbe.periodSeconds }}
+ tcpSocket:
+ port: {{ .Values.artemis.livenessProbe.port }}
+ initialDelaySeconds: {{ .Values.artemis.livenessProbe.initialDelaySeconds }}
+ periodSeconds: {{ .Values.artemis.livenessProbe.periodSeconds }}
 ```
 
-The thesis (§2.7) distinguishes **liveness** probes (restart a stuck container) from **readiness** probes (remove an unready Pod from Service load balancing); this deployment only configures liveness.
+Kubernetes distinguishes **liveness** probes (restart a stuck container) from **readiness** probes (remove an unready Pod from Service load balancing); this deployment only configures liveness.
 
 ## Namespaces
 
@@ -89,20 +89,20 @@ A **Service** gives ephemeral Pods a stable virtual IP (ClusterIP) and DNS name.
 ```yaml
 # Deployment pod template
 labels:
-  microserviceName: inventory
-  component: backend
-  env: dev
+ microserviceName: inventory
+ component: backend
+ env: dev
 ---
 # Service selector — must match exactly
 selector:
-  microserviceName: inventory
-  component: backend
-  env: dev
+ microserviceName: inventory
+ component: backend
+ env: dev
 ```
 
 The selector is re-evaluated continuously, so scaling or rolling updates need no Service changes. The project's three standard labels are `microserviceName`, `component`, and `env` — they also become log labels in Alloy (see [Grafana Alloy](../technologies/grafana-alloy.md#labels-created-by-the-pipeline)).
 
-Service types in the thesis: **ClusterIP** (internal, default), **NodePort** (static port on each node), **LoadBalancer** (cloud-provided external IP). This project uses ClusterIP for everything; external access is through Ingress or port forwarding.
+Service types in the design: **ClusterIP** (internal, default), **NodePort** (static port on each node), **LoadBalancer** (cloud-provided external IP). This project uses ClusterIP for everything; external access is through Ingress or port forwarding.
 
 An **Ingress** is a Layer-7 router (HTTP/HTTPS) and needs an **Ingress Controller** to function. The frontend Ingress routes by path and host:
 
@@ -123,10 +123,10 @@ Both can be injected as environment variables or mounted files. The repository u
 
 ```yaml
 envFrom:
-  - configMapRef:
-      name: inventory-config
-  - secretRef:
-      name: inventory-secret
+ - configMapRef:
+ name: inventory-config
+ - secretRef:
+ name: inventory-secret
 ```
 
 The ConfigMap carries `DATASOURCE_URL`, `ARTEMIS_BROKER_URL`, and the Keycloak URLs; the Secret carries passwords encoded at render time with `b64enc`. The frontend's `config.js` is a ConfigMap mounted with `subPath`. See [configuration](../reference/configuration.md#backend-runtime-environment).
@@ -137,12 +137,12 @@ Stateful components need storage that outlives a Pod. A **PVC** requests storage
 
 ```yaml
 volumeMounts:
-  - name: postgres-data
-    mountPath: /var/lib/postgresql/data
+ - name: postgres-data
+ mountPath: /var/lib/postgresql/data
 volumes:
-  - name: postgres-data
-    persistentVolumeClaim:
-      claimName: inventory-db-pvc
+ - name: postgres-data
+ persistentVolumeClaim:
+ claimName: inventory-db-pvc
 ```
 
 The project declares PVCs for each PostgreSQL database and for Artemis, typically 1 GiB each. See [stateful components](../concepts/architecture.md#responsibilities).
@@ -164,7 +164,7 @@ The project stays within a namespace, so ConfigMaps use short names like `keyclo
 
 ## What does *not* trigger a restart
 
-The thesis (§2.8.4) is explicit about a common surprise:
+Kubernetes is explicit about a common surprise:
 
 - A Pod spec is **immutable**; only changes to the Deployment's Pod *template* cause a rollout.
 - Building a new image does not change the template. With a `:latest` tag, nothing changes at all — and an image already cached on the node is not re-pulled.

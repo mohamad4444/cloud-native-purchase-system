@@ -11,9 +11,9 @@ Install Python 3.11 or newer with `pip` and virtual environment support. No Java
 A single script installs every required tool and verifies the result:
 
 ```bash
-./scripts/install-tools.sh --check     # see what is missing
-./scripts/install-tools.sh             # install missing tools
-./scripts/install-tools.sh --optional  # also install k9s and stern
+./scripts/install-tools.sh --check # see what is missing
+./scripts/install-tools.sh # install missing tools
+./scripts/install-tools.sh --optional # also install k9s and stern
 ```
 
 It supports Arch/EndeavourOS, Debian/Ubuntu and Fedora, reads pinned versions from `.env`, skips anything already installed, and never deletes a cluster. After it finishes you may need to log out and back in for Docker group membership to take effect.
@@ -21,8 +21,8 @@ It supports Arch/EndeavourOS, Debian/Ubuntu and Fedora, reads pinned versions fr
 Two optional sets of tools are available:
 
 ```bash
-./scripts/install-tools.sh --optional    # k9s, stern, lazydocker, Lens, Freelens, Headlamp
-./scripts/install-tools.sh --dashboards  # Portainer (:9000), Yacht (:8000), Dockge (:2201)
+./scripts/install-tools.sh --optional # k9s, stern, lazydocker, Lens, Freelens, Headlamp
+./scripts/install-tools.sh --dashboards # Portainer (:9000), Yacht (:8000), Dockge (:2201)
 ```
 
 The first adds terminal and desktop inspectors for Kubernetes and Docker. The second starts browser-based dashboards as Docker containers. See [runtime notes](../guides/runtime-notes.md#where-to-read-next) for related environment notes.

@@ -26,7 +26,7 @@ You can check whether your kernel offers it:
 ```bash
 lsmod | grep veth
 find /lib/modules/$(uname -r) -name 'veth*.ko*'
-ip link add veth-test type veth peer name veth-test2   # needs root
+ip link add veth-test type veth peer name veth-test2 # needs root
 ```
 
 If the device type is unknown or the module file is missing, the kernel was built without veth support (common in locked-down VMs, containers and some cloud images). If the module exists but is not loaded, `sudo modprobe veth` fixes it.
@@ -76,19 +76,19 @@ minikube addons enable ingress
 # 2. Build images into local Docker, then load them into the cluster
 set -a; . ./.env; set +a
 docker buildx bake base-images --set '*.push=false' --load
-docker push localhost:5000/builder-common:latest       # so Buildx can use it as a base
+docker push localhost:5000/builder-common:latest # so Buildx can use it as a base
 docker buildx bake application-images --set '*.push=false' --load
 for i in builder-common artemis keycloak nginx-frontend inventory-service purchase-service dind; do
-  minikube image load localhost:5000/$i:latest
+ minikube image load localhost:5000/$i:latest
 done
 
 # 3. Install cert-manager CRDs, then deploy with IfNotPresent
 helmfile -f environments/helmfile.yaml -e dev --selector name=cert-manager sync
 # (temporarily set globalConfig.pullPolicy: IfNotPresent in dev.yaml)
 helmfile -f environments/helmfile.yaml -e dev \
-  --selector name=frontend --selector name=keycloak \
-  --selector name=message-broker --selector name=inventory-service \
-  --selector name=purchase-service sync --skip-needs
+ --selector name=frontend --selector name=keycloak \
+ --selector name=message-broker --selector name=inventory-service \
+ --selector name=purchase-service sync --skip-needs
 
 # 4. Expose the app
 kubectl port-forward -n dev service/frontend-service 4200:80

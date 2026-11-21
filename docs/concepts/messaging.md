@@ -4,19 +4,19 @@ Submitting a purchase and deciding whether stock exists happen in different serv
 
 ```mermaid
 sequenceDiagram
-  participant Client
-  participant Purchase
-  participant Broker as Artemis
-  participant Inventory
-  Client->>Purchase: POST /purchase-api/purchases
-  Purchase->>Purchase: Save PENDING purchase
-  Purchase->>Broker: purchase.requested
-  Purchase-->>Client: HTTP 200 with purchase DTO
-  Broker->>Inventory: PurchaseRequestedEvent
-  Inventory->>Inventory: Check and reduce stock
-  Inventory->>Broker: purchase.result
-  Broker->>Purchase: PurchaseResultEvent
-  Purchase->>Purchase: Set CONFIRMED or REJECTED
+ participant Client
+ participant Purchase
+ participant Broker as Artemis
+ participant Inventory
+ Client->>Purchase: POST /purchase-api/purchases
+ Purchase->>Purchase: Save PENDING purchase
+ Purchase->>Broker: purchase.requested
+ Purchase-->>Client: HTTP 200 with purchase DTO
+ Broker->>Inventory: PurchaseRequestedEvent
+ Inventory->>Inventory: Check and reduce stock
+ Inventory->>Broker: purchase.result
+ Broker->>Purchase: PurchaseResultEvent
+ Purchase->>Purchase: Set CONFIRMED or REJECTED
 ```
 
 The response and background processing can overlap; the diagram shows the logical steps, not a guarantee that the result listener always runs after the client receives its response.

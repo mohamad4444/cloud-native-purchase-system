@@ -13,30 +13,30 @@ A **microservices architecture** splits the application into small services orga
 - communicates with others over a network,
 - can be written in a different language if needed.
 
-The thesis (§2.1) lists the benefits this project demonstrates — independent deployability, technology heterogeneity, fault isolation, and faster change cycles — along with the costs: distributed-system complexity, network failures, and data consistency problems.
+The project demonstrates the benefits this project demonstrates — independent deployability, technology heterogeneity, fault isolation, and faster change cycles — along with the costs: distributed-system complexity, network failures, and data consistency problems.
 
 ```mermaid
 flowchart LR
-  subgraph MONO["Monolith"]
-    direction TB
-    M1[UI + Orders + Stock + Auth] --> MDB[(one database)]
-  end
-  subgraph MICRO["Microservices (this project)"]
-    direction TB
-    F[Frontend] --> P[Purchase]
-    F --> I[Inventory]
-    P --> PDB[(purchase DB)]
-    I --> IDB[(inventory DB)]
-    P -.->|Artemis| I
-  end
-  MONO -.->|"decompose by capability"| MICRO
+ subgraph MONO["Monolith"]
+ direction TB
+ M1[UI + Orders + Stock + Auth] --> MDB[(one database)]
+ end
+ subgraph MICRO["Microservices (this project)"]
+ direction TB
+ F[Frontend] --> P[Purchase]
+ F --> I[Inventory]
+ P --> PDB[(purchase DB)]
+ I --> IDB[(inventory DB)]
+ P -.->|Artemis| I
+ end
+ MONO -.->|"decompose by capability"| MICRO
 ```
 
 The project keeps the old Compose version as the `Docker-Compsoe-Version` tag precisely because the two models were hard to maintain side by side; see [project history](../project-history.md).
 
-### The monolith in detail (§2.1.1)
+### The monolith in detail
 
-The thesis paints the "monolithic misery" with an e-commerce example. A single codebase holds modules named `UserAuthenticationModule`, `InventoryModule` and `PurchaseModule`. They call each other **in process** through direct method calls, and a purchase uses one ACID transaction across all of them. Early on that is pleasant: one `.war` or `.jar` to build, test and deploy.
+The design paints the "monolithic misery" with an e-commerce example. A single codebase holds modules named `UserAuthenticationModule`, `InventoryModule` and `PurchaseModule`. They call each other **in process** through direct method calls, and a purchase uses one ACID transaction across all of them. Early on that is pleasant: one `.war` or `.jar` to build, test and deploy.
 
 As it grows, the costs appear:
 
@@ -45,7 +45,7 @@ As it grows, the costs appear:
 - **Scale-as-a-unit** — horizontal scaling copies the entire application, including modules that are not under load.
 - **Shared fate** — a memory leak in one module can bring down everything.
 
-The thesis calls the decomposition principle **Domain-Driven Design**: organise services around business domains, not technical layers. A **Bounded Context** is an explicit boundary inside which a particular domain model and its rules apply. The project maps three:
+The design calls the decomposition principle **Domain-Driven Design**: organise services around business domains, not technical layers. A **Bounded Context** is an explicit boundary inside which a particular domain model and its rules apply. The project maps three:
 
 | Bounded context | Service | Owns |
 | --- | --- | --- |
@@ -53,14 +53,14 @@ The thesis calls the decomposition principle **Domain-Driven Design**: organise 
 | Product Inventory | Inventory Service | stock levels |
 | Order Fulfilment | Purchase Service | purchase records |
 
-### The main trade-off: inter-service communication (§2.1.3)
+### The main trade-off: inter-service communication
 
-The thesis calls this "the primary trade-off" of microservices. Once calls cross a network:
+The design calls this "the primary trade-off" of microservices. Once calls cross a network:
 
 - **Networks are unreliable** — timeouts, partitions and partial failures need explicit handling.
 - **Synchronous REST** is simple but blocks; a slow Inventory service can cause cascading failures.
 - **Asynchronous messaging** decouples services but introduces eventual consistency.
-- **Cross-service ACID is impractical** — the thesis introduces the **Saga** pattern: a sequence of local transactions with compensating actions. Its illustrative events are `ORDER_CREATED` → `INVENTORY_RESERVED` / `INVENTORY_RESERVATION_FAILED` → `CONFIRMED` or `CANCELLED`.
+- **Cross-service ACID is impractical** — the design introduces the **Saga** pattern: a sequence of local transactions with compensating actions. Its illustrative events are `ORDER_CREATED` → `INVENTORY_RESERVED` / `INVENTORY_RESERVATION_FAILED` → `CONFIRMED` or `CANCELLED`.
 - **Service discovery** replaces hard-coded addresses; in Kubernetes this is cluster DNS.
 - **API evolution** demands versioning so consumers are not broken by changes.
 
@@ -68,11 +68,11 @@ The project's Saga-shaped flow uses different names — `purchase.requested` / `
 
 ## DevOps
 
-DevOps joins development and operations so that building, testing, and deploying become a continuous, automated flow. The thesis describes the usual loop: **plan → code → build → test → release → deploy → operate → monitor**.
+DevOps joins development and operations so that building, testing, and deploying become a continuous, automated flow. The design describes the usual loop: **plan → code → build → test → release → deploy → operate → monitor**.
 
-### The Three Ways (§2.2.1)
+### The Three Ways
 
-The thesis grounds DevOps in the framework from *The Phoenix Project*:
+The design grounds DevOps in the framework from *The Phoenix Project*:
 
 | Way | Principle | Here |
 | --- | --- | --- |
@@ -80,7 +80,7 @@ The thesis grounds DevOps in the framework from *The Phoenix Project*:
 | **Second Way** | Amplify feedback loops — shorten and strengthen feedback so problems are found near their source | logs in Loki/Grafana, `stern-*` Make targets, the `docs-build` CI job that fails on broken docs |
 | **Third Way** | Continual experimentation and learning — high trust, blameless post-mortems, time to improve | the [problems and fixes](../problems-and-fixes.md) page records failures and what each one taught |
 
-### Enabling technologies (§2.2.2)
+### Enabling technologies
 
 DevOps is cultural, but these technologies make it practical:
 
@@ -94,9 +94,9 @@ DevOps is cultural, but these technologies make it practical:
 
 In this project the loop is represented by local iteration (rebuild, redeploy, watch logs), GitLab CI (a push triggers test/build/deploy jobs), and observability (Pod logs land in Loki). See [development workflow](../guides/development.md), [CI/CD pipeline](cicd.md) and [observability](observability.md).
 
-## The Twelve-Factor App (§2.3)
+## The Twelve-Factor App
 
-The Twelve-Factor methodology was written for **SaaS** applications. The thesis explicitly notes (§2.3) that this project is *not* SaaS — it runs on a self-hosted local cluster — but the factors still apply as "a clean contract with the underlying platform". Here is each factor explained, with the concrete implementation and any honest gap.
+The Twelve-Factor methodology was written for **SaaS** applications. The design explicitly notes that this project is *not* SaaS — it runs on a self-hosted local cluster — but the factors still apply as "a clean contract with the underlying platform". Here is each factor explained, with the concrete implementation and any honest gap.
 
 | # | Factor | Explanation and example here |
 | --- | --- | --- |
@@ -117,7 +117,7 @@ Two honest gaps: replica counts are not automatically scaled (no HPA), and state
 
 ## Cloud-native fundamentals
 
-The CNCF definition (§2.4) emphasises container-based, dynamically orchestrated, loosely coupled systems. The thesis highlights the properties this project demonstrates:
+The CNCF definition emphasises container-based, dynamically orchestrated, loosely coupled systems. The design highlights the properties this project demonstrates:
 
 - **Container packaging** — every component has a Dockerfile and a Bake target.
 - **Declarative orchestration** — Kubernetes manifests rendered by Helm.
@@ -127,21 +127,21 @@ The CNCF definition (§2.4) emphasises container-based, dynamically orchestrated
 
 ```mermaid
 flowchart TB
-  CN["Cloud-native properties"] --> C1["Containers"]
-  CN --> C2["Kubernetes orchestration"]
-  CN --> C3["Loose coupling / events"]
-  CN --> C4["Observability"]
-  CN --> C5["Automation"]
-  C1 --> P["docker-bake.hcl"]
-  C2 --> H["Helmfile + charts"]
-  C3 --> A["Artemis queues"]
-  C4 --> L["Alloy → Loki → Grafana"]
-  C5 --> CI[".gitlab-ci.yml"]
+ CN["Cloud-native properties"] --> C1["Containers"]
+ CN --> C2["Kubernetes orchestration"]
+ CN --> C3["Loose coupling / events"]
+ CN --> C4["Observability"]
+ CN --> C5["Automation"]
+ C1 --> P["docker-bake.hcl"]
+ C2 --> H["Helmfile + charts"]
+ C3 --> A["Artemis queues"]
+ C4 --> L["Alloy → Loki → Grafana"]
+ C5 --> CI[".gitlab-ci.yml"]
 ```
 
-### The cloud-native technology stack (§2.4.3)
+### The cloud-native technology stack
 
-The thesis presents the technologies as a stack, with each layer building on the one below. This is a useful mental model for where each tool in the repository belongs:
+The design presents the technologies as a stack, with each layer building on the one below. This is a useful mental model for where each tool in the repository belongs:
 
 | Layer | Role | Tool here |
 | --- | --- | --- |
@@ -154,20 +154,20 @@ The thesis presents the technologies as a stack, with each layer building on the
 
 ```mermaid
 flowchart TB
-  L6["Observability<br/>Loki · Grafana · Alloy"]
-  L5["Continuous delivery<br/>GitLab CI + Runner"]
-  L4["Declarative configuration<br/>Helm + Helmfile"]
-  L3["Service management<br/>Services + DNS"]
-  L2["Orchestration<br/>Kubernetes"]
-  L1["Containers<br/>Docker"]
-  L1 --> L2 --> L3 --> L4 --> L5 --> L6
+ L6["Observability<br/>Loki · Grafana · Alloy"]
+ L5["Continuous delivery<br/>GitLab CI + Runner"]
+ L4["Declarative configuration<br/>Helm + Helmfile"]
+ L3["Service management<br/>Services + DNS"]
+ L2["Orchestration<br/>Kubernetes"]
+ L1["Containers<br/>Docker"]
+ L1 --> L2 --> L3 --> L4 --> L5 --> L6
 ```
 
 Note that the stack is a *dependency* stack, not the runtime request path — the [nine-layer architecture diagram](../concepts/design-decisions.md#the-nine-layers-at-a-glance) shows the layers from the application's point of view.
 
 ## Containerization
 
-Docker packages an application with its dependencies so it runs the same everywhere. The thesis (§2.5) explains the building blocks this project uses:
+Docker packages an application with its dependencies so it runs the same everywhere. The design explains the building blocks this project uses:
 
 - **Images and layers** — each instruction in a Dockerfile creates a cached layer. The Java services use multi-stage builds so the final image contains only the JRE and the JAR, not Maven and the JDK.
 - **Buildx** — the extended builder that supports the `docker-container` driver and a custom BuildKit configuration. The local HTTP registry needs `insecure = true`; see the [Kubernetes tutorial](../tutorials/local-kubernetes.md).
