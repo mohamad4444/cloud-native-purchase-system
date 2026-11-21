@@ -65,13 +65,13 @@ Use the helper script for all port-forwards at once:
 bash portforwarding/port-forward.sh start
 ```
 
-It forwards frontend (4200), Keycloak (8080), purchase (8001), inventory (8002), Artemis (8161), Grafana (3000) and Loki (3100) in the background. Check with `bash portforwarding/port-forward.sh status`; stop with `bash portforwarding/port-forward.sh stop`. Its limitations are listed in [troubleshooting]](../guides/troubleshooting.md#existing-helper-script-limitations).
+It forwards frontend (4200), Keycloak (8088), purchase (8001), inventory (8002), Artemis (8161), Grafana (3000) and Loki (3100) in the background. Check with `bash portforwarding/port-forward.sh status`; stop with `bash portforwarding/port-forward.sh stop`. Its limitations are listed in [troubleshooting]](../guides/troubleshooting.md#existing-helper-script-limitations).
 
 For visibility while learning, start the four core forwards manually instead:
 
 ```bash
 kubectl port-forward -n dev service/frontend-service 4200:80
-kubectl port-forward -n dev service/keycloak-service 8080:8080
+kubectl port-forward -n dev service/keycloak-service 8088:8080
 kubectl port-forward -n dev service/purchase-service 8001:8080
 kubectl port-forward -n dev service/inventory-service 8002:8080
 ```
@@ -81,7 +81,7 @@ kubectl port-forward -n dev service/inventory-service 8002:8080
 | What | URL / command |
 | --- | --- |
 | Frontend UI | <http://localhost:4200> |
-| Keycloak realm | <http://localhost:8080/realms/purchase-service-realm> |
+| Keycloak realm | <http://localhost:8088/realms/purchase-service-realm> |
 | Inventory API | <http://localhost:8002/inventory-api/inventory> |
 | Purchase API | <http://localhost:8001/purchase-api/purchases> |
 | Metrics endpoint | <http://localhost:8002/actuator/prometheus> |
@@ -133,7 +133,8 @@ minikube delete      # remove it entirely
 ## Troubleshooting
 
 - Pods in `ImagePullBackOff` → images were not loaded; rebuild with `make build-and-push` or see [runtime notes](../guides/runtime-notes.md).
-- Login button does nothing → reload the page; the button is bound before the silent-SSO check. Check the browser console for `"[auth]" messages.
+- Login button does nothing → reload the page; the button is bound before the silent-SSO check. Check the browser console for `"[auth]"` messages.
+- Login page shows another app (e.g. Open WebUI) → port 8080 is occupied. This setup uses **8088** for Keycloak; keep the `8088` port-forward running.
 - 401 from the API → expected without a token; sign in first.
 - 500 "Access Denied" → the token lacks `ROLE_USER`; see [authentication](../concepts/authentication.md).
 - Lens shows no pods → select `dev` or **All namespaces**.

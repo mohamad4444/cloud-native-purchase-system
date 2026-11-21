@@ -3,13 +3,13 @@ globalConfig:
   env: "dev"
   profile: "dev"
   registry: "localhost:5000/"
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 frontend:
   image:
     pullPolicy: IfNotPresent
   config:
     keycloak:
-      url: "http://localhost:8080"
+      url: "http://localhost:8088"
     api:
       purchases: "http://localhost:8001/purchase-api/purchases"
       inventory: "http://localhost:8002/inventory-api/inventory"
@@ -20,12 +20,12 @@ keycloak:
     configs:
       proxyAddressForwarding: false
       proxyMode: standalone
-      frontendUrl: http://localhost:8080
+      frontendUrl: http://localhost:8088
   ingress:
     enabled: false
 inventory-service:
   keycloak:
-    issuer: http://localhost:8080/realms/purchase-service-realm
+    issuer: http://localhost:8088/realms/purchase-service-realm
 purchase-service:
   keycloak:
-    issuer: http://localhost:8080/realms/purchase-service-realm
+    issuer: http://localhost:8088/realms/purchase-service-realm

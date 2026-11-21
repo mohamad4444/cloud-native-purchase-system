@@ -32,7 +32,7 @@ The release keys for overrides are `frontend`, `keycloak`, `inventory-service`, 
 | Component | Development | Staging |
 | --- | --- | --- |
 | Frontend | `http://localhost:4200` | `https://frontend.local` |
-| Keycloak | `http://localhost:8080` | `https://keycloak.local` |
+| Keycloak | `http://localhost:8088` | `https://keycloak.local` |
 | Purchase API | `http://localhost:8001/purchase-api/purchases` | `https://frontend.local/purchase-api/purchases` |
 | Inventory API | `http://localhost:8002/inventory-api/inventory` | `https://frontend.local/inventory-api/inventory` |
 | Grafana | `http://localhost:3000` via port forward when installed | Same monitoring Service; no Grafana ingress is supplied |
@@ -53,7 +53,7 @@ Both backend ConfigMaps and Secrets provide the following variables to the share
 | `DATASOURCE_PASSWORD` | Database password | Injected through a Kubernetes Secret |
 | `ARTEMIS_BROKER_URL` | Broker connection | `tcp://artemis-service:61616` |
 | `ARTEMIS_USER`, `ARTEMIS_PASSWORD` | Broker credentials | Set by chart values; password injected through a Secret |
-| `KEYCLOAK_ISSUER_URI` | Expected token issuer | `http://localhost:8080/realms/purchase-service-realm` |
+| `KEYCLOAK_ISSUER_URI` | Expected token issuer | `http://localhost:8088/realms/purchase-service-realm` |
 | `KEYCLOAK_JWK_SET_URI` | Internal signing-key endpoint | `http://keycloak-service:8080/realms/purchase-service-realm/protocol/openid-connect/certs` |
 
 Secret templates base64-encode the values already present in chart YAML. This is Kubernetes Secret serialization, not encryption of the repository values.

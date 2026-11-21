@@ -10,7 +10,7 @@ The checked-in realm is `purchase-service-realm`; the frontend client is `web-fr
 
 ## Issuer and signing keys are different concerns
 
-The JWT issuer must match the URL recorded in a token. In `dev`, that is `http://localhost:8080/realms/purchase-service-realm`; in staging it is `https://keycloak.local/realms/purchase-service-realm`.
+The JWT issuer must match the URL recorded in a token. In `dev`, that is `http://localhost:8088/realms/purchase-service-realm`; in staging it is `https://keycloak.local/realms/purchase-service-realm`.
 
 The backend's JWK URL uses the internal Service instead:
 
