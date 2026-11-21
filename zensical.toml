@@ -51,6 +51,7 @@ nav = [
     { "Certificate management" = "certificate-management.md" },
     { "Grafana Alloy and logging" = "monitoring-and-logging.md" },
     { "Complete development workflow" = "deep-dives/workflow.md" },
+    { "Runtime notes and errors" = "guides/runtime-notes.md" },
     { "Troubleshooting" = "guides/troubleshooting.md" },
   ] },
   { "Reference" = [
