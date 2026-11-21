@@ -11,6 +11,7 @@ extra_css = ["stylesheets/extra.css"]
 nav = [
   { "Start here" = [
     { "Overview" = "index.md" },
+    { "Quick guide" = "getting-started/quick-guide.md" },
     { "Learning process" = "learning-process.md" },
     { "Problems and fixes" = "problems-and-fixes.md" },
     { "Prerequisites" = "getting-started/prerequisites.md" },
