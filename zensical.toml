@@ -2,6 +2,7 @@
 site_name = "Cloud Native Purchase System"
 site_description = "Learn the purchase flow, Kubernetes deployment, and Grafana Alloy log pipeline."
 site_author = "Mohammad Mahamid"
+site_url = "https://mohamad4444.github.io/cloud-native-purchase-system/"
 repo_url = "https://github.com/mohamad4444/cloud-native-purchase-system"
 repo_name = "cloud-native-purchase-system"
 edit_uri = "edit/develop/docs/"

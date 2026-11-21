@@ -44,6 +44,12 @@ The static output goes to ignored `site/`. Inspect changed pages, navigation, co
 
 When updating the generator, change the pin deliberately, rebuild, and review the rendered result. Keep `.venv-docs/`, `.cache/`, and `site/` out of commits.
 
+## Publish on GitHub Pages
+
+The site is published automatically to **<https://mohamad4444.github.io/cloud-native-purchase-system/>** by the [docs workflow](https://github.com/mohamad4444/cloud-native-purchase-system/blob/develop/.github/workflows/docs.yml). It builds Zensical in strict mode on every push to `develop` that touches docs-related files, then deploys the generated `site/` directory with GitHub's official Pages actions.
+
+One-time setup in the GitHub repository: **Settings → Pages → Build and deployment → Source: GitHub Actions**. After that, pushes to `develop` publish automatically. `site_url` in `zensical.toml` matches the Pages address so generated links work at the subpath.
+
 ## Serve a static build
 
 For a local check of the generated files:
@@ -69,4 +75,4 @@ server {
 
 Replace the example hostname and directory with your deployment values. This configuration illustrates static file serving; DNS and HTTPS belong to the chosen host. If serving from a subpath, configure the final `site_url` in `zensical.toml` and verify links at that base path. See [Zensical's build documentation](https://zensical.org/docs/usage/build/).
 
-This migration configures builds and local previews; it does not publish the site or push tags. The local `pre-zensical` tag preserves the committed baseline described in [project history](project-history.md).
+The local `pre-zensical` tag preserves the committed baseline described in [project history](project-history.md).
