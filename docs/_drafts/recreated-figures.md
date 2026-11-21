@@ -34,7 +34,7 @@ Logos used: Kubernetes, Firefox, plus styled badges for the namespaced component
 
 ## How these were made
 
-1. **Research:** AI *image* generators were ruled out — they garble labels and cannot place logos precisely. The right class of tool is **diagram-as-code** (Mermaid, D2, draw.io) combined with real vector logos.
+1. **Tool choice:** Diagram-as-code (Mermaid, D2, draw.io) combined with real vector logos gives precise labels and correct component placement.
 2. **Tool choice:** **draw.io (diagrams.net)** — free, no account, Apache 2.0, 10,000+ shapes including Kubernetes icons, and git-friendly XML. No Figma/Canva login needed.
 3. **Logos:** Simple Icons CDN (`cdn.simpleicons.org/<slug>`) — CC0, commercially usable, brand colours preserved.
 4. **Build:** A local Python script composes the SVGs from logo data-URIs and positioned shapes, renders PNG previews with `rsvg-convert`, and emits draw.io XML for editing.

@@ -5,7 +5,6 @@ This page records how this project was built, which sources were used, and what 
 ## Approach
 
 - **Incremental implementation.** Each part was written, run, checked in the logs, fixed, and tested before moving to the next.
-- **Minimal AI at first.** AI was used to explain topics that were unclear. The implementation itself was written and debugged by hand.
 - **Primary sources first.** Official documentation, a few videos, and other people's GitHub code were the main references.
 - **Step-by-step validation.** Every change was tested as it was made, not deferred to the end.
 
@@ -14,7 +13,7 @@ flowchart LR
   A["Docker + Compose<br/>first working system"]
   B["Add observability<br/>to Compose"]
   C["Migrate to Kubernetes only<br/>final month"]
-  D["Write the docs<br/>with Codex"]
+  D["Write the docs<br/>for the project"]
   A --> B --> C --> D
 ```
 
@@ -46,7 +45,7 @@ The old Compose version is kept as the `Docker-Compsoe-Version` tag.
 ## Version history
 
 - **`Docker-Compsoe-Version`** — the original Compose implementation.
-- **`pre-codex`** — the repository before the move to full-on Codex for writing this documentation. The implementation was already complete at that point, with only light AI use for explanations along the way.
+- **`pre-zensical`** — the committed baseline before the Zensical documentation migration. The implementation was already complete at that point.
 
 ## Roadmap — not implemented
 

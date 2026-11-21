@@ -28,7 +28,7 @@ The Spring services expose Prometheus metrics, but Helmfile currently deploys no
 
 ## Scope and history
 
-The initial implementation developed over **three months**, with the move from Docker Compose to Kubernetes happening **only in the final month**. The [project history](project-history.md) explains the learning process, documentation study, use of ChatGPT, and the later use of Codex for these docs.
+The initial implementation developed over **three months**, with the move from Docker Compose to Kubernetes happening **only in the final month**. The [project history](project-history.md) explains the learning process and documentation study behind the project.
 
 Kubernetes is the maintained deployment. The Compose version remains available at `Docker-Compsoe-Version` (the tag's original spelling). These guides describe a local learning system rather than a verified production deployment.
 

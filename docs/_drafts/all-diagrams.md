@@ -357,7 +357,7 @@ flowchart LR
   A["Docker + Compose<br/>first working system"]
   B["Add observability<br/>to Compose"]
   C["Migrate to Kubernetes only<br/>final month"]
-  D["Write the docs<br/>with Codex"]
+  D["Write the docs<br/>for the project"]
   A --> B --> C --> D
 ```
 

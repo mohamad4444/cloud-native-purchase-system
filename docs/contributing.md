@@ -69,4 +69,4 @@ server {
 
 Replace the example hostname and directory with your deployment values. This configuration illustrates static file serving; DNS and HTTPS belong to the chosen host. If serving from a subpath, configure the final `site_url` in `zensical.toml` and verify links at that base path. See [Zensical's build documentation](https://zensical.org/docs/usage/build/).
 
-This migration configures builds and local previews; it does not publish the site or push tags. The local `pre-codex` tag preserves the committed baseline described in [project history](project-history.md).
+This migration configures builds and local previews; it does not publish the site or push tags. The local `pre-zensical` tag preserves the committed baseline described in [project history](project-history.md).

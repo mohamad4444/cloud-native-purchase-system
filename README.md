@@ -8,9 +8,9 @@ The maintained deployment uses **Kubernetes**. The older Docker Compose implemen
 
 I developed this project over three months. I started with Docker and Docker Compose, without knowing what Kubernetes was; the move to Kubernetes happened only in the final month, and this was my first time using it. As I learned more, Compose no longer fit the orchestration I wanted to explore, and maintaining both deployments would have been too much work.
 
-I worked through the implementation file by file, wrote and understood the code, diagnosed problems using logs, and tested it myself. I used ChatGPT to explore concepts and work through technical questions alongside TechWorld with Nana's Kubernetes tutorial and intensive study of the official Kubernetes, Spring AOP, and other project documentation. Grafana Alloy was new to me at the time: videos and tutorials were scarce, and I could find only one relevant YouTube video, so I spent substantial time reading its documentation directly. Reading other people's GitHub code also helped, from small libraries and focused examples to larger libraries and complete implementations.
+I worked through the implementation file by file, wrote and understood the code, diagnosed problems using logs, and tested it myself. I learned alongside TechWorld with Nana's Kubernetes tutorial and intensive study of the official Kubernetes, Spring AOP, and other project documentation. Grafana Alloy was new to me at the time: videos and tutorials were scarce, and I could find only one relevant YouTube video, so I spent substantial time reading its documentation directly. Reading other people's GitHub code also helped, from small libraries and focused examples to larger libraries and complete implementations.
 
-I now use Codex to help write and organize the documentation. The local `pre-codex` tag marks the committed version before this documentation migration. See [the project history](docs/project-history.md) for the fuller account and learning resources.
+The documentation was written and organized as part of this project, with the Zensical migration preserving earlier content. See [the project history](docs/project-history.md) for the fuller account and learning resources.
 
 ## Documentation
 

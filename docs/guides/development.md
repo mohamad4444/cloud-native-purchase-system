@@ -70,4 +70,4 @@ Do not infer test coverage from these commands: inspect which tests exist and wh
 
 ## Preserve useful versions
 
-The local annotated `pre-codex` tag identifies the committed baseline before the Zensical migration. Inspect it with `git show --no-patch pre-codex`; use a separate worktree if you want to compare that version without disturbing uncommitted work. The historical Compose tag remains available as well. See [project history](../project-history.md).
+The local annotated `pre-zensical` tag identifies the committed baseline before the Zensical migration. Inspect it with `git show --no-patch pre-zensical`; use a separate worktree if you want to compare that version without disturbing uncommitted work. The historical Compose tag remains available as well. See [project history](../project-history.md).
