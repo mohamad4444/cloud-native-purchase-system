@@ -14,7 +14,7 @@ The documentation was written and organized as part of this project, with the Ze
 
 ## Documentation
 
-The documentation lives in [`docs/`](docs/index.md) and builds with [Zensical](https://zensical.org/docs/). Start with:
+The documentation is published at **[mohamad4444.github.io/cloud-native-purchase-system](https://mohamad4444.github.io/cloud-native-purchase-system/)** and builds with [Zensical](https://zensical.org/docs/). The source lives in [`docs/`](docs/index.md). Start with:
 
 - [Learning process](docs/learning-process.md), [design decisions](docs/concepts/design-decisions.md), and [project history](docs/project-history.md).
 - [Prerequisites](docs/getting-started/prerequisites.md) and [local Kubernetes setup](docs/tutorials/local-kubernetes.md).
