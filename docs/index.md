@@ -14,7 +14,7 @@ This project explores how a small purchase application fits together across appl
 | Understand the deployment files | [Kubernetes and Helm](concepts/kubernetes-and-helm.md) |
 | Understand the technologies | [Technology stack, explained](technologies/overview.md) |
 | Understand one technology in depth | [Grafana Alloy, explained](technologies/grafana-alloy.md) |
-| Study a topic from the thesis in depth | The [Deep dives](deep-dives/microservices.md) section — AOP, Keycloak/OIDC, Zero Trust, Kubernetes objects, Helm values, containers, PKI, observability, build tools, CI/CD and evaluation |
+| Study a topic from the thesis in depth | The [Deep dives](deep-dives/microservices.md) section — microservices, AOP, Keycloak/OIDC, Zero Trust, messaging, Kubernetes objects, Helm values, containers, PKI, observability, build tools, CI/CD and evaluation |
 | Follow a log from Java to Grafana | [Observability explained](deep-dives/observability.md), [Grafana Alloy, explained](technologies/grafana-alloy.md), then [Grafana Alloy and logging](monitoring-and-logging.md) |
 | Change or repair something | [Development](guides/development.md) and [troubleshooting](guides/troubleshooting.md) |
 | Look up a value or endpoint | [Configuration](reference/configuration.md) and [HTTP API](reference/api.md) |

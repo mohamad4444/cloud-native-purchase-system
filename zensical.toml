@@ -34,6 +34,7 @@ nav = [
     { "AOP explained" = "deep-dives/aop.md" },
     { "Keycloak and OIDC explained" = "deep-dives/keycloak.md" },
     { "Zero Trust explained" = "deep-dives/zero-trust.md" },
+    { "Messaging explained" = "deep-dives/messaging.md" },
     { "Kubernetes objects" = "deep-dives/kubernetes-objects.md" },
     { "Helm values in depth" = "deep-dives/helm-values.md" },
     { "Containers and builds" = "deep-dives/containers.md" },
