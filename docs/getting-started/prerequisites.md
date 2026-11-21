@@ -8,6 +8,16 @@ Install Python 3.11 or newer with `pip` and virtual environment support. No Java
 
 ## For the application
 
+A single script installs every required tool and verifies the result:
+
+```bash
+./scripts/install-tools.sh --check     # see what is missing
+./scripts/install-tools.sh             # install missing tools
+./scripts/install-tools.sh --optional  # also install k9s and stern
+```
+
+It supports Arch/EndeavourOS, Debian/Ubuntu and Fedora, reads pinned versions from `.env`, skips anything already installed, and never deletes a cluster. After it finishes you may need to log out and back in for Docker group membership to take effect.
+
 | Tool | Purpose | Upstream instructions |
 | --- | --- | --- |
 | Docker Engine and Buildx | Run Minikube and build images | [Docker installation](https://docs.docker.com/engine/install/) and [Buildx](https://docs.docker.com/build/concepts/overview/) |
