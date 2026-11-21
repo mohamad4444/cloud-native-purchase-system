@@ -20,6 +20,7 @@ This project explores how a small purchase application fits together across appl
 | Follow a log from Java to Grafana | [Observability explained](deep-dives/observability.md), [Grafana Alloy, explained](technologies/grafana-alloy.md), then [Grafana Alloy and logging](monitoring-and-logging.md) |
 | Change or repair something | [Development](guides/development.md) and [troubleshooting](guides/troubleshooting.md) |
 | Look up a value or endpoint | [Configuration](reference/configuration.md) and [HTTP API](reference/api.md) |
+| Find which tool does what | [Tools reference](reference/tools.md) |
 
 Tutorials lead to an observable result. Concept pages explain why the pieces exist, and the learning process connects them to the work behind the project. The technology section explains one tool in depth. Guides cover a specific task, and reference pages describe the checked-in interfaces and configuration.
 

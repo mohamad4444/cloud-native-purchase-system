@@ -23,7 +23,7 @@ The documentation lives in [`docs/`](docs/index.md) and builds with [Zensical](h
 - [Technology stack, explained](docs/technologies/overview.md) and [Grafana Alloy, explained](docs/technologies/grafana-alloy.md).
 - In-depth guides from the thesis: [what a cloud project is](docs/deep-dives/cloud-project.md), [microservices](docs/deep-dives/microservices.md), [Spring Boot and request flow](docs/deep-dives/spring-boot.md), [business services](docs/deep-dives/services.md), [complete workflow](docs/deep-dives/workflow.md), [AOP](docs/deep-dives/aop.md), [Keycloak and OIDC](docs/deep-dives/keycloak.md), [Zero Trust](docs/deep-dives/zero-trust.md), [messaging](docs/deep-dives/messaging.md), [Kubernetes objects](docs/deep-dives/kubernetes-objects.md), [Helm values](docs/deep-dives/helm-values.md), [containers](docs/deep-dives/containers.md), [HTTPS and PKI](docs/deep-dives/pki.md), [observability](docs/deep-dives/observability.md), [build tools](docs/deep-dives/build-tools.md), [CI/CD](docs/deep-dives/cicd.md), and [limitations and evaluation](docs/deep-dives/limitations.md).
 - [Grafana Alloy and logging](docs/monitoring-and-logging.md), [certificates](docs/certificate-management.md), and [troubleshooting](docs/guides/troubleshooting.md).
-- [Configuration](docs/reference/configuration.md), [API reference](docs/reference/api.md), and [development workflow](docs/guides/development.md).
+- [Configuration](docs/reference/configuration.md), [API reference](docs/reference/api.md), [tools reference](docs/reference/tools.md), and [development workflow](docs/guides/development.md).
 
 Preview the docs from the repository root (Python 3.11 or newer):
 

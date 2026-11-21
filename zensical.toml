@@ -58,6 +58,7 @@ nav = [
     { "Configuration" = "reference/configuration.md" },
     { "HTTP API" = "reference/api.md" },
     { "Repository map" = "reference/repository.md" },
+    { "Tools" = "reference/tools.md" },
   ] },
 ]
 
