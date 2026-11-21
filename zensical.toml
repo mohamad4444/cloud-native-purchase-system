@@ -25,6 +25,7 @@ nav = [
     { "Design decisions" = "concepts/design-decisions.md" },
     { "End-to-end use cases" = "concepts/use-cases.md" },
     { "Spring Boot and request flow" = "deep-dives/spring-boot.md" },
+    { "Business services in detail" = "deep-dives/services.md" },
     { "Shared Java library" = "concepts/common-library.md" },
     { "AOP explained" = "deep-dives/aop.md" },
     { "Keycloak and OIDC explained" = "deep-dives/keycloak.md" },
@@ -49,6 +50,7 @@ nav = [
     { "Development workflow" = "guides/development.md" },
     { "Certificate management" = "certificate-management.md" },
     { "Grafana Alloy and logging" = "monitoring-and-logging.md" },
+    { "Complete development workflow" = "deep-dives/workflow.md" },
     { "Troubleshooting" = "guides/troubleshooting.md" },
   ] },
   { "Reference" = [

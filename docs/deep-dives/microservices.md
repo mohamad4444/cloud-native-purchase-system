@@ -34,32 +34,84 @@ flowchart LR
 
 The project keeps the old Compose version as the `Docker-Compsoe-Version` tag precisely because the two models were hard to maintain side by side; see [project history](../project-history.md).
 
+### The monolith in detail (§2.1.1)
+
+The thesis paints the "monolithic misery" with an e-commerce example. A single codebase holds modules named `UserAuthenticationModule`, `InventoryModule` and `PurchaseModule`. They call each other **in process** through direct method calls, and a purchase uses one ACID transaction across all of them. Early on that is pleasant: one `.war` or `.jar` to build, test and deploy.
+
+As it grows, the costs appear:
+
+- **Tight coupling** — a change in one module requires recompiling the whole application.
+- **Homogeneous stack** — one language and one runtime for every module.
+- **Scale-as-a-unit** — horizontal scaling copies the entire application, including modules that are not under load.
+- **Shared fate** — a memory leak in one module can bring down everything.
+
+The thesis calls the decomposition principle **Domain-Driven Design**: organise services around business domains, not technical layers. A **Bounded Context** is an explicit boundary inside which a particular domain model and its rules apply. The project maps three:
+
+| Bounded context | Service | Owns |
+| --- | --- | --- |
+| User Identity | Keycloak | users, roles, tokens |
+| Product Inventory | Inventory Service | stock levels |
+| Order Fulfilment | Purchase Service | purchase records |
+
+### The main trade-off: inter-service communication (§2.1.3)
+
+The thesis calls this "the primary trade-off" of microservices. Once calls cross a network:
+
+- **Networks are unreliable** — timeouts, partitions and partial failures need explicit handling.
+- **Synchronous REST** is simple but blocks; a slow Inventory service can cause cascading failures.
+- **Asynchronous messaging** decouples services but introduces eventual consistency.
+- **Cross-service ACID is impractical** — the thesis introduces the **Saga** pattern: a sequence of local transactions with compensating actions. Its illustrative events are `ORDER_CREATED` → `INVENTORY_RESERVED` / `INVENTORY_RESERVATION_FAILED` → `CONFIRMED` or `CANCELLED`.
+- **Service discovery** replaces hard-coded addresses; in Kubernetes this is cluster DNS.
+- **API evolution** demands versioning so consumers are not broken by changes.
+
+The project's Saga-shaped flow uses different names — `purchase.requested` / `purchase.result` and `PENDING` → `CONFIRMED` / `REJECTED` — but the same idea. See [asynchronous messaging](messaging.md#request-reply-in-theory-and-in-this-project).
+
 ## DevOps
 
-DevOps joins development and operations so that building, testing, and deploying become a continuous, automated flow. The thesis describes the usual loop: **plan → code → build → test → release → deploy → operate → monitor**. In this project that loop is represented by:
+DevOps joins development and operations so that building, testing, and deploying become a continuous, automated flow. The thesis describes the usual loop: **plan → code → build → test → release → deploy → operate → monitor**.
 
-- Local iteration — rebuild an image, redeploy a workload, watch the logs (see [development workflow](../guides/development.md)).
-- GitLab CI — a push triggers test/build/deploy jobs (see [CI/CD pipeline](cicd.md)).
-- Observability — logs from every Pod land in Loki (see [observability](observability.md)).
+### The Three Ways (§2.2.1)
 
-## The Twelve-Factor App
+The thesis grounds DevOps in the framework from *The Phoenix Project*:
 
-The Twelve-Factor methodology (§2.3) is a set of rules for software-as-a-service applications. The table shows how each factor appears here, and where the learning project stops short.
+| Way | Principle | Here |
+| --- | --- | --- |
+| **First Way** | Systems thinking — optimise the whole flow from development to the customer; remove constraints, reduce batch sizes, automate | `make build-and-push` and `make deploy` collapse many commands; CI builds and deploys in one pipeline |
+| **Second Way** | Amplify feedback loops — shorten and strengthen feedback so problems are found near their source | logs in Loki/Grafana, `stern-*` Make targets, the `docs-build` CI job that fails on broken docs |
+| **Third Way** | Continual experimentation and learning — high trust, blameless post-mortems, time to improve | the [problems and fixes](../problems-and-fixes.md) page records failures and what each one taught |
 
-| Factor | How it appears in this project |
-| --- | --- |
-| I. Codebase | One repository, two business services plus shared code |
-| II. Dependencies | Maven POMs declare dependencies; Docker images pin base versions in `.env` |
-| III. Config | Configuration is injected through ConfigMaps and Secrets, not compiled in |
-| IV. Backing services | PostgreSQL and Artemis are treated as attached resources addressed by Service DNS |
-| V. Build, release, run | Docker Bake builds, Helmfile releases, Kubernetes runs |
-| VI. Processes | Services are stateless; state lives in PostgreSQL and Artemis |
-| VII. Port binding | Spring Boot serves HTTP on `8080`, exposed through a Kubernetes Service |
-| VIII. Concurrency | Multiple replicas are possible; the charts expose replica counts |
-| IX. Disposability | Pods are disposable; startup and shutdown are handled by the container runtime |
-| X. Dev/prod parity | `dev` and `staging` run the same stack on one cluster, differing mainly in ingress/TLS |
-| XI. Logs | Logs go to stdout as structured JSON and are collected by Alloy |
-| XII. Admin processes | Flyway migrations run at application startup |
+### Enabling technologies (§2.2.2)
+
+DevOps is cultural, but these technologies make it practical:
+
+| Technology | Role | Here |
+| --- | --- | --- |
+| Version control | Single source of truth for code and config | Git/GitLab repository |
+| CI/CD | Automate build, test and deploy | `.gitlab-ci.yml`, GitLab Runner |
+| Infrastructure as Code | Machine-readable, repeatable infrastructure | Helm charts, Helmfile, `docker-bake.hcl`, `Makefile` |
+| Containers and orchestration | Portable units plus automated management | Docker images, Kubernetes/Helmfile |
+| Monitoring and observability | Feedback for the Second Way | Loki, Grafana, Alloy; Prometheus discussed but not deployed |
+
+In this project the loop is represented by local iteration (rebuild, redeploy, watch logs), GitLab CI (a push triggers test/build/deploy jobs), and observability (Pod logs land in Loki). See [development workflow](../guides/development.md), [CI/CD pipeline](cicd.md) and [observability](observability.md).
+
+## The Twelve-Factor App (§2.3)
+
+The Twelve-Factor methodology was written for **SaaS** applications. The thesis explicitly notes (§2.3) that this project is *not* SaaS — it runs on a self-hosted local cluster — but the factors still apply as "a clean contract with the underlying platform". Here is each factor explained, with the concrete implementation and any honest gap.
+
+| # | Factor | Explanation and example here |
+| --- | --- | --- |
+| I | **Codebase** | One codebase in version control, many deployments. This single repo produces `dev` and `staging` deployments from the same commit. |
+| II | **Dependencies** | Declare and isolate dependencies explicitly. Maven POMs declare Java libraries; Dockerfile `ARG`s and `.env` pin base image versions — nothing is assumed to exist on the host. |
+| III | **Config** | Store deployment-specific config in the environment, strictly separate from code. `application-common.properties` uses `${DATASOURCE_URL:...}` placeholders filled from Kubernetes ConfigMaps and Secrets. |
+| IV | **Backing services** | Treat databases, brokers and identity providers as attached resources addressed by a locator in config. JDBC URLs, `tcp://artemis-service:61616` and Keycloak URLs live in ConfigMaps; swapping a database needs no code change. |
+| V | **Build, release, run** | Keep the three stages strictly separate. Build = `docker buildx bake`; release = `helmfile -e staging sync` combines the image with config; run = Kubernetes starts the Deployments. |
+| VI | **Processes** | Execute the app as stateless processes; persist data in a stateful backing service. The Spring services hold no state between requests; PostgreSQL and Artemis hold it. |
+| VII | **Port binding** | Export HTTP as a service by binding a port. `server.port=${SERVER_PORT:8080}` and `containerPort: 8080`, reached through a Kubernetes Service. |
+| VIII | **Concurrency** | Scale out through the process model rather than by growing one process. Deployments declare `replicas`; Artemis listener concurrency is 1–5. No HPA is configured, so scaling is manual. |
+| IX | **Disposability** | Start and stop quickly, handle graceful shutdown. Pods are disposable and recreated by controllers; the Reloader annotation and `rollout-restart-*` Make targets handle config-driven restarts. |
+| X | **Dev/prod parity** | Keep development and production as similar as possible. `dev` and `staging` use the same charts and images on one cluster; the main differences are ingress, TLS and frontend URLs. |
+| XI | **Logs** | Treat logs as event streams written to stdout; let the environment collect them. Logback writes JSON to stdout; Alloy ships it to Loki. The application does not write log files. |
+| XII | **Admin processes** | Run one-off administrative tasks in the same environment as the app. Flyway migrations run at application startup inside the service process, using the same config. |
 
 Two honest gaps: replica counts are not automatically scaled (no HPA), and stateful components are single-instance. The [limitations page](limitations.md) lists these.
 
@@ -86,6 +138,32 @@ flowchart TB
   C4 --> L["Alloy → Loki → Grafana"]
   C5 --> CI[".gitlab-ci.yml"]
 ```
+
+### The cloud-native technology stack (§2.4.3)
+
+The thesis presents the technologies as a stack, with each layer building on the one below. This is a useful mental model for where each tool in the repository belongs:
+
+| Layer | Role | Tool here |
+| --- | --- | --- |
+| **Containers** | Package and isolate workloads | Docker images, `docker-bake.hcl` |
+| **Orchestration** | Schedule and manage containers across nodes | Kubernetes (Minikube) |
+| **Service management** | Discovery and stable networking | Kubernetes Services + cluster DNS |
+| **Declarative configuration** | Desired state, versioned and repeatable | Helm charts, Helmfile, values files |
+| **Continuous delivery** | Automate build → deploy | GitLab CI, Runner, dind image |
+| **Observability** | Understand behaviour from outputs | Loki + Grafana; Alloy collection |
+
+```mermaid
+flowchart TB
+  L6["Observability<br/>Loki · Grafana · Alloy"]
+  L5["Continuous delivery<br/>GitLab CI + Runner"]
+  L4["Declarative configuration<br/>Helm + Helmfile"]
+  L3["Service management<br/>Services + DNS"]
+  L2["Orchestration<br/>Kubernetes"]
+  L1["Containers<br/>Docker"]
+  L1 --> L2 --> L3 --> L4 --> L5 --> L6
+```
+
+Note that the stack is a *dependency* stack, not the runtime request path — the [nine-layer architecture diagram](../concepts/design-decisions.md#the-nine-layers-at-a-glance) shows the layers from the application's point of view.
 
 ## Containerization
 

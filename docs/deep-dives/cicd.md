@@ -91,9 +91,11 @@ helmfile --file ./environments -e staging sync
 
 Helmfile reads `environments/helmfile.yaml`, selects `staging.yaml` values, composes per-release values through `env-magic.gotmpl`, and applies all releases in dependency order. The details of that mechanism are in [Helm values in depth](helm-values.md).
 
-## Runner command examples
+## Runner command examples (§2.21)
 
-The thesis (§2.21) lists common Runner commands. The ones relevant here are:
+The thesis gives concrete examples of what job scripts can do. These are the categories worth knowing.
+
+### Runner lifecycle commands
 
 | Command | Purpose |
 | --- | --- |
@@ -104,6 +106,52 @@ The thesis (§2.21) lists common Runner commands. The ones relevant here are:
 | `gitlab-runner status` / `start` / `stop` | Manage the runner service |
 
 In this project the runner is installed by a Helm chart, so lifecycle management happens through Helmfile rather than direct `gitlab-runner` commands.
+
+### Basic and filesystem commands (§2.21.1–2.21.2)
+
+A job runs arbitrary shell commands in the build image. Common groups:
+
+```bash
+mkdir -p build && cp target/app.jar build/       # prepare artefacts
+find . -name '*.log' -delete                     # clean up
+```
+
+### Build and dependency commands
+
+```bash
+mvn clean compile
+mvn package
+mvn verify
+docker build -t my-service:latest .
+docker push my-registry/my-service:latest
+```
+
+The project's build job uses `docker buildx bake` instead of plain `docker build`, but the principle is the same: produce an artefact and push it where the cluster can pull it.
+
+### Kubernetes and Minikube commands
+
+```bash
+kubectl get pods -n dev
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/inventory -n dev
+kubectl config use-context minikube
+minikube status
+minikube service list
+```
+
+These appear throughout the tutorials and Make targets; see [development workflow](../guides/development.md).
+
+### A simple three-stage pipeline (§2.21.3)
+
+The thesis illustrates a pipeline with `build`, `test`, `deploy` stages — compile, run tests, then apply manifests and restart a rollout. This project's real pipeline is in `.gitlab-ci.yml` and adds a `docs-build` validation job; see [the pipeline definition](#continuous-integration-and-delivery).
+
+### Multi-environment deployment (§2.21.3)
+
+The thesis shows separate deploy jobs selecting different kubectl contexts and Helm values files for Minikube and production. This project instead uses **one** Helmfile with `-e dev` or `-e staging`, and CI always deploys `staging`. That keeps a single source of deployment truth; see [Helm values in depth](helm-values.md#helmfile-orchestration).
+
+### Local-machine execution (§2.21.4)
+
+Runners can also execute on the host with a shell executor. Diagnostic commands such as `uname -a`, `df -h`, `free -m`, `curl -I` and `ping` help verify the environment. The `prerequisites` page gives the equivalent checks for a local setup — see [prerequisites](../getting-started/prerequisites.md#for-the-application).
 
 ## Documentation validation
 
