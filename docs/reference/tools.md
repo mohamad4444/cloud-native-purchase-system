@@ -78,6 +78,12 @@ For this project most inspection can also be done with plain `kubectl` — see [
 
 The script is idempotent: it skips existing tools, reads pinned versions from `.env`, supports Arch/EndeavourOS, Debian/Ubuntu and Fedora, and never deletes a cluster. The AppImage tools (Lens, Freelens, Headlamp) require FUSE.
 
+To check whether the ports these tools need are free (and which process owns them if not), run:
+
+```bash
+./scripts/check-ports.sh
+```
+
 Environment-specific problems — veth, the registry proxy, and the transparent HTTP proxy — are documented in [runtime notes](../guides/runtime-notes.md).
 
 ## Where to read next

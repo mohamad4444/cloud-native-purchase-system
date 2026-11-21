@@ -21,7 +21,7 @@ The provided scripts do the setup in order:
 ```
 
 !!! warning "Read `startup.sh` first"
-    `startup.sh` begins with `minikube delete` and deploys both `dev` and `staging`. On an existing cluster, skip it and run the explicit steps below instead. The [tutorial]](../tutorials/local-kubernetes.md#1-start-the-cluster) walks through them.
+    `startup.sh` begins with `minikube delete` and deploys both `dev` and `staging`. On an existing cluster, skip it and run the explicit steps below instead. The [tutorial](../tutorials/local-kubernetes.md#1-start-the-cluster) walks through them.
 
 Manual equivalent for a first run:
 
@@ -97,6 +97,17 @@ APIs return **401** without a token — that is correct. Sign in through the UI;
 | Realm | `purchase-service-realm` |
 | Client | `web-frontend-client` |
 
+## Check ports before starting
+
+Port-forwards fail silently if a port is already taken by another app (for example Open WebUI on 8080). Run the check script first — it lists each occupied port and the process or container that owns it:
+
+```bash
+./scripts/check-ports.sh                  # all project ports
+./scripts/check-ports.sh 4200 8088 8001   # specific ports
+```
+
+It exits `0` when every checked port is free and `1` otherwise. The full mode also prints which service normally uses each port. If a port is busy, stop the owning process, or use `bash portforwarding/port-forward.sh restart`.
+
 ## Useful checks
 
 ```bash
@@ -122,12 +133,41 @@ In Lens, select the **`dev`** namespace (or **All namespaces**) in the Pods view
 | Yacht | <http://localhost:8000> |
 | Dockge | <http://localhost:2201> |
 
-## Clean up
+## Clean up / destroy
+
+Nothing runs in the background forever unless you leave it there. Use the matching level of cleanup:
 
 ```bash
-bash portforwarding/port-forward.sh stop   # or Ctrl+C on manual forwards
-minikube stop        # pause the cluster
-minikube delete      # remove it entirely
+# 1. Stop port-forwards (the most common leftover)
+bash portforwarding/port-forward.sh stop
+#    If you started kubectl port-forward manually, press Ctrl+C in each terminal.
+#    Verify with: ./scripts/check-ports.sh
+
+# 2. Pause the cluster but keep all images and state (quickest to resume)
+minikube stop
+
+# 3. Destroy the cluster and everything in it (images, databases, deployments)
+minikube delete
+
+# 4. Stop the optional browser dashboards (if you installed them)
+docker stop portainer yacht dockge 2>/dev/null || true
+#    To remove them completely (also deletes their data volumes):
+#    docker rm -f portainer yacht dockge
+#    docker volume rm portainer_data yacht 2>/dev/null || true
+
+# 5. Stop the local Buildx builder container (optional)
+docker buildx stop purchase-docs-builder 2>/dev/null || true
+```
+
+!!! note "Cleanup order"
+    Stop port-forwards **before** `minikube stop`/`delete` — otherwise `kubectl` processes keep trying to reach a cluster that no longer exists. `minikube delete` removes the cluster permanently; `minikube stop` only pauses it.
+
+Check that everything is down with:
+
+```bash
+./scripts/check-ports.sh                  # should report all ports free
+minikube status                           # should say Stopped / Not found
+docker ps --format '{{.Names}}' | grep -E 'minikube|portainer|yacht|dockge' || echo 'no project containers'
 ```
 
 ## Troubleshooting
