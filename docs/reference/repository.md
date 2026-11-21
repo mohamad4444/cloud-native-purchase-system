@@ -54,7 +54,7 @@ flowchart TB
   classDef docs fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c;
   class POMS,COMMON,PUR,INV,WEB,KC,ART,DIND code;
   class CHARTS,ENV deploy;
-  class MAKE,BAKE,SCRIPTS,CA,CI ops;
+  class MAKE,BAKE,SCRIPTS,PF,CA,CI ops;
   class DOCS docs;
 ```
 
