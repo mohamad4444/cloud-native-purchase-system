@@ -1,0 +1,6 @@
+/* Keep Mermaid diagrams inside the content area.
+   Some diagrams render wider than the page and would otherwise be cropped. */
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}

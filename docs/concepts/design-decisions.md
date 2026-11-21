@@ -46,14 +46,14 @@ flowchart TB
   L8["8 · Observability<br/>Alloy · Loki · Grafana"]
   L9["9 · PKI<br/>cert-manager"]
 
-  L2 -->|"deploys via helmfile"| L1
-  L2 -->|"builds images"| L3
-  L3 -->|"images pulled by Pods"| L1
+  L2 -->|"deploys"| L1
+  L2 -->|"builds"| L3
+  L3 -->|"pulled by Pods"| L1
   L4 --> L5 --> L6 --> L7
-  L8 -.->|"observes all Pods"| L4
-  L8 -.->|"observes all Pods"| L5
-  L8 -.->|"observes all Pods"| L6
-  L8 -.->|"observes all Pods"| L7
+  L8 -.-> L4
+  L8 -.-> L5
+  L8 -.-> L6
+  L8 -.-> L7
   L9 -.->|"secures ingress"| L1
   L9 -.->|"TLS for Keycloak"| L4
 
@@ -65,7 +65,7 @@ flowchart TB
   class L8,L9 cross;
 ```
 
-Layer 8 is only partially realized: logs have a working Alloy → Loki → Grafana pipeline, but no Prometheus server is deployed even though the applications expose metrics. [Grafana Alloy, explained](../technologies/grafana-alloy.md) goes deep on the collector, and [Grafana Alloy and logging](../monitoring-and-logging.md#metrics-are-exposed-but-collection-is-unfinished) covers the operational side.
+The dashed lines from L8 show that observability reads the logs of **all** application Pods (L4–L7). Layer 8 is only partially realized: logs have a working Alloy → Loki → Grafana pipeline, but no Prometheus server is deployed even though the applications expose metrics. [Grafana Alloy, explained](../technologies/grafana-alloy.md) goes deep on the collector, and [Grafana Alloy and logging](../monitoring-and-logging.md#metrics-are-exposed-but-collection-is-unfinished) covers the operational side.
 
 Two supporting namespaces are shared by both application environments: `monitoring` for the logging stack and `cert-manager` for TLS. CI/CD work uses `gitlab-runner`. The application itself runs in `dev` or `staging`, as described in [Kubernetes, Helm, and Helmfile](kubernetes-and-helm.md#namespaces-and-shared-infrastructure).
 
