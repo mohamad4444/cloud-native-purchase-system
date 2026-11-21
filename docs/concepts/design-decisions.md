@@ -37,19 +37,25 @@ The layers stack from the platform up to the business workflow. Observability an
 ```mermaid
 flowchart TB
   L1["1 · Orchestration<br/>Kubernetes"]
-  L2["2 · CI/CD<br/>GitLab Runner"]
+  L2["2 · CI/CD<br/>GitLab CI/CD"]
   L3["3 · Containerization<br/>Docker + Bake"]
   L4["4 · Security<br/>Keycloak + PKCE"]
   L5["5 · Frontend<br/>Nginx + JavaScript"]
   L6["6 · Backend<br/>Spring Boot"]
-  L7["7 · Messaging<br/>ActiveMQ Artemis"]
+  L7["7 · Messaging<br/>Apache Artemis"]
   L8["8 · Observability<br/>Alloy · Loki · Grafana"]
   L9["9 · PKI<br/>cert-manager"]
 
-  L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
-  L8 -.->|"observes"| L4
-  L8 -.->|"observes"| L6
-  L9 -.->|"secures ingress"| L4
+  L2 -->|"deploys via helmfile"| L1
+  L2 -->|"builds images"| L3
+  L3 -->|"images pulled by Pods"| L1
+  L4 --> L5 --> L6 --> L7
+  L8 -.->|"observes all Pods"| L4
+  L8 -.->|"observes all Pods"| L5
+  L8 -.->|"observes all Pods"| L6
+  L8 -.->|"observes all Pods"| L7
+  L9 -.->|"secures ingress"| L1
+  L9 -.->|"TLS for Keycloak"| L4
 
   classDef platform fill:#e8eaf6,stroke:#3949ab,color:#1a237e;
   classDef app fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;

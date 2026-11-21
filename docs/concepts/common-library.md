@@ -111,7 +111,7 @@ classDiagram
 
 | Shared class | Responsibility |
 | --- | --- |
-| `BaseEvent` and the two event classes | Serializable event payloads with a UUID, timestamp, and correlation ID (`purchaseId`) |
+| `BaseEvent` and the two event classes | JSON-serializable event payloads with a UUID, timestamp, and correlation ID (`purchaseId`) |
 | `QueueNames` | The two queue constants: `purchase.requested` and `purchase.result` |
 | `MessageProducer` | Thin wrapper over `JmsTemplate.convertAndSend` |
 | `JmsConfig` | JSON conversion for JMS text messages |

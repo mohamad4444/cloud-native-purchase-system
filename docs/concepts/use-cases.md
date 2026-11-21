@@ -35,7 +35,8 @@ sequenceDiagram
   Artemis->>Inventory: purchase.requested
   Inventory->>Inventory: check and reduce stock
   Inventory->>Artemis: purchase.result
-  Artemis->>Purchase: update to CONFIRMED or REJECTED
+  Artemis->>Purchase: PurchaseResultEvent
+  Purchase->>Purchase: result listener updates to CONFIRMED or REJECTED
 ```
 
 The thesis describes the outcome the user sees: if stock is sufficient the purchase becomes **Completed**, otherwise **Rejected**. In the checked-in code those states are named `CONFIRMED` and `REJECTED`, with `PENDING` while the broker work is in flight; the [messaging page](messaging.md) explains the names and the timing.

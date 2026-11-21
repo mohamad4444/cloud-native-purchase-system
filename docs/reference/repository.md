@@ -30,7 +30,8 @@ flowchart TB
     direction LR
     MAKE["Makefile"]
     BAKE["docker-bake.hcl<br/>+ .env"]
-    SCRIPTS["scripts/<br/>portforwarding/"]
+    SCRIPTS["scripts/<br/>setup + helpers"]
+    PF["portforwarding/<br/>port-forward.sh"]
     CA["certificate-authority/"]
     CI[".gitlab-ci.yml"]
     MAKE --> BAKE
@@ -38,7 +39,7 @@ flowchart TB
   end
 
   DOCS["docs/<br/>zensical.toml<br/>this site"]
-  K8S["Kubernetes<br/>dev · staging · monitoring"]
+  K8S["Kubernetes<br/>dev · staging · monitoring ·<br/>cert-manager · gitlab-runner"]
 
   CODE -->|"built into images"| DEPLOY
   OPS -->|"builds"| CODE
