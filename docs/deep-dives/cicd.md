@@ -153,6 +153,25 @@ The thesis shows separate deploy jobs selecting different kubectl contexts and H
 
 Runners can also execute on the host with a shell executor. Diagnostic commands such as `uname -a`, `df -h`, `free -m`, `curl -I` and `ping` help verify the environment. The `prerequisites` page gives the equivalent checks for a local setup — see [prerequisites](../getting-started/prerequisites.md#for-the-application).
 
+## Attaching the local runner automatically
+
+`scripts/setup-gitlab-ci.sh` connects a local cluster to a GitLab project through the GitLab API using a **Personal Access Token with the `api` scope**. It:
+
+1. validates the token and resolves the project (by numeric ID or `namespace/project` path, auto-detected from the git remote),
+2. creates a **project runner** through `POST /projects/:id/runners`, receiving a `glrt-…` runner authentication token,
+3. installs `charts/gitlab-runner-sa` and the `gitlab/gitlab-runner` chart (v0.80.1) in the `gitlab-runner` namespace with that token in a temporary mode-0600 values file (removed on exit — the token is never committed),
+4. optionally sets CI/CD variables and triggers a pipeline.
+
+```bash
+GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh --dry-run   # preview
+GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh             # attach runner
+GITLAB_TOKEN=glpat-... ./scripts/setup-gitlab-ci.sh --trigger  # also run a pipeline
+```
+
+The runner is registered with tag `kubernetes`, matching the `tags: [kubernetes]` in `.gitlab-ci.yml`. The generated values override the build image with `registry.kube-system.svc.cluster.local:80/dind:latest`, which is the address Pods can actually reach (the checked-in `runner.yaml` still uses the host-only `localhost:5000` default).
+
+Set `GITLAB_URL`, `GITLAB_PROJECT_ID`, `GITLAB_PROJECT_PATH`, `RUNNER_DESCRIPTION` or `RUNNER_TAGS` to override the defaults. Run `--check` to verify cluster access before supplying a token. See `--help` for the full list.
+
 ## Documentation validation
 
 The `docs-build` job makes the documentation part of CI: any change under `docs/`, `zensical.toml`, `requirements-docs.txt`, `README.md`, `CONTRIBUTING.md`, or `.gitlab-ci.yml` triggers a strict Zensical build. See [contributing to the docs](../contributing.md#build-and-check).
