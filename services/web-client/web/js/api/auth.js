@@ -2,12 +2,15 @@ import { KEYCLOAK_CONFIG } from '../config.js';
 import { setToken } from '../state.js';
 import { updateLoginState } from '../ui.js';
 import Keycloak from './lib/keycloak.js';
+
+// Create the client eagerly so the Login button can be bound before the
+// (potentially slow) silent-SSO check resolves.
+export const keycloak = new Keycloak(KEYCLOAK_CONFIG);
+
 export async function initAuth() {
     console.log('[auth] Starting initAuth');
-    //const Keycloak = window.Keycloak;
-    const keycloak = new Keycloak(KEYCLOAK_CONFIG);
 
-    // Initialize Keycloak and attempt silent SSO login
+    // Initialize Keycloak and attempt silent SSO login.
     const authenticated = await keycloak.init({
         onLoad: 'check-sso',
         silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
@@ -21,20 +24,16 @@ export async function initAuth() {
     console.log('[auth] keycloak.init() resolved:', { authenticated, token: keycloak.token });
 
     if (authenticated && keycloak.token) {
-        // Save token to sessionStorage for your app's state management
         sessionStorage.setItem('accessToken', keycloak.token);
         setToken(keycloak.token);
         updateLoginState(keycloak.tokenParsed?.preferred_username);
 
-        // Setup token refresh before expiration
         setInterval(() => {
             keycloak.updateToken(30).then(refreshed => {
                 if (refreshed) {
                     console.log('[auth] Token refreshed');
                     sessionStorage.setItem('accessToken', keycloak.token);
                     setToken(keycloak.token);
-                } else {
-                    console.log('[auth] Token still valid, no refresh needed');
                 }
             }).catch(() => {
                 console.log('[auth] Token refresh failed, logging out');

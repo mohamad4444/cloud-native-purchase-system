@@ -1,63 +1,73 @@
 # Quick guide: run and access the project
 
-The shortest path from a fresh clone to a working app. Full explanations are in the [tutorial](../tutorials/local-kubernetes.md) and the [tools reference](../reference/tools.md).
+The shortest path from a fresh clone to a working app, using the repository's own scripts and Makefile. Full explanations are in the [tutorial](../tutorials/local-kubernetes.md) and [tools reference](../reference/tools.md).
 
 ## 1. Install tools
 
 ```bash
-./scripts/install-tools.sh            # required tools
-./scripts/install-tools.sh --optional # k9s, Lens, Freelens, Headlamp, lazydocker
+./scripts/install-tools.sh            # required tools (Arch / Debian / Fedora)
 ./scripts/install-tools.sh --check    # verify
 ```
 
-Log out and back in once if you were just added to the `docker` group.
+Log out and back in once if you were just added to the `docker` group. Optional inspectors (k9s, Lens, Headlamp, lazydocker) and browser dashboards are covered in the [tools reference](../reference/tools.md).
 
-## 2. Start the cluster
+## 2. Prepare the cluster
+
+The provided scripts do the setup in order:
+
+```bash
+./scripts/setup-buildx.sh      # create the Buildx builder
+./scripts/startup.sh           # start Minikube, addons, registry port-forward, build & deploy
+```
+
+!!! warning "Read `startup.sh` first"
+    `startup.sh` begins with `minikube delete` and deploys both `dev` and `staging`. On an existing cluster, skip it and run the explicit steps below instead. The [tutorial]](../tutorials/local-kubernetes.md#1-start-the-cluster) walks through them.
+
+Manual equivalent for a first run:
 
 ```bash
 minikube start --driver=docker --memory=8g --cpus=4
 minikube addons enable ingress
+kubectl port-forward -n kube-system service/registry 5000:80   # keep running
+./scripts/setup-buildx.sh
 ```
 
-Check: `kubectl get nodes` should show `minikube` as `Ready`.
+## 3. Build and deploy with Make
 
-## 3. Build and load images
+The [Makefile](https://github.com/mohamad4444/cloud-native-purchase-system/blob/develop/Makefile) loads `.env` automatically and wraps the long commands:
 
 ```bash
-set -a; . ./.env; set +a
-mkdir -p .local
-cat > .local/buildkitd.toml <<'EOF'
-[registry."localhost:5000"]
-  http = true
-  insecure = true
-EOF
-docker buildx create --name purchase-docs-builder --use \
-  --driver docker-container --driver-opt network=host \
-  --buildkitd-config .local/buildkitd.toml
-docker buildx inspect --bootstrap
-make build-and-push
-
-for i in builder-common artemis keycloak nginx-frontend inventory-service purchase-service dind; do
-  minikube image load localhost:5000/$i:latest
-done
+make build-and-push    # docker buildx bake base-images + application-images
+make deploy            # helmfile -e staging sync
+make release           # both of the above (also the default `make` target)
 ```
 
-On a normal network you can push to the in-cluster registry and let Pods pull from it instead — see [runtime notes](../guides/runtime-notes.md) for why `image load` is used here.
-
-## 4. Deploy
+`deploy` and `release` target **staging**. For the `dev` environment used in this guide, run Helmfile directly:
 
 ```bash
 helmfile -f environments/helmfile.yaml -e dev --selector name=cert-manager sync --skip-needs
-# set globalConfig.pullPolicy: IfNotPresent in environments/values/env/dev.yaml when using image load
 helmfile -f environments/helmfile.yaml -e dev \
   --selector name=frontend --selector name=keycloak \
   --selector name=message-broker --selector name=inventory-service \
   --selector name=purchase-service sync --skip-needs
 ```
 
-Verify: `kubectl get pods -n dev` — eight Pods should be `Running`.
+If images were loaded with `minikube image load` instead of pushed to a registry, set `globalConfig.pullPolicy: IfNotPresent` in `environments/values/env/dev.yaml` first — see [runtime notes](../guides/runtime-notes.md).
 
-## 5. Expose the app
+!!! note "A rebuilt `latest` image does not restart Pods"
+    After rebuilding an image with the same tag, run `make rollout-restart-inventory` / `make rollout-restart-purchase` (targets staging), or `kubectl rollout restart deployment/<name> -n dev`.
+
+## 4. Expose the app
+
+Use the helper script for all port-forwards at once:
+
+```bash
+bash portforwarding/port-forward.sh start
+```
+
+It forwards frontend (4200), Keycloak (8080), purchase (8001), inventory (8002), Artemis (8161), Grafana (3000) and Loki (3100) in the background. Check with `bash portforwarding/port-forward.sh status`; stop with `bash portforwarding/port-forward.sh stop`. Its limitations are listed in [troubleshooting]](../guides/troubleshooting.md#existing-helper-script-limitations).
+
+For visibility while learning, start the four core forwards manually instead:
 
 ```bash
 kubectl port-forward -n dev service/frontend-service 4200:80
@@ -74,7 +84,7 @@ kubectl port-forward -n dev service/inventory-service 8002:8080
 | Keycloak realm | <http://localhost:8080/realms/purchase-service-realm> |
 | Inventory API | <http://localhost:8002/inventory-api/inventory> |
 | Purchase API | <http://localhost:8001/purchase-api/purchases> |
-| Metrics (no dashboard) | <http://localhost:8002/actuator/prometheus> |
+| Metrics endpoint | <http://localhost:8002/actuator/prometheus> |
 
 APIs return **401** without a token — that is correct. Sign in through the UI; see [first purchase](../tutorials/first-purchase.md).
 
@@ -93,6 +103,7 @@ APIs return **401** without a token — that is correct. Sign in through the UI;
 kubectl get pods -A                       # all workloads
 kubectl logs -n dev deployment/inventory --tail=100
 kubectl get events -n dev --sort-by=.lastTimestamp
+make stern-inventory                      # tail inventory logs (staging)
 k9s                                       # terminal UI
 lazydocker                                # Docker containers
 ```
@@ -114,15 +125,16 @@ In Lens, select the **`dev`** namespace (or **All namespaces**) in the Pods view
 ## Clean up
 
 ```bash
-kubectl port-forward processes: Ctrl+C
+bash portforwarding/port-forward.sh stop   # or Ctrl+C on manual forwards
 minikube stop        # pause the cluster
 minikube delete      # remove it entirely
 ```
 
 ## Troubleshooting
 
-- Pods in `ImagePullBackOff` → images were not loaded; repeat step 3, or check the [runtime notes](../guides/runtime-notes.md).
+- Pods in `ImagePullBackOff` → images were not loaded; rebuild with `make build-and-push` or see [runtime notes](../guides/runtime-notes.md).
+- Login button does nothing → reload the page; the button is bound before the silent-SSO check. Check the browser console for `"[auth]" messages.
 - 401 from the API → expected without a token; sign in first.
-- 500 "Access Denied" → the token lacks the `ROLE_USER` authority; see [authentication](../concepts/authentication.md).
-- Lens shows no pods → select the `dev` namespace or **All namespaces**.
+- 500 "Access Denied" → the token lacks `ROLE_USER`; see [authentication](../concepts/authentication.md).
+- Lens shows no pods → select `dev` or **All namespaces**.
 - Certificate not ready → harmless in dev; TLS is only used in staging.
