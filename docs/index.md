@@ -6,6 +6,8 @@ This project explores how a small purchase application fits together across appl
 
 | Your goal | Read next |
 | --- | --- |
+| Understand what "cloud" means here | [What is a cloud project?](deep-dives/cloud-project.md) |
+| Understand Spring Boot and the request path | [Spring Boot and request flow](deep-dives/spring-boot.md) |
 | See how the project was learned and what it demonstrates | [Learning process](learning-process.md) |
 | See problems faced and how they were fixed | [Problems and fixes](problems-and-fixes.md) |
 | Run the project for the first time | [Prerequisites](getting-started/prerequisites.md), then [local Kubernetes](tutorials/local-kubernetes.md) |
