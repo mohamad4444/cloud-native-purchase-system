@@ -1,5 +1,62 @@
 # Repository map
 
+The repository keeps code, deployment definitions, build tooling, and documentation side by side. The diagram groups them by role; solid arrows show how source becomes a running deployment, dotted arrows show what the docs explain.
+
+```mermaid
+flowchart TB
+  subgraph CODE["services/ — code and images"]
+    direction LR
+    POMS["poms/<br/>Maven parents"]
+    COMMON["common/<br/>shared JAR"]
+    PUR["purchase-service/<br/>REST + JMS"]
+    INV["inventory-service/<br/>REST + JMS"]
+    WEB["web-client/<br/>Nginx + JS"]
+    KC["keycloak/<br/>realm + image"]
+    ART["artemis/<br/>broker image"]
+    DIND["dind/<br/>CI build image"]
+    POMS --> COMMON
+    COMMON --> PUR
+    COMMON --> INV
+  end
+
+  subgraph DEPLOY["Deployment as code"]
+    direction LR
+    CHARTS["charts/<br/>local Helm charts"]
+    ENV["environments/<br/>helmfile + values"]
+    CHARTS --- ENV
+  end
+
+  subgraph OPS["Build and operate"]
+    direction LR
+    MAKE["Makefile"]
+    BAKE["docker-bake.hcl<br/>+ .env"]
+    SCRIPTS["scripts/<br/>portforwarding/"]
+    CA["certificate-authority/"]
+    CI[".gitlab-ci.yml"]
+    MAKE --> BAKE
+    CI --> BAKE
+  end
+
+  DOCS["docs/<br/>zensical.toml<br/>this site"]
+  K8S["Kubernetes<br/>dev · staging · monitoring"]
+
+  CODE -->|"built into images"| DEPLOY
+  OPS -->|"builds"| CODE
+  OPS -->|"selects environment"| DEPLOY
+  DEPLOY -->|"runs in"| K8S
+  DOCS -.->|"explains"| CODE
+  DOCS -.->|"explains"| DEPLOY
+
+  classDef code fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+  classDef deploy fill:#e0f2f1,stroke:#00695c,color:#004d40;
+  classDef ops fill:#fff3e0,stroke:#ef6c00,color:#e65100;
+  classDef docs fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c;
+  class POMS,COMMON,PUR,INV,WEB,KC,ART,DIND code;
+  class CHARTS,ENV deploy;
+  class MAKE,BAKE,SCRIPTS,CA,CI ops;
+  class DOCS docs;
+```
+
 | Path | What to look for |
 | --- | --- |
 | `services/purchase-service/` | Purchase API, persistence, request publisher, result listener, Flyway migrations |

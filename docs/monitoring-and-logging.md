@@ -1,6 +1,6 @@
 # Grafana Alloy and logging
 
-This page follows a log from a Spring service to Grafana. The Kubernetes logging stack uses **Alloy to collect**, **Loki to store**, and **Grafana to query**. Grafana itself does not read the container log files.
+This page follows a log from a Spring service to Grafana. The Kubernetes logging stack uses **Alloy to collect**, **Loki to store**, and **Grafana to query**. Grafana itself does not read the container log files. If you are new to the collector, start with [Grafana Alloy, explained](../technologies/grafana-alloy.md), which walks through the component pipeline in the checked-in ConfigMap; this page focuses on deploying and querying the stack.
 
 ```mermaid
 flowchart TB

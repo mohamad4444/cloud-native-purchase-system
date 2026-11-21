@@ -10,6 +10,8 @@ site_dir = "site"
 nav = [
   { "Start here" = [
     { "Overview" = "index.md" },
+    { "Learning process" = "learning-process.md" },
+    { "Problems and fixes" = "problems-and-fixes.md" },
     { "Prerequisites" = "getting-started/prerequisites.md" },
     { "Project history" = "project-history.md" },
   ] },
@@ -19,9 +21,16 @@ nav = [
   ] },
   { "Concepts" = [
     { "System architecture" = "concepts/architecture.md" },
+    { "Design decisions" = "concepts/design-decisions.md" },
+    { "Shared Java library" = "concepts/common-library.md" },
+    { "End-to-end use cases" = "concepts/use-cases.md" },
     { "Kubernetes, Helm, and Helmfile" = "concepts/kubernetes-and-helm.md" },
     { "Authentication and roles" = "concepts/authentication.md" },
     { "Asynchronous purchases" = "concepts/messaging.md" },
+  ] },
+  { "Technologies" = [
+    { "Technology stack, explained" = "technologies/overview.md" },
+    { "Grafana Alloy, explained" = "technologies/grafana-alloy.md" },
   ] },
   { "Guides" = [
     { "Development workflow" = "guides/development.md" },
@@ -39,7 +48,7 @@ nav = [
 
 [project.theme]
 language = "en"
-features = ["navigation.tabs", "navigation.sections", "navigation.top", "content.code.copy"]
+features = ["navigation.top", "content.code.copy"]
 
 [project.theme.icon]
 repo = "fontawesome/brands/github"

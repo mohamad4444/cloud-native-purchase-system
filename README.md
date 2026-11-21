@@ -16,9 +16,11 @@ I now use Codex to help write and organize the documentation. The local `pre-cod
 
 The documentation lives in [`docs/`](docs/index.md) and builds with [Zensical](https://zensical.org/docs/). Start with:
 
+- [Learning process](docs/learning-process.md), [design decisions](docs/concepts/design-decisions.md), and [project history](docs/project-history.md).
 - [Prerequisites](docs/getting-started/prerequisites.md) and [local Kubernetes setup](docs/tutorials/local-kubernetes.md).
-- [Your first purchase](docs/tutorials/first-purchase.md) and [system architecture](docs/concepts/architecture.md).
-- [Kubernetes and Helm](docs/concepts/kubernetes-and-helm.md), [authentication](docs/concepts/authentication.md), and [asynchronous messaging](docs/concepts/messaging.md).
+- [Your first purchase](docs/tutorials/first-purchase.md), [end-to-end use cases](docs/concepts/use-cases.md), and [system architecture](docs/concepts/architecture.md).
+- [Kubernetes and Helm](docs/concepts/kubernetes-and-helm.md), [authentication](docs/concepts/authentication.md), [asynchronous messaging](docs/concepts/messaging.md), and [the shared Java library](docs/concepts/common-library.md).
+- [Technology stack, explained](docs/technologies/overview.md) and [Grafana Alloy, explained](docs/technologies/grafana-alloy.md).
 - [Grafana Alloy and logging](docs/monitoring-and-logging.md), [certificates](docs/certificate-management.md), and [troubleshooting](docs/guides/troubleshooting.md).
 - [Configuration](docs/reference/configuration.md), [API reference](docs/reference/api.md), and [development workflow](docs/guides/development.md).
 

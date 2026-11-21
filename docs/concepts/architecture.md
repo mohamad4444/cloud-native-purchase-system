@@ -20,6 +20,49 @@ flowchart TB
 
 In staging, ingress-nginx routes `frontend.local` paths to the frontend and API Services and exposes Keycloak at `keycloak.local`. In development, ingress is disabled and the browser reaches the forwarded ports directly.
 
+Namespaces provide the isolation between the two environment instances. Platform tooling lives in shared namespaces that are not selected by `dev` or `staging`.
+
+```mermaid
+flowchart TB
+  ING["ingress-nginx<br/>frontend.local · keycloak.local<br/>staging only"]
+
+  subgraph DEV["namespace: dev — HTTP + port forward"]
+    direction LR
+    DF["frontend"]
+    DP["purchase + DB"]
+    DI["inventory + DB"]
+    DK["keycloak + DB"]
+    DA["artemis"]
+  end
+
+  subgraph STAGING["namespace: staging — HTTPS + ingress"]
+    direction LR
+    SF["frontend"]
+    SP["purchase + DB"]
+    SI["inventory + DB"]
+    SK["keycloak + DB"]
+    SA["artemis"]
+  end
+
+  subgraph SHARED["shared platform namespaces"]
+    direction LR
+    MON["monitoring<br/>Alloy · Loki · Grafana"]
+    CA["cert-manager<br/>local CA issuer"]
+    RUN["gitlab-runner<br/>temporary build pods"]
+  end
+
+  ING --> STAGING
+  SHARED -.->|"logs · TLS · CI"| DEV
+  SHARED -.->|"logs · TLS · CI"| STAGING
+
+  classDef env fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
+  classDef platform fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
+  classDef ingress fill:#fff3e0,stroke:#ef6c00,color:#e65100;
+  class DF,DP,DI,DK,DA,SF,SP,SI,SK,SA env;
+  class MON,CA,RUN platform;
+  class ING ingress;
+```
+
 ## Responsibilities
 
 | Component | Responsibility | Source directory |
