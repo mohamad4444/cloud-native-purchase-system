@@ -28,9 +28,13 @@ Manual equivalent for a first run:
 ```bash
 minikube start --driver=docker --memory=8g --cpus=4
 minikube addons enable ingress
+minikube addons enable metrics-server   # required for CPU/memory graphs in Lens
 kubectl port-forward -n kube-system service/registry 5000:80 # keep running
 ./scripts/setup-buildx.sh
 ```
+
+!!! note "No CPU/memory numbers in Lens?"
+    Lens reads live resource usage from the Kubernetes Metrics API, which is provided by the `metrics-server` addon. Without it, `kubectl top` fails and Pod/Node views show no graphs. Enable it with `minikube addons enable metrics-server` and wait ~30 seconds for the first samples. Verify with `kubectl top nodes`. Lens's own Prometheus stack (namespace `lens-metrics`) provides historical charts but does not replace metrics-server.
 
 ## 3. Build and deploy with Make
 
